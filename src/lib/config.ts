@@ -1,5 +1,5 @@
 /**
- * An interface for isomorphic env variable access
+ * An interface for config variables
  */
 
 
@@ -22,6 +22,7 @@ if (missing.length)
 
 export default {
 	isProd,
+	apiPrefix: '/api',
 	...lambdaEnv,
 	...localEnv,
 }

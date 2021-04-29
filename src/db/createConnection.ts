@@ -1,7 +1,7 @@
 import type { ConnectionOptions } from 'typeorm'
 import { createConnection as tCreateConnection } from 'typeorm'
 
-import env from '../lib/env'
+import env from '../lib/config'
 
 /**
  * Calls a memoized typeorm.createConnection. By memoizing, it can be 

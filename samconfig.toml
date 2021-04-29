@@ -2,9 +2,9 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "serverless-fullstack4"
+stack_name = "hookedjs"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-17czrlu5auqc6"
-s3_prefix = "serverless-fullstack4"
+s3_prefix = "hookedjs"
 region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"

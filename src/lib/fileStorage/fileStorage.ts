@@ -5,7 +5,7 @@ import * as AWS from 'aws-sdk'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import env from './env'
+import env from '../config'
 
 export default {
 	async put(key: string, data: string | Buffer, contentType: string) {
@@ -20,7 +20,7 @@ export default {
 
 const 
 	s3 = new AWS.S3()
-	,tmpDir = __dirname + '/../../fileStorage/'
+	,tmpDir = __dirname + '/../../../.fileStorage/'
 
 async function localPut(key: string, data: any, contentType: string) {
 	const 

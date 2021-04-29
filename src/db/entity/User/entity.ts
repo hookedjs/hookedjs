@@ -2,7 +2,7 @@ import * as crypto from 'crypto'
 import * as cuid from 'cuid'
 import {BaseEntity,Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryColumn, UpdateDateColumn, VersionColumn} from 'typeorm'
 
-import { assertValid, assertValidSet, deduplicate, isNullOrUndefined } from '../../../lib/validation'
+import { assertValid, assertValidSet, deduplicate, FormValidationErrorSet, isNullOrUndefined, ValidationErrorSet, ValueError } from '../../../lib/validation'
 import {UserCreate, UserRole, UserRoleSet, UserStatus, UserStatusSet, UserType} from './types'
 
 @Entity()
@@ -55,8 +55,15 @@ export default class UserEntity extends BaseEntity {
 	}
 	
 	// Generic save helpers which apply sanitize
-	async saveSafe() {return await this.sanitize(), this.save()}
-	static async createSafe(obj: UserCreate) {const record = new this(obj);await record.sanitize();return record.save()}
+	async saveSafe() {return await this.sanitize(), this.save().catch(e => {
+		if (e.message.startsWith('Duplicate')) {
+			if (e.message.includes(this.email))
+				throw new ValidationErrorSet(this, {email: new ValueError('email', 'email is unavailable')})
+			throw new FormValidationErrorSet(this, 'one or more values conflict with an existing record')
+		}
+		throw e
+	})}
+	static async createSafe(obj: UserCreate) {const record = new this(obj); return record.saveSafe()}
 	static async insertSafe(arr: UserCreate[]) {
 		const sanitized = await Promise.all([...arr].map(obj => new this(obj)).map(async ent => (await ent.sanitize(),ent)))
 		return this.insert(sanitized as any)
