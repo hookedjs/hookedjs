@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "serverless-fullstack4"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-17czrlu5auqc6"
+s3_prefix = "serverless-fullstack4"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AuthSecret=\"serverlesssupersecretauthsecret\" DbName=\"public\" DbUser=\"admin\" DbPassword=\"supercrazysecretpassword\""

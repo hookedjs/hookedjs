@@ -1,0 +1,6 @@
+coverage/
+contrib/
+reports/
+node_modules/
+./*.js
+src/db/migration/*
