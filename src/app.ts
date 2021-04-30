@@ -32,7 +32,7 @@ const
 ///////////////////////////////
 // Default Headers
 ///////////////////////////////
-app.addHook('onRequest', async (req, reply) => {
+app.addHook('onRequest', async function setHeaders(req, reply) {
 	if (req.method === 'GET' || req.method === 'OPTIONS')
 		reply.headers({'cache-control': 'public, max-age=86400'})
 })
@@ -68,7 +68,7 @@ dynamicMiddlewares.forEach(file => {
 ///////////////////////////////
 // Not Found / Error Handling
 ///////////////////////////////
-app.setNotFoundHandler((req, reply) => { 
+app.setNotFoundHandler(function notFoundHandler(req, reply) { 
 	reply
 		.code(404)
 		.headers({'cache-control': 'no-store, max-age=0'})

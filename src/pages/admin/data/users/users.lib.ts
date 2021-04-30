@@ -1,6 +1,6 @@
-import { UserRole, UserRoleSet } from '../../../db/types'
-import env from '../../../lib/config'
-import { assertAttrsWithin, assertValid, assertValidSet } from '../../../lib/validation'
+import { UserRole, UserRoleSet } from '../../../../db/types'
+import env from '../../../../lib/config'
+import { assertAttrsWithin, assertValid, assertValidSet } from '../../../../lib/validation'
 export const usersEndpoint = `${env.apiPrefix}/admin/users`
 
 export class UserCreateProps {
@@ -32,3 +32,4 @@ export const UserCreatePropsExample = new UserCreateProps({
 	acceptedTerms: true,
 })
 export const UserCreatePropsEnum = Enum.getEnumFromClassInstance(UserCreatePropsExample)
+

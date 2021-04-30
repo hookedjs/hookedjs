@@ -4,7 +4,7 @@ import fileStorage from './fileStorage'
 
 
 export default async function filesPlugin(app: FastifyInstance, options: FastifyOptions) {
-	app.post(fileByIdEndpoint(':id'), async (req, reply) => {
+	app.post(fileByIdEndpoint(':id'), async function upsertFile(req, reply) {
 		const 
 			{id} = req.params as Record<string, string>
 			,files = req.raw.files || {}
@@ -14,7 +14,7 @@ export default async function filesPlugin(app: FastifyInstance, options: Fastify
 		await fileStorage.put(id, file.data, file.mimetype)
 		reply.code(201).send('success')
 	})
-	app.get(fileByIdEndpoint(':id'), async (req, reply) => {
+	app.get(fileByIdEndpoint(':id'), async function getFile(req, reply) {
 		const {id} = req.params as Record<string, string>
 		try {
 			const file = await fileStorage.get(id)
@@ -28,7 +28,7 @@ export default async function filesPlugin(app: FastifyInstance, options: Fastify
 			throw err
 		}
 	})
-	app.get(fileMetaByIdEndpoint(':id'), async (req, reply) => {
+	app.get(fileMetaByIdEndpoint(':id'), async function getFileMeta(req, reply) {
 		const {id} = req.params as Record<string, string>
 		try {
 			const file = await fileStorage.get(id)
