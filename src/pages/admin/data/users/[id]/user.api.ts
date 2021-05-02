@@ -1,5 +1,6 @@
-import { UserEntity } from '../../../../../db'
-import { FormValidationErrorSet } from '../../../../../lib/validation'
+import { UserEntity } from '#src/db'
+import { FormValidationErrorSet } from '#src/lib/validation'
+
 import { userByIdEndpoint } from './user.lib'
 
 export default async function userPlugin(app: FastifyInstance, options: FastifyOptions) {

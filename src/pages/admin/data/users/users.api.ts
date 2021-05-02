@@ -1,4 +1,5 @@
-import { UserEntity } from '../../../../db'
+import { UserEntity } from '#src/db'
+
 import { UserCreateProps, usersEndpoint } from './users.lib'
 
 export default async function usersPlugin(app: FastifyInstance, options: FastifyOptions) {

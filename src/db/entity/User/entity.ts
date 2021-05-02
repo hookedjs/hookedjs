@@ -2,7 +2,8 @@ import * as crypto from 'crypto'
 import * as cuid from 'cuid'
 import {BaseEntity,Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryColumn, UpdateDateColumn, VersionColumn} from 'typeorm'
 
-import { assertValid, assertValidSet, deduplicate, FormValidationErrorSet, isNullOrUndefined, ValidationErrorSet, ValueError } from '../../../lib/validation'
+import { assertValid, assertValidSet, deduplicate, FormValidationErrorSet, isNullOrUndefined, ValidationErrorSet, ValueError } from '#src/lib/validation'
+
 import {UserCreate, UserRole, UserRoleSet, UserStatus, UserStatusSet, UserType} from './types'
 
 @Entity()
