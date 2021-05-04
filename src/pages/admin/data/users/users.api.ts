@@ -1,17 +1,18 @@
 import { UserEntity } from '#src/db'
 
-import { UserCreateProps, usersEndpoint } from './users.lib'
+import { UserPostProps, usersEndpoint } from './users.lib'
 
 export default async function usersPlugin(app: FastifyInstance, options: FastifyOptions) {
 	app.get(usersEndpoint, async function getUsers(req, reply) {
-		const users = await UserEntity.find()
-		users.forEach(u => u.passwordHash = '*******' )
+		const props = req.query as any
+		const users = await UserEntity.find({
+			withDeleted: 'withDeleted' in props && props.withDeleted !== 'false'
+		})
 		reply.send(users)
 	})
 	app.post(usersEndpoint, async function createUser(req, reply) {
-		const props = new UserCreateProps(req.body)
+		const props = new UserPostProps(req.body)
 		const user = await UserEntity.createSafe(props)
-		user.passwordHash = '*******'
-		reply.code(201).send('success')
+		reply.code(201).send()
 	})
 }

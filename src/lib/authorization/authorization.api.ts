@@ -1,6 +1,6 @@
 import jwtPlugin from 'fastify-jwt'
 
-import { createConnection, UserEntity, UserStatus } from '#src/db'
+import { createConnection, UserEntity, UserStatusEnum } from '#src/db'
 
 import config from '../config'
 import { ForbiddenError, FormValidationErrorSet, RequiredError, ValidationErrorSet } from '../validation'
@@ -34,7 +34,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		if (!user) throw new Error('User in token was somehow deleted...?')
 		const
 			passwordChanged = req.user.createdAt < user.passwordUpdatedAt.getTime()
-			,isBanned = user.status === UserStatus.BANNED
+			,isBanned = user.status === UserStatusEnum.BANNED
 		if (!user || passwordChanged || isBanned) 
 			throw new ForbiddenError()
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })

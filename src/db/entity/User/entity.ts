@@ -2,9 +2,9 @@ import * as crypto from 'crypto'
 import * as cuid from 'cuid'
 import {BaseEntity,Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryColumn, UpdateDateColumn, VersionColumn} from 'typeorm'
 
-import { assertValid, assertValidSet, deduplicate, FormValidationErrorSet, isNullOrUndefined, ValidationErrorSet, ValueError } from '#src/lib/validation'
+import { assertValid, assertValidSet, isDefinedAndNotNull } from '#src/lib/validation'
 
-import {UserCreate, UserRole, UserRoleSet, UserStatus, UserStatusSet, UserType} from './types'
+import {UserCreate, UserRoleEnum, UserRoleSet, UserStatusEnum, UserStatusSet, UserType} from './types'
 
 @Entity()
 export default class UserEntity extends BaseEntity {
@@ -24,8 +24,10 @@ export default class UserEntity extends BaseEntity {
 	@Column('smallint')
 	status: UserType['status']
 
-	@Column('json')
-	roles: UserRole[]
+	@Column('varchar', {default: '[0]', length: 30})
+	rolesJson: string
+	get roles() { return JSON.parse(this.rolesJson) as UserRoleEnum[]}
+	set roles(roles: UserRoleEnum[]) { this.rolesJson = JSON.stringify(roles)}
 
 	@Column('varchar', {length: 30}) 
 	givenName: UserType['givenName']
@@ -47,24 +49,20 @@ export default class UserEntity extends BaseEntity {
 		super()
 		// Set defaults (note: prefer this over Typeorm.default, b/c it doesnt set until save)
 		this.id = cuid()
-		this.roles = [UserRole.AUTHOR]
-		this.status = UserStatus.ACTIVE
+		this.roles = [UserRoleEnum.AUTHOR]
+		this.status = UserStatusEnum.ACTIVE
 		this.passwordUpdatedAt = new Date()
 		if (seedObj) {
 			Object.assign(this, seedObj)
 		}
 	}
+
+	toJSON() {return {...Object.omit(this, ['rolesJson']), passwordHash: '*******', roles: this.roles}}
+	toString() {return JSON.stringify(this.toJSON())}
 	
 	// Generic save helpers which apply sanitize
-	async saveSafe() {return await this.sanitize(), this.save().catch(e => {
-		if (e.message.startsWith('Duplicate')) {
-			if (e.message.includes(this.email))
-				throw new ValidationErrorSet(this, {email: new ValueError('email', 'email is unavailable')})
-			throw new FormValidationErrorSet(this, 'one or more values conflict with an existing record')
-		}
-		throw e
-	})}
-	static async createSafe(obj: UserCreate) {const record = new this(obj); return record.saveSafe()}
+	async saveSafe() {return await this.sanitize(), this.save()}
+	static async createSafe(obj: UserCreate) {const record = new this(obj);await record.sanitize();return record.save()}
 	static async insertSafe(arr: UserCreate[]) {
 		const sanitized = await Promise.all([...arr].map(obj => new this(obj)).map(async ent => (await ent.sanitize(),ent)))
 		return this.insert(sanitized as any)
@@ -76,14 +74,14 @@ export default class UserEntity extends BaseEntity {
 			this.passwordUpdatedAt = new Date()
 			delete this.password
 		}
-		this.roles = deduplicate(this.roles)
 		assertValidSet<UserType>(this, {
 			id: assertValid('id', this.id, ['isRequired', 'isString', 'isNoneEmpty']),
 			email: assertValid('email', this.email, ['isRequired', 'isString', 'isTruthy', 'isEmail']),
-			password: !isNullOrUndefined(this.password) && assertValid('password', this.password, ['isString', 'isNoneEmpty', 'isPassword']),
-			passwordHash: !isNullOrUndefined(this.passwordHash) && assertValid('passwordHash', this.passwordHash, ['isString', 'isHash']),
+			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isString', 'isNoneEmpty', 'isPassword']),
+			passwordHash: isDefinedAndNotNull(this.passwordHash) && assertValid('passwordHash', this.passwordHash, ['isString', 'isHash']),
 			passwordUpdatedAt: assertValid('passwordUpdatedAt', this.passwordUpdatedAt, ['isRequired', 'isDatable']),
 			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: UserStatusSet }),
+			rolesJson: assertValid('rolesJson', this.rolesJson, ['isRequired', 'isString', 'isNoneEmpty']),
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: UserRoleSet }),
 			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
@@ -92,6 +90,7 @@ export default class UserEntity extends BaseEntity {
 			deletedAt: false,
 			version: false,
 		})
+		this.roles = this.roles.deDuplicate()
 	}
 
 	static async hashPassword(str: string, salt = crypto.randomBytes(16).toString('hex')): Promise<string> {

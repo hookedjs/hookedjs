@@ -1,7 +1,6 @@
 import 'reflect-metadata'
 
 import fastify from 'fastify'
-// import compressPlugin from 'fastify-compress'
 import fileUploadPlugin from 'fastify-file-upload'
 import helmetPlugin from 'fastify-helmet'
 import fastifyPluginize from 'fastify-plugin'
@@ -50,7 +49,6 @@ app.register(helmetPlugin, {
 		},
 	},
 })
-// app.register(compressPlugin, { threshold: 800 }) // default = 1024
 app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
 app.register(staticPlugin, { root: htmlPath })
 

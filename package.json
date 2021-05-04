@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "license": "ISC",
   "scripts": {
-    "build": "npm run lint && tsc && sam build && tsc -b --clean",
+    "build": "npm run lint && tsc && sam build && npm run clean",
+		"clean": "tsc -b --clean",
     "start": "jwtSecret=secret ts-node src/server.ts",
     "dev": "jwtSecret=secret ts-node-dev --transpile-only src/server.ts",
     "deploy": "npm run build && sam deploy",
@@ -16,7 +17,7 @@
     "logs": "sam logs -n ApiLambda --stack-name hookedjs",
     "typeorm": "ts-node --require ./src/lib/polyfills ./node_modules/typeorm/cli.js",
     "typeorm:migration-gen": "npm run typeorm -- schema:drop && npm run typeorm -- migration:run && npm run typeorm -- migration:generate -n ",
-    "prepare": "husky install"
+    "prepare": "if [ -d \".git\" ]; then husky install; fi"
   },
   "files": [
     "src"
