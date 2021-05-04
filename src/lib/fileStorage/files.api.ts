@@ -4,6 +4,8 @@ import fileStorage from './fileStorage'
 
 
 export default async function filesPlugin(app: FastifyInstance, options: FastifyOptions) {
+	// TODO: File meta should be in the database instead of in a file.
+	// TODO: There should be a sep Admin API vs public for Files
 	app.post(fileByIdEndpoint(':id'), async function upsertFile(req, reply) {
 		const 
 			{id} = req.params as Record<string, string>

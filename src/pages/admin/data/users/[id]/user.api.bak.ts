@@ -4,12 +4,13 @@ import { FormValidationErrorSet } from '#src/lib/validation'
 import { userByIdEndpoint, UserPatchProps,userRestoreEndpoint } from './user.lib'
 
 export default async function userPlugin(app: FastifyInstance, options: FastifyOptions) {
+	// TODO: Refactor the '/api/admin' endpoints to be public and less crud-y
 	app.get(userByIdEndpoint(':id'), async (req, reply) => {
 		const 
 			{id} = req.params as Record<string, string>
 			,user = await UserEntity.findOne({id})
 		if (!user)
-			throw new FormValidationErrorSet({id}, 'user id invalid')
+			throw new FormValidationErrorSet({id}, 'id invalid')
 		reply.send(user)
 	})
 	app.patch(userByIdEndpoint(':id'), async (req, reply) => {
@@ -17,7 +18,7 @@ export default async function userPlugin(app: FastifyInstance, options: FastifyO
 			{id} = req.params as Record<string, string>
 			,user = await UserEntity.findOne({id})
 		if (!user)
-			throw new FormValidationErrorSet({id}, 'user id invalid')
+			throw new FormValidationErrorSet({id}, 'id invalid')
 		
 		const props = new UserPatchProps(req.body)
 		Object.assign(user, props)
@@ -29,7 +30,7 @@ export default async function userPlugin(app: FastifyInstance, options: FastifyO
 			{id} = req.params as Record<string, string>
 			,user = await UserEntity.findOne({id})
 		if (!user)
-			throw new FormValidationErrorSet({id}, 'user id invalid')
+			throw new FormValidationErrorSet({id}, 'id invalid')
 		
 		await user.softRemove()
 		reply.code(204).send()
