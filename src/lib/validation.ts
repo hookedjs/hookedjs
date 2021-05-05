@@ -23,6 +23,9 @@ export class ForbiddenError extends Error {
 		super()
 	}
 }
+export function throwForbiddenError(): never {
+	throw new ForbiddenError()
+}
 
 type ValidationErrorType<T> = Record<keyof T, any>
 

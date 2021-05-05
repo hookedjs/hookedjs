@@ -1,5 +1,6 @@
-export interface UserType {
-  id: string
+import type { BaseEntityType } from '../BaseEntityTypes'
+
+export interface UserType extends BaseEntityType {
   email: string
 	rolesJson: string
   roles: UserRoleEnum[]
@@ -9,11 +10,6 @@ export interface UserType {
   passwordUpdatedAt: Date
   givenName: string
   surname: string
-
-  createdAt: Date
-  updatedAt: Date
-  deletedAt: Date | null
-  version: number
 }
 
 export type UserCreateOptional = Pick<UserType, 'id' | 'roles' | 'status' | 'password'>

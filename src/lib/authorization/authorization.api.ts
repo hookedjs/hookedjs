@@ -1,10 +1,10 @@
 import jwtPlugin from 'fastify-jwt'
 
-import { createConnection, UserEntity, UserStatusEnum } from '#src/db'
+import { createConnection, UserEntity, UserRoleEnum, UserStatusEnum } from '#src/db'
 
 import config from '../config'
 import { ForbiddenError, FormValidationErrorSet, RequiredError, ValidationErrorSet } from '../validation'
-import { authEndpoint, authLoginEndpoint, authRefreshEndpoint, LoginProps } from './authorization.lib'
+import { authEndpoint, authLoginEndpoint, authRefreshEndpoint, authRegisterEndpoint, LoginProps, RegisterProps } from './authorization.lib'
 
 
 export default async function authorizationPlugin(app: FastifyInstance, options: FastifyOptions) {
@@ -19,7 +19,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		try {await req.jwtVerify()}
 		catch (err) {req.user = { id: '', roles: [], createdAt: 0 }}
 	})
-	app.post(authLoginEndpoint, async function createLoginToken(req, reply) {
+	app.post(authLoginEndpoint, async function authLoginEndpoint(req, reply) {
 		const props = new LoginProps(req.body)
 		const user = await UserEntity.findOne({ where: { email: props.email } })
 		if (!(user && await user.comparePassword(props.password)))
@@ -27,7 +27,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
 		reply.send({token})
 	})
-	app.post(authRefreshEndpoint, async function createRefreshToken(req, reply) {
+	app.post(authRefreshEndpoint, async function authRefreshEndpoint(req, reply) {
 		if (!req.user.id)
 			throw new ValidationErrorSet({}, {Authorization: new RequiredError('authorization')})
 		const user = await UserEntity.findOne({ where: { id: req.user.id } })
@@ -40,6 +40,16 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
 		reply.send({token})
 	})
+	app.post(authRegisterEndpoint, async function authRegisterEndpoint(req, reply) {
+		const props = {
+			...new RegisterProps(req.body),
+			roles: [UserRoleEnum.AUTHOR]
+		}
+		const user = await UserEntity.createSafe(props)
+		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
+		reply.send({token})
+	})
+
 	app.get(authEndpoint, async function getAuthStatusHandler(req, reply) {
 		reply
 			.headers({'cache-control': 'no-store, max-age=0'})

@@ -1,17 +1,13 @@
 import * as crypto from 'crypto'
-import * as cuid from 'cuid'
-import {BaseEntity,Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryColumn, UpdateDateColumn, VersionColumn} from 'typeorm'
+import {Column, Entity} from 'typeorm'
 
 import { assertValid, assertValidSet, isDefinedAndNotNull } from '#src/lib/validation'
 
+import BaseEntity from '../BaseEntity'
 import {UserCreate, UserRoleEnum, UserRoleSet, UserStatusEnum, UserStatusSet, UserType} from './types'
 
 @Entity()
 export default class UserEntity extends BaseEntity {
-
-	@PrimaryColumn('varchar', {length: 30})
-	id: UserType['id']
-
 	@Column('varchar', {unique: true, length: 30}) 
 	email: UserType['email']
 
@@ -35,38 +31,16 @@ export default class UserEntity extends BaseEntity {
 	@Column('varchar', {length: 30})
 	surname: UserType['surname']
 
-	@CreateDateColumn()
-	createdAt: UserType['createdAt']
-	@UpdateDateColumn()
-	updatedAt: UserType['updatedAt']
-	@DeleteDateColumn()
-	deletedAt: UserType['deletedAt']
-	@VersionColumn()
-	version: UserType['version']
-
-	// Extend constructor and save with defaults, validations and mutations
 	constructor(seedObj?: UserCreate) {
-		super()
-		// Set defaults (note: prefer this over Typeorm.default, b/c it doesnt set until save)
-		this.id = cuid()
+		super(seedObj)
 		this.roles = [UserRoleEnum.AUTHOR]
 		this.status = UserStatusEnum.ACTIVE
-		this.passwordUpdatedAt = new Date()
-		if (seedObj) {
-			Object.assign(this, seedObj)
-		}
 	}
-
+	async saveSafe(): Promise<UserEntity> {return super.saveSafe()}
+	static async createSafe(obj: UserCreate) {return (new this(obj)).saveSafe()}
+	static async insertSafe(arr: UserCreate[]) {return super.insertSafe(arr)}
 	toJSON() {return {...Object.omit(this, ['rolesJson']), passwordHash: '*******', roles: this.roles}}
 	toString() {return JSON.stringify(this.toJSON())}
-	
-	// Generic save helpers which apply sanitize
-	async saveSafe() {return await this.sanitize(), this.save()}
-	static async createSafe(obj: UserCreate) {const record = new this(obj);await record.sanitize();return record.save()}
-	static async insertSafe(arr: UserCreate[]) {
-		const sanitized = await Promise.all([...arr].map(obj => new this(obj)).map(async ent => (await ent.sanitize(),ent)))
-		return this.insert(sanitized as any)
-	}
 	
 	async sanitize() {
 		if (this.password) {
@@ -79,7 +53,7 @@ export default class UserEntity extends BaseEntity {
 			email: assertValid('email', this.email, ['isRequired', 'isString', 'isTruthy', 'isEmail']),
 			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isString', 'isNoneEmpty', 'isPassword']),
 			passwordHash: isDefinedAndNotNull(this.passwordHash) && assertValid('passwordHash', this.passwordHash, ['isString', 'isHash']),
-			passwordUpdatedAt: assertValid('passwordUpdatedAt', this.passwordUpdatedAt, ['isRequired', 'isDatable']),
+			passwordUpdatedAt: false,
 			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: UserStatusSet }),
 			rolesJson: assertValid('rolesJson', this.rolesJson, ['isRequired', 'isString', 'isNoneEmpty']),
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: UserRoleSet }),

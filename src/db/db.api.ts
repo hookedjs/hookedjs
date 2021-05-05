@@ -28,11 +28,10 @@ export default async function dbPlugin(app: FastifyInstance, options: FastifyOpt
 			req.url.startsWith(`${config.apiPrefix}/crud`) 
 			&& !req.user.roles.includes(UserRoleEnum.ADMIN)
 		) {
-			// TODO: Re-enable permission guard
 			throw new ForbiddenError()
 		}
 	})
-	const entityFiles: string[] = glob.sync(`${__dirname}/**/entity.ts`)
+	const entityFiles: string[] = glob.sync(`${__dirname}/entity/**/entity.ts`)
 	entityFiles.forEach(file => {
 		const entity = require(file.slice(0, -3))?.default
 		if (entity) app.register(entityCrudPluginGenerator(entity))

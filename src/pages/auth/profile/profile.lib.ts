@@ -1,23 +1,18 @@
-import { UserRoleEnum, UserRoleSet } from '#src/db/types'
 import env from '#src/lib/config'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
 
-export const userEndpoint = `${env.apiPrefix}/admin/users`
-export function userByIdEndpoint(id: string) { return `${userEndpoint}/${id}` }
-export function userRestoreEndpoint(id: string) { return `${userEndpoint}/${id}/restore` }
+export const profileEndpoint = `${env.apiPrefix}/auth/profile`
 
-export class UserPatchProps {
+export class ProfilePatchProps {
 		email = ''
 		password = ''
-		roles: UserRoleEnum[] = null as any
 		givenName = ''
 		surname = ''
 		constructor(props: any) {
 			assertAttrsWithin(props, this)
-			assertValidSet<UserPatchProps>(props, {
+			assertValidSet<ProfilePatchProps>(props, {
 				email: 'email' in props && assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
 				password: 'password' in props && assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty', 'isPassword']),
-				roles: 'roles' in props && assertValid('roles', props.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: UserRoleSet }),
 				givenName: 'givenName' in props && assertValid('givenName', props.givenName, ['isDefined', 'isString', 'isNoneEmpty']),
 				surname: 'surname' in props && assertValid('surname', props.surname, ['isDefined', 'isString', 'isNoneEmpty']),
 			})
@@ -25,12 +20,11 @@ export class UserPatchProps {
 			Object.rmFalseyAttrs(this, true)
 		}
 }
-export const UserPatchPropsExample = new UserPatchProps({
+export const ProfilePatchPropsExample: ProfilePatchProps = {
 	email: 'admin@example.com',
 	password: 'Password8',
-	roles: [UserRoleEnum.ADMIN],
 	givenName: 'Sally',
 	surname: 'Fields',
-})
-export const UserPatchPropsEnum = Enum.getEnumFromClassInstance(UserPatchPropsExample)
+}
+export const ProfilePatchPropsEnum = Enum.getEnumFromClassInstance(ProfilePatchPropsExample)
 
