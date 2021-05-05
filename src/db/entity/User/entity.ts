@@ -1,44 +1,44 @@
 import * as crypto from 'crypto'
 import {Column, Entity} from 'typeorm'
 
-import { assertValid, assertValidSet, isDefinedAndNotNull } from '#src/lib/validation'
+import { assertValid, assertValidSet, isDefinedAndNotNull } from '#lib/validation'
 
 import BaseEntity from '../BaseEntity'
-import {UserCreate, UserRoleEnum, UserRoleSet, UserStatusEnum, UserStatusSet, UserType} from './types'
+import * as t from './types'
 
 @Entity()
 export default class UserEntity extends BaseEntity {
 	@Column('varchar', {unique: true, length: 30}) 
-	email: UserType['email']
+	email: t.UserType['email']
 
 	password?: string // converts to this.passwordHash in sanitize
 	@Column('varchar', {nullable: true, length: 161})
-	passwordHash: UserType['passwordHash']
+	passwordHash: t.UserType['passwordHash']
 	@Column('timestamp')
-	passwordUpdatedAt: UserType['passwordUpdatedAt']
+	passwordUpdatedAt: t.UserType['passwordUpdatedAt']
 
 	@Column('smallint')
-	status: UserType['status']
+	status: t.UserType['status']
 
 	@Column('varchar', {default: '[0]', length: 30})
 	rolesJson: string
-	get roles() { return JSON.parse(this.rolesJson) as UserRoleEnum[]}
-	set roles(roles: UserRoleEnum[]) { this.rolesJson = JSON.stringify(roles)}
+	get roles() { return JSON.parse(this.rolesJson) as t.UserRoleEnum[]}
+	set roles(roles: t.UserRoleEnum[]) { this.rolesJson = JSON.stringify(roles)}
 
 	@Column('varchar', {length: 30}) 
-	givenName: UserType['givenName']
+	givenName: t.UserType['givenName']
 
 	@Column('varchar', {length: 30})
-	surname: UserType['surname']
+	surname: t.UserType['surname']
 
-	constructor(seedObj?: UserCreate) {
+	constructor(seedObj?: t.UserCreate) {
 		super(seedObj)
-		this.roles = [UserRoleEnum.AUTHOR]
-		this.status = UserStatusEnum.ACTIVE
+		this.roles = [t.UserRoleEnum.AUTHOR]
+		this.status = t.UserStatusEnum.ACTIVE
 	}
 	async saveSafe(): Promise<UserEntity> {return super.saveSafe()}
-	static async createSafe(obj: UserCreate) {return (new this(obj)).saveSafe()}
-	static async insertSafe(arr: UserCreate[]) {return super.insertSafe(arr)}
+	static async createSafe(obj: t.UserCreate) {return (new this(obj)).saveSafe()}
+	static async insertSafe(arr: t.UserCreate[]) {return super.insertSafe(arr)}
 	toJSON() {return {...Object.omit(this, ['rolesJson']), passwordHash: '*******', roles: this.roles}}
 	toString() {return JSON.stringify(this.toJSON())}
 	
@@ -48,15 +48,15 @@ export default class UserEntity extends BaseEntity {
 			this.passwordUpdatedAt = new Date()
 			delete this.password
 		}
-		assertValidSet<UserType>(this, {
+		assertValidSet<t.UserType>(this, {
 			id: assertValid('id', this.id, ['isRequired', 'isString', 'isNoneEmpty']),
 			email: assertValid('email', this.email, ['isRequired', 'isString', 'isTruthy', 'isEmail']),
 			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isString', 'isNoneEmpty', 'isPassword']),
 			passwordHash: isDefinedAndNotNull(this.passwordHash) && assertValid('passwordHash', this.passwordHash, ['isString', 'isHash']),
 			passwordUpdatedAt: false,
-			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: UserStatusSet }),
+			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: t.UserStatusSet }),
 			rolesJson: assertValid('rolesJson', this.rolesJson, ['isRequired', 'isString', 'isNoneEmpty']),
-			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: UserRoleSet }),
+			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: t.UserRoleSet }),
 			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			createdAt: false,

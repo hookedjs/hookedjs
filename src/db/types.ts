@@ -1,1 +1,0 @@
-export * from './entity/User/types'

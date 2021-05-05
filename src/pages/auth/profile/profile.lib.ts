@@ -1,5 +1,5 @@
-import env from '#src/lib/config'
-import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
+import env from '#lib/config'
+import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
 
 export const profileEndpoint = `${env.apiPrefix}/auth/profile`
 

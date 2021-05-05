@@ -3,8 +3,7 @@ import 'reflect-metadata'
 import {createConnection} from 'typeorm'
 import {inspect} from 'util'
 
-import UserEntity from './entity'
-import { UserCreate, UserRoleEnum } from './types'
+import { UserCreate, UserEntity, UserRoleEnum } from '.'
 
 seedUsers().catch(e => {console.error(inspect(e, false, 4, true))})
 

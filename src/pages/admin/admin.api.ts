@@ -1,6 +1,6 @@
-import { UserRoleEnum } from '#src/db'
-import config from '#src/lib/config'
-import { ForbiddenError } from '#src/lib/validation'
+import { UserRoleEnum } from '#db/entity'
+import config from '#lib/config'
+import { ForbiddenError } from '#lib/validation'
 
 export default async function adminPlugin(app: FastifyInstance, options: FastifyOptions) {
 	app.addHook('preValidation', async function adminAuthGuard(req, reply) {

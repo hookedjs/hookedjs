@@ -10,7 +10,7 @@
 import * as cuid from 'cuid'
 import {BaseEntity as tBaseEntity, CreateDateColumn, DeleteDateColumn, PrimaryColumn, UpdateDateColumn, VersionColumn} from 'typeorm'
 
-import { FormValidationErrorSet, ValidationErrorSet, ValueError } from '#src/lib/validation'
+import { FormValidationErrorSet, ValidationErrorSet, ValueError } from '#lib/validation'
 
 import type { BaseEntityType } from './BaseEntityTypes'
 

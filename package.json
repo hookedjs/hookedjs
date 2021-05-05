@@ -24,7 +24,9 @@
   ],
   "imports": {
     "#hint": "Subpath folder mappings are deprecated after node v16 -- Maybe consider npm/module-alias later",
-    "#src/": "./src/"
+    "#src/": "./src/",
+    "#lib/": "./src/lib/",
+    "#db/": "./src/db/"
   },
   "dependencies": {
     "aws-lambda-fastify": "^1.4.4",

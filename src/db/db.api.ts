@@ -1,11 +1,11 @@
 import * as glob from 'glob'
 import { getManager } from 'typeorm'
 
-import { ForbiddenError, FormValidationErrorSet } from '#src/lib/validation'
+import { ForbiddenError, FormValidationErrorSet } from '#lib/validation'
 
 import config from '../lib/config'
-import { UserRoleEnum } from '.'
 import createConnection from './createConnection'
+import { UserRoleEnum } from './entity'
 
 export default async function dbPlugin(app: FastifyInstance, options: FastifyOptions) {
 	// Connect to DB on API requests
