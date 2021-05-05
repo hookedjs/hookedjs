@@ -1,46 +1,51 @@
 import * as crypto from 'crypto'
-import {Column, Entity} from 'typeorm'
+import {Column, Entity, OneToMany} from 'typeorm'
 
 import { assertValid, assertValidSet, isDefinedAndNotNull } from '#lib/validation'
 
 import BaseEntity from '../BaseEntity'
+import { FileEntity } from '../File'
 import * as t from './types'
 
 @Entity()
 export default class UserEntity extends BaseEntity {
-	@Column('varchar', {unique: true, length: 30}) 
+	@Column({type: 'varchar', unique: true, length: 30}) 
 	email: t.UserType['email']
 
 	password?: string // converts to this.passwordHash in sanitize
-	@Column('varchar', {nullable: true, length: 161})
+	@Column({type: 'varchar', nullable: true, length: 161})
 	passwordHash: t.UserType['passwordHash']
-	@Column('timestamp')
+	@Column({type: 'timestamp'})
 	passwordUpdatedAt: t.UserType['passwordUpdatedAt']
 
-	@Column('smallint')
+	@Column({type: 'smallint'})
 	status: t.UserType['status']
 
-	@Column('varchar', {default: '[0]', length: 30})
+	@Column({type: 'varchar', default: '[0]', length: 30})
 	rolesJson: string
 	get roles() { return JSON.parse(this.rolesJson) as t.UserRoleEnum[]}
 	set roles(roles: t.UserRoleEnum[]) { this.rolesJson = JSON.stringify(roles)}
 
-	@Column('varchar', {length: 30}) 
+	@Column({type: 'varchar', length: 30}) 
 	givenName: t.UserType['givenName']
 
-	@Column('varchar', {length: 30})
+	@Column({type: 'varchar', length: 30})
 	surname: t.UserType['surname']
 
-	constructor(seedObj?: t.UserCreate) {
-		super(seedObj)
-		this.roles = [t.UserRoleEnum.AUTHOR]
-		this.status = t.UserStatusEnum.ACTIVE
+	@OneToMany(() => FileEntity, file => file.createdBy)
+	files: t.UserType['files'];
+
+	constructor(seedObj?: Partial<t.UserCreate>) {
+		const defaults: Partial<UserEntity> = {
+			roles: [t.UserRoleEnum.AUTHOR],
+			status: t.UserStatusEnum.ACTIVE
+		}	
+		super({...defaults, ...seedObj})
 	}
 	async saveSafe(): Promise<UserEntity> {return super.saveSafe()}
 	static async createSafe(obj: t.UserCreate) {return (new this(obj)).saveSafe()}
 	static async insertSafe(arr: t.UserCreate[]) {return super.insertSafe(arr)}
 	toJSON() {return {...Object.omit(this, ['rolesJson']), passwordHash: '*******', roles: this.roles}}
-	toString() {return JSON.stringify(this.toJSON())}
 	
 	async sanitize() {
 		if (this.password) {
@@ -59,6 +64,7 @@ export default class UserEntity extends BaseEntity {
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: t.UserRoleSet }),
 			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
+			files: false,
 			createdAt: false,
 			updatedAt: false,
 			deletedAt: false,

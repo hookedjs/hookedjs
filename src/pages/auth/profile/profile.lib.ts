@@ -1,7 +1,7 @@
-import env from '#lib/config'
+import config from '#lib/config'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
 
-export const profileEndpoint = `${env.apiPrefix}/auth/profile`
+export const profileEndpoint = `${config.apiPrefix}/auth/profile`
 
 export class ProfilePatchProps {
 		email = ''

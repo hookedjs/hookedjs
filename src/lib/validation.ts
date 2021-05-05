@@ -11,6 +11,7 @@ export class NotFoundError extends Error {
 		super()
 	}
 }
+export function throwNotFoundError(): never {throw new NotFoundError()}
 
 export class ForbiddenError extends Error {
 	type = 'ForbiddenError'
@@ -23,9 +24,7 @@ export class ForbiddenError extends Error {
 		super()
 	}
 }
-export function throwForbiddenError(): never {
-	throw new ForbiddenError()
-}
+export function throwForbiddenError(): never {throw new ForbiddenError()}
 
 type ValidationErrorType<T> = Record<keyof T, any>
 
@@ -78,6 +77,9 @@ export class ValidationErrorSet<T> extends Error {
 		if (this.context.entity.passwordNextConfirm) this.context.entity.passwordNextConfirm = '********'
 		if (this.context.entity.passwordHash) this.context.entity.passwordHash = '********'
 	}
+}
+export function throwValidationErrorSet<T>(entity: any, errorSet: Partial<ValidationErrorType<T>>): never {
+	throw new ValidationErrorSet(entity, errorSet)
 }
 
 export function assertIdentified (req: FastifyRequest) {if(!(req as any).user?.id) throw new ForbiddenError()}
@@ -162,6 +164,9 @@ export class AssertValidClass {
 		&& new ValueError(this.attrName, `${this.attrName} must be longer than ${low} and shorter than ${high}`)
 
 	// Pattern matching
+	isInstanceOf = (expected: any) => 
+		!(this.attrValue instanceof expected)
+		&& new ValueError(this.attrName, `${this.attrName} is invalid`)
 	isEqual = ({expected, message}: {expected: any, message?: string}) => 
 		this.attrValue !== expected
 		&& new ValueError(this.attrName, message || `${this.attrName} is invalid`)
@@ -192,6 +197,7 @@ export function assertValid(
 	attrValue: any,
 	basics: (keyof AssertValidClass)[],
 	complex?: {
+		isInstanceOf?: any,
 		isEqual?: {expected: any, message?: string},
 		isDifferent?: {expected: any, message?: string},
 		matches?: {regex: RegExp, message?: string},

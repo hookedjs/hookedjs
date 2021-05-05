@@ -1,7 +1,7 @@
 import type { ConnectionOptions } from 'typeorm'
 import { createConnection as tCreateConnection } from 'typeorm'
 
-import env from '../lib/config'
+import config from '../lib/config'
 
 /**
  * Calls a memoized typeorm.createConnection. By memoizing, it can be 
@@ -23,7 +23,7 @@ export default function createConnection() {
  * barfed for some reason.
  */
 async function createConnectionRaw() {
-	return env.isProd ? tCreateConnection(prodOrmconfig) : tCreateConnection()
+	return config.isProd ? tCreateConnection(prodOrmconfig) : tCreateConnection()
 }
 
 /**
@@ -35,10 +35,10 @@ const createConnectionM = Function.memoize(createConnectionRaw)
 
 const prodOrmconfig: ConnectionOptions = {
 	type: 'aurora-data-api',
-	region: env.region,
-	secretArn: env.dbSecretArn,
-	resourceArn: env.dbArn,
-	database: env.dbName,
+	region: config.region,
+	secretArn: config.dbSecretArn,
+	resourceArn: config.dbArn,
+	database: config.dbName,
 	serviceConfigOptions: { maxRetries: 8 },
 	// synchronize: true,
 	migrationsRun: true,

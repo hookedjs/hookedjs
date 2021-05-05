@@ -1,4 +1,5 @@
 import type { BaseEntityType } from '../BaseEntityTypes'
+import type { FileType } from '../types'
 
 export interface UserType extends BaseEntityType {
   email: string
@@ -10,6 +11,7 @@ export interface UserType extends BaseEntityType {
   passwordUpdatedAt: Date
   givenName: string
   surname: string
+  files: FileType[]
 }
 
 export type UserCreateOptional = Pick<UserType, 'id' | 'roles' | 'status' | 'password'>

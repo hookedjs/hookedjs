@@ -5,22 +5,22 @@ import * as AWS from 'aws-sdk'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import env from '../config'
+import config from './config'
 
 export default {
 	async put(key: string, data: string | Buffer, contentType: string) {
-		const _put = env.isProd ? s3Put : localPut
+		const _put = config.isProd ? s3Put : localPut
 		return _put(key, data, contentType)
 	},
 	async get(key: string) {
-		const _get = env.isProd ? s3Get : localGet
+		const _get = config.isProd ? s3Get : localGet
 		return _get(key)
 	}
 }
 
 const 
 	s3 = new AWS.S3()
-	,tmpDir = __dirname + '/../../../.fileStorage/'
+	,tmpDir = __dirname + '/../../.fileStorage/'
 
 async function localPut(key: string, data: any, contentType: string) {
 	const 
@@ -49,7 +49,7 @@ async function localGet(key: string): Promise<GetResult> {
 
 async function s3Put(key: string, data: any, contentType: string) {
 	const params = {
-		Bucket: env.s3Bucket,
+		Bucket: config.s3Bucket,
 		Key: key,
 		Body: data,
 		ContentType: contentType,
@@ -59,7 +59,7 @@ async function s3Put(key: string, data: any, contentType: string) {
 async function s3Get(key: string): Promise<GetResult> {
 	try {
 		const params = {
-			Bucket: env.s3Bucket,
+			Bucket: config.s3Bucket,
 			Key: key
 		}
 		const obj = await s3.getObject(params).promise()

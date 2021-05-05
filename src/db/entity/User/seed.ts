@@ -1,41 +1,28 @@
-import 'reflect-metadata'
+import { UserCreate as CreateType, UserEntity as Entity, UserRoleEnum } from '.'
 
-import {createConnection} from 'typeorm'
-import {inspect} from 'util'
+export default async function seedUsers() {
+	console.log('Inserting user records into the database...')
+	
+	const records = await Entity.insertSafe(fakeRecords)
+	console.log('Loaded records: ', records)
 
-import { UserCreate, UserEntity, UserRoleEnum } from '.'
+	// const record = await Entity.createSafe(fakeRecords[0])
+	// console.dir(record)
 
-seedUsers().catch(e => {console.error(inspect(e, false, 4, true))})
+	// const record = new Entity(fakeRecords[0])
+	// await record.saveSafe()
+	// console.dir(record)
 
-async function seedUsers() {
-	const connection = await createConnection()
-
-	await Promise.all((await UserEntity.find()).map(u => UserEntity.delete(u.id)))
-
-	console.log('Inserting new users into the database...')
-	const users = await UserEntity.insertSafe(fakeUsers)
-	console.log('Loaded users: ', users)
-
-	// const user = await UserEntity.createSafe(fakeUsers[0])
-	// console.dir(user)
-
-	// const user = new UserEntity(fakeUsers[0])
-	// await user.saveSafe()
-	// console.dir(user)
-
-	// const user2 = await UserEntity.findOne({where: {email: 'admin@example.com'}})
-	// console.log(await user2!.comparePassword('Password2'))
-	// user2!.password = 'Password3'
-	// await user2!.saveSafe()
-	// console.log(user2!.passwordVersion)
-	// console.log(user2)
-	// console.log(await user2!.comparePassword('Password9'))
-
-
-	connection.close()
+	// const record2 = await Entity.findOne({where: {email: 'admin@example.com'}})
+	// console.log(await record2!.comparePassword('Password2'))
+	// record2!.password = 'Password3'
+	// await record2!.saveSafe()
+	// console.log(record2!.passwordVersion)
+	// console.log(record2)
+	// console.log(await record2!.comparePassword('Password9'))
 }
 
-export const fakeUsers: UserCreate[] = [
+export const fakeRecords: CreateType[] = [
 	{
 		email: 'admin@example.com',
 		roles: [UserRoleEnum.ADMIN],
@@ -52,7 +39,7 @@ export const fakeUsers: UserCreate[] = [
 	},
 	{
 		email: 'author@example.com',
-		roles: [UserRoleEnum.AUTHOR],
+		// roles: [UserRoleEnum.AUTHOR],
 		givenName: 'Sally',
 		surname: 'Author',
 	}

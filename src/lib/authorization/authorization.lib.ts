@@ -1,6 +1,8 @@
+import config from '#lib/config'
+
 import { assertAttrsWithin, assertValid, assertValidSet } from '../validation'
 
-export const authEndpoint = '/auth'
+export const authEndpoint = `${config.apiPrefix}/auth`
 export const authLoginEndpoint = `${authEndpoint}/login`
 export const authRefreshEndpoint = `${authEndpoint}/refresh`
 export const authRegisterEndpoint = `${authEndpoint}/register`
