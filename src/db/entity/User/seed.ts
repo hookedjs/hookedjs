@@ -39,7 +39,7 @@ export const fakeRecords: CreateType[] = [
 	},
 	{
 		email: 'author@hookedjs.org',
-		// roles: [UserRoleEnum.AUTHOR],
+		roles: [UserRoleEnum.AUTHOR],
 		givenName: 'Sally',
 		surname: 'Author',
 	}

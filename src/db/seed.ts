@@ -9,8 +9,10 @@ import { UserEntity } from './entity';
 (async function main() {
 	const connection = await createConnection()
 
-	if (await UserEntity.find({take: 1}))
-		throw new FormValidationErrorSet({}, 'the database is dirty and cannot be seeded')
+	console.log(await UserEntity.find({take: 1}))
+
+	if ((await UserEntity.find({take: 1})).length)
+		throw new Error('the database is dirty and cannot be seeded')
 
 	const seedFiles: string[] = glob.sync(__dirname + '/entity/**/seed.ts')
 	await Promise.all(seedFiles.map(f => require(f).default()))

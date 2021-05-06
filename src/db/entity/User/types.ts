@@ -3,7 +3,6 @@ import type { FileType } from '../types'
 
 export interface UserType extends BaseEntityType {
   email: string
-	rolesJson: string
   roles: UserRoleEnum[]
   status: UserStatusEnum
   password?: string

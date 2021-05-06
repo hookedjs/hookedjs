@@ -2,9 +2,9 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "hookedjs"
+stack_name = "hookedjs2"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-17czrlu5auqc6"
-s3_prefix = "hookedjs"
+s3_prefix = "hookedjs2"
 region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"

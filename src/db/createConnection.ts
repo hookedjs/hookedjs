@@ -11,7 +11,10 @@ export default function createConnection() {
 	return createConnectionM()
 		.catch(e => {
 			createConnectionM.bust()
-			throw e
+			throw (
+				e.message.startsWith('Communications link failure') && new DbConnectionError ||
+				e
+			)
 		})
 }
 
@@ -39,10 +42,22 @@ const prodOrmconfig: ConnectionOptions = {
 	secretArn: config.dbSecretArn,
 	resourceArn: config.dbArn,
 	database: config.dbName,
-	serviceConfigOptions: { maxRetries: 8 },
+	serviceConfigOptions: { maxRetries: 1 },
 	// synchronize: true,
 	migrationsRun: true,
 	entities: 		['src/db/entity/**/entity.js'],
 	migrations: 	['src/db/migration/**/*.js'],
 	subscribers: 	['src/db/subscriber/**/*.js'],
+}
+
+export class DbConnectionError extends Error {
+	type = 'DbConnectionError'
+	note = 'The DB is unavailable'
+	context = {
+		entity: null,
+		errorSet: {}
+	}
+	constructor() {
+		super('The DB is unavailable')
+	}
 }

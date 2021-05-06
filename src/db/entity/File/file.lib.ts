@@ -17,6 +17,6 @@ export class PostProps {
 }
 export const PostPropsExample = new PostProps({
 	data: 'hello, world',
-	mimetype: 'plain/text, utf-8',
+	mimetype: 'text/plain;charset=UTF-8',
 })
 export const PostPropsEnum = Enum.getEnumFromClassInstance(PostPropsExample)

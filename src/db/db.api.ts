@@ -21,8 +21,10 @@ export default async function dbPlugin(app: FastifyInstance, options: FastifyOpt
 	})
 
 	app.post(`${config.apiPrefix}/init`, async function seedDb(req, reply) {
-		if (await UserEntity.find({take: 1}))
+		if ((await UserEntity.find({take: 1})).length)
 			throw new FormValidationErrorSet({}, 'the database is dirty and cannot be initted')
+		// ;(await UserEntity.findOne({email: 'admin@hookedjs.org'}))?.remove()
+		// user?.remove()
 		reply.code(201).send(await UserEntity.createSafe({
 			email: 'admin@hookedjs.org',
 			roles: [UserRoleEnum.ADMIN],
@@ -33,7 +35,7 @@ export default async function dbPlugin(app: FastifyInstance, options: FastifyOpt
 	})
 
 	app.post(`${config.apiPrefix}/seed`, async function seedDb(req, reply) {
-		if (await UserEntity.find({take: 1}))
+		if ((await UserEntity.find({take: 1})).length)
 			throw new FormValidationErrorSet({}, 'the database is dirty and cannot be seeded')
 		const seedFiles: string[] = glob.sync(__dirname + '/entity/**/seed.ts')
 		await Promise.all(seedFiles.map(f => require(f).default()))
@@ -42,6 +44,7 @@ export default async function dbPlugin(app: FastifyInstance, options: FastifyOpt
 
 	// CRUD
 	app.addHook('preValidation', async function adminAuthGuard(req, reply) {
+		console.log(req.user.roles, req.user.roles.includes(UserRoleEnum.ADMIN) )
 		if (
 			req.url.startsWith(`${config.apiPrefix}/crud`) 
 			&& !req.user.roles.includes(UserRoleEnum.ADMIN)

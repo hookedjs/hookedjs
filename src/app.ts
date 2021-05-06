@@ -17,7 +17,7 @@ const
 	htmlPath = path.join(__dirname, '/html')
 	,notFoundHtml = fs.readFileSync(path.join(htmlPath, '/not-found.html'))
 	,app = fastify({
-		logger: false,
+		logger: true,
 		...!config.isProd ? {
 			http2: true,
 			https: { 

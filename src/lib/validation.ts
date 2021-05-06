@@ -8,7 +8,7 @@ export class NotFoundError extends Error {
 		errorSet: {}
 	}
 	constructor() {
-		super()
+		super('The article you seek doth not exist')
 	}
 }
 export function throwNotFoundError(): never {throw new NotFoundError()}
@@ -21,7 +21,7 @@ export class ForbiddenError extends Error {
 		errorSet: {}
 	}
 	constructor() {
-		super()
+		super('You lack permission to this endpoint')
 	}
 }
 export function throwForbiddenError(): never {throw new ForbiddenError()}

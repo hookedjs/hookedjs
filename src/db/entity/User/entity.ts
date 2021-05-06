@@ -21,10 +21,8 @@ export default class UserEntity extends BaseEntity {
 	@Column({type: 'smallint'})
 	status: t.UserType['status']
 
-	@Column({type: 'varchar', default: '[0]', length: 30})
-	rolesJson: string
-	get roles() { return JSON.parse(this.rolesJson) as t.UserRoleEnum[]}
-	set roles(roles: t.UserRoleEnum[]) { this.rolesJson = JSON.stringify(roles)}
+	@Column({type: 'simple-json'})
+	roles: t.UserType['roles']
 
 	@Column({type: 'varchar', length: 30}) 
 	givenName: t.UserType['givenName']
@@ -45,7 +43,7 @@ export default class UserEntity extends BaseEntity {
 	async saveSafe(): Promise<UserEntity> {return super.saveSafe()}
 	static async createSafe(obj: t.UserCreate) {return (new this(obj)).saveSafe()}
 	static async insertSafe(arr: t.UserCreate[]) {return super.insertSafe(arr)}
-	toJSON() {return {...Object.omit(this, ['rolesJson']), passwordHash: '*******', roles: this.roles}}
+	toJSON() {return {...this, passwordHash: '*******'}}
 	
 	async sanitize() {
 		if (this.password) {
@@ -60,7 +58,6 @@ export default class UserEntity extends BaseEntity {
 			passwordHash: isDefinedAndNotNull(this.passwordHash) && assertValid('passwordHash', this.passwordHash, ['isString', 'isHash']),
 			passwordUpdatedAt: false,
 			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: t.UserStatusSet }),
-			rolesJson: assertValid('rolesJson', this.rolesJson, ['isRequired', 'isString', 'isNoneEmpty']),
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: t.UserRoleSet }),
 			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
