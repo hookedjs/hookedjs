@@ -5,21 +5,39 @@ import { ForbiddenError, FormValidationErrorSet } from '#lib/validation'
 
 import config from '../lib/config'
 import createConnection from './createConnection'
-import { UserRoleEnum } from './entity'
+import { UserEntity, UserRoleEnum } from './entity'
 
 export default async function dbPlugin(app: FastifyInstance, options: FastifyOptions) {
-	// Connect to DB on API requests
-	app.addHook('onRequest', async (req, reply) => {
+	app.addHook('onRequest', async function setHeadersAndOpenConnection(req, reply) {
 		if (req.url.startsWith(config.apiPrefix)) {
 			reply.headers({'cache-control': 'no-store, max-age=0'})
 			await createConnection()
 		}
 	})
 
-	// DB Healthcheck
-	app.get(`${config.apiPrefix}/dbtime`, async (req, reply) => {
+	app.get(`${config.apiPrefix}/dbtime`, async function getDbTime(req, reply) {
 		const time = await getManager().query('SELECT CURRENT_TIME()')
 		reply.send(time[0]['CURRENT_TIME()'])
+	})
+
+	app.post(`${config.apiPrefix}/init`, async function seedDb(req, reply) {
+		if (await UserEntity.find({take: 1}))
+			throw new FormValidationErrorSet({}, 'the database is dirty and cannot be initted')
+		reply.code(201).send(await UserEntity.createSafe({
+			email: 'admin@hookedjs.org',
+			roles: [UserRoleEnum.ADMIN],
+			password: 'HookedjsPassword8',
+			givenName: 'Sally',
+			surname: 'Admin',
+		}))
+	})
+
+	app.post(`${config.apiPrefix}/seed`, async function seedDb(req, reply) {
+		if (await UserEntity.find({take: 1}))
+			throw new FormValidationErrorSet({}, 'the database is dirty and cannot be seeded')
+		const seedFiles: string[] = glob.sync(__dirname + '/entity/**/seed.ts')
+		await Promise.all(seedFiles.map(f => require(f).default()))
+		reply.send()
 	})
 
 	// CRUD

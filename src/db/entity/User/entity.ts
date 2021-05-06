@@ -3,7 +3,7 @@ import {Column, Entity, OneToMany} from 'typeorm'
 
 import { assertValid, assertValidSet, isDefinedAndNotNull } from '#lib/validation'
 
-import BaseEntity from '../BaseEntity'
+import BaseEntity from '../base/BaseEntity'
 import { FileEntity } from '../File'
 import * as t from './types'
 

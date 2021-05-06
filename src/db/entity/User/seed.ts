@@ -13,7 +13,7 @@ export default async function seedUsers() {
 	// await record.saveSafe()
 	// console.dir(record)
 
-	// const record2 = await Entity.findOne({where: {email: 'admin@example.com'}})
+	// const record2 = await Entity.findOne({where: {email: 'admin@hookedjs.org'}})
 	// console.log(await record2!.comparePassword('Password2'))
 	// record2!.password = 'Password3'
 	// await record2!.saveSafe()
@@ -24,7 +24,7 @@ export default async function seedUsers() {
 
 export const fakeRecords: CreateType[] = [
 	{
-		email: 'admin@example.com',
+		email: 'admin@hookedjs.org',
 		roles: [UserRoleEnum.ADMIN],
 		password: 'Password8',
 		// status: 4,
@@ -32,13 +32,13 @@ export const fakeRecords: CreateType[] = [
 		surname: 'Admin',
 	},
 	{
-		email: 'editor@example.com',
+		email: 'editor@hookedjs.org',
 		roles: [UserRoleEnum.EDITOR],
 		givenName: 'Sally',
 		surname: 'Editor',
 	},
 	{
-		email: 'author@example.com',
+		email: 'author@hookedjs.org',
 		// roles: [UserRoleEnum.AUTHOR],
 		givenName: 'Sally',
 		surname: 'Author',

@@ -1,4 +1,4 @@
-import type { BaseEntityType } from '../BaseEntityTypes'
+import type { BaseEntityType } from '../base/BaseEntityTypes'
 import type { FileType } from '../types'
 
 export interface UserType extends BaseEntityType {
