@@ -115,7 +115,8 @@ export class AssertValidClass {
 		typeof this.attrValue !== 'boolean' 
 		&& new TypeError(this.attrName, 'true/false')
 	isDate = () => 
-		!this.attrValue?.getTime()
+		this.attrValue?.constructor?.name !== 'Date'
+		// !this.attrValue?.getTime()
 		&& new TypeError(this.attrName, 'date')
 	isDatable = () => // can attrValue be converted to a date
 		!(new Date(this.attrValue))?.getTime()
@@ -249,6 +250,7 @@ export function assertAttrsWithin(given: Record<string, any>, expected: Record<s
 	)
 }
 
+export const isDefined = (arg: any) => arg !== undefined
 export const isNullOrUndefined = (arg: any) => arg === undefined || arg === null
 export const isDefinedAndNotNull = (arg: any) => !isNullOrUndefined(arg)
 

@@ -12,7 +12,7 @@ import {BaseEntity as tBaseEntity, CreateDateColumn, DeleteDateColumn, PrimaryCo
 
 import { FormValidationErrorSet, ValidationErrorSet, ValueError } from '#lib/validation'
 
-import type { BaseEntityType } from './BaseEntityTypes'
+import type { BaseEntityType } from './BaseEntity.lib'
 
 class BaseEntity extends tBaseEntity {
 	@PrimaryColumn('varchar', {length: 30})

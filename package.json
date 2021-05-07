@@ -6,7 +6,7 @@
   "license": "ISC",
   "scripts": {
     "build": "npm run lint && tsc && sam build && npm run clean",
-		"clean": "tsc -b --clean",
+    "clean": "tsc -b --clean",
     "start": "ts-node src/server.ts",
     "dev": "ts-node-dev --transpile-only src/server.ts",
     "deploy": "npm run build && sam deploy",
