@@ -2,7 +2,7 @@ import fileStorage from '#lib/fileStorage'
 import { throwNotFoundError } from '#lib/validation'
 import { FileEntity } from '#src/db/entity'
 
-import { fileByIdEndpoint } from './files.lib'
+import { fileByIdEndpoint } from './files.api.lib'
 
 export default async function filesPlugin(app: FastifyInstance, options: FastifyOptions) {
 	app.get(fileByIdEndpoint(':id'), async function getFile(req, reply) {

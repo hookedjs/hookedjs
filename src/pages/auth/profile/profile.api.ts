@@ -1,7 +1,7 @@
 import { UserEntity } from '#db/entity'
 import { throwForbiddenError } from '#lib/validation'
 
-import { profileEndpoint, ProfilePatchProps } from './profile.lib'
+import { profileEndpoint, ProfilePatchProps } from './profile.api.lib'
 
 export default async function profilePlugin(app: FastifyInstance, options: FastifyOptions) {
 	app.get(profileEndpoint, async function getProfile(req, reply) {

@@ -4,7 +4,7 @@ import fileStorage from '#lib/fileStorage'
 import { RequiredError, throwNotFoundError, throwValidationErrorSet } from '#lib/validation'
 import { FileEntity } from '#src/db/entity'
 
-import { fileByIdEndpoint, PostProps } from './file.lib'
+import { fileByIdEndpoint, PostProps } from './file.api.lib'
 
 export default async function filePlugin(app: FastifyInstance, options: FastifyOptions) {
 	app.post(fileByIdEndpoint(':id'), async function upsertFile(req, reply) {

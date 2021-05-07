@@ -5,7 +5,7 @@ import { UserEntity, UserRoleEnum, UserStatusEnum } from '#db/entity'
 
 import config from '../config'
 import { ForbiddenError, FormValidationErrorSet, RequiredError, ValidationErrorSet } from '../validation'
-import { authEndpoint, authLoginEndpoint, authRefreshEndpoint, authRegisterEndpoint, LoginProps, RegisterProps } from './authorization.lib'
+import { authEndpoint, authLoginEndpoint, authRefreshEndpoint, authRegisterEndpoint, LoginProps, RegisterProps } from './authorization.api.lib'
 
 
 export default async function authorizationPlugin(app: FastifyInstance, options: FastifyOptions) {
