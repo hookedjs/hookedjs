@@ -79,6 +79,7 @@ function commonContentTypes() {
 		'text/javascript',
 		'text/javascript',
 		'text/plain',
+		'text/plain;charset=UTF-8',
 		'video/mp2t',
 		'video/mp4',
 		'video/mpeg',

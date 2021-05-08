@@ -14,20 +14,19 @@ export default async function seedFiles() {
 		givenName: 'Sally',
 		surname: 'Files',
 	})
-
 	fakeRecords = fakeRecords.map(r => ({...r, createdById: user.id}))
+
+	const img = await fs.promises.readFile(__dirname + '/seed.jpeg')
 	
 	const records = await Entity.insertSafe(fakeRecords)
 	console.log('Loaded records: ', records)
-	const img = await fs.promises.readFile(__dirname + '/seed.jpeg')
-	records.identifiers.forEach(({id}) => fileStorage.put(id, img, 'image/jpeg'))
+	records.identifiers.forEach(({id}) => fileStorage.put(id, img, 'image/jpeg'))	
 
-	// const img = await fs.promises.readFile(__dirname + '/seed.jpeg')
-	// await Promise.all((await Entity.find()).forEach(r => fileStorage.put(r.id, img, r.type)))
 	
+	// fakeRecords = fakeRecords.map(r => ({...r, bin: img}))
+	// const records = await Promise.all(fakeRecords.map(r => Entity.createSafe(r)))
+	// console.log('Loaded records: ', records)
 
-	// const record = await Entity.createSafe(fakeRecords[0])
-	// console.dir(record)
 
 	// const record = new Entity(fakeRecords[0])
 	// await record.saveSafe()
@@ -39,18 +38,18 @@ export let fakeRecords: CreateType[] = [
 		name: 'seed.jpeg',
 		type: 'image/jpeg',
 		size: 40,
-		md5: 'sldkfj'
+		md5: 'sldkfj',
 	},
 	{
 		name: 'seed.jpeg',
 		type: 'image/jpeg',
 		size: 40,
-		md5: 'sldkfj'
+		md5: 'sldkfj',
 	},
 	{
 		name: 'seed.jpeg',
 		type: 'image/jpeg',
 		size: 40,
-		md5: 'sldkfj'
+		md5: 'sldkfj',
 	},
 ]

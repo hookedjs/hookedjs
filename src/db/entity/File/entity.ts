@@ -29,6 +29,9 @@ export default class FileEntity extends BaseEntity {
 	// It is _not_ populated when reading a file entity
 	bin: l.FileType['bin']
 
+	// bin64 is a helplfer for bin to populate bin from a base64 str
+	set bin64(base64str: string) {this.bin = Buffer.from(base64str, 'base64')}
+
 	constructor(seedObj?: Partial<l.FileCreate>) {super(seedObj)}
 	async saveSafe(): Promise<FileEntity> {
 		const file = await super.saveSafe()

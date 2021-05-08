@@ -64,14 +64,62 @@
 		</section>
 	</section>
 	<section class="form">
-		<h2>Form</h2>
-		<p>Experiment with uploading a file via the form below to file id = '__test__'.</p>
-		<form action="/files/__test__" method="post" enctype="multipart/form-data">
+		<h2>Multi-part Form</h2>
+		<p>Experiment with uploading a file via the form below to file id = '1234'.</p>
+		<form action="/api/crud/files/1234/bin" method="post" enctype="multipart/form-data">
 			<div class="form-group">
 				<input aria-label="File picker" type="file" name="file" id="file">
 			</div>
 			<input type="submit">
 		</form>
+	</section>
+	<section class="form">
+		<h2>Ajax Form</h2>
+		<form action="#" id="ajax-form" method="post" onsubmit="onAjaxSubmit(event)">
+			<div class="form-group">
+				<input aria-label="File picker" type="file" name="file" id="file2">
+			</div>
+			<input type="submit">
+		</form>
+
+		<script>
+			async function onAjaxSubmit(event) {
+				event.preventDefault()
+				const json = await formToJson(event.target)
+				console.log(json.file)
+			}
+
+			async function formToJson(formElement) {
+				const reqBody = {}
+				for (const e of formElement.elements) {
+					if (e.type === 'submit') continue
+					reqBody[e.name] = (
+						e.type === 'checkbox' && e.checked ||
+						e.type === 'file' && await readFile(e.files[0]) ||
+						e.value
+					)
+				}
+				return reqBody
+			}
+
+			function readFile(file) {
+				return new Promise((resolve, reject) => {
+					var fr = new FileReader();
+					// fr.onload = () => resolve(fr.result)
+					fr.onerror = reject
+					fr.readAsDataURL(file)
+					fr.onload = () => {
+						// Encoding fixes thanks to https://stackoverflow.com/a/52311051/1202757
+						let encoded = fr.result.toString().replace(/^data:(.*,)?/, '');
+						if ((encoded.length % 4) > 0) {
+							encoded += '='.repeat(4 - (encoded.length % 4));
+						}
+						resolve(encoded);
+					};
+				})
+			}
+
+		</script>
 	</section>
 </body>
 

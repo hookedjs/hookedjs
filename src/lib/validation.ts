@@ -142,6 +142,10 @@ export class AssertValidClass {
 	isUrlRel = () =>
 		this.attrValue[0] !== ('/')
 		&& new ValueError(this.attrName, 'relative url is invalid')
+	isStringOrBuffer = () => 
+		typeof this.attrValue !== 'string'
+		&& !Buffer.isBuffer(this.attrValue)
+		&& new TypeError(this.attrName, 'stringOrBuffer')
 	
 
 	// Ranges

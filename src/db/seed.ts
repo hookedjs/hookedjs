@@ -3,8 +3,6 @@ import 'reflect-metadata'
 import * as glob from 'glob'
 import { createConnection } from 'typeorm'
 
-import { FormValidationErrorSet } from '#src/lib/validation'
-
 import { UserEntity } from './entity';
 (async function main() {
 	const connection = await createConnection()
@@ -15,6 +13,7 @@ import { UserEntity } from './entity';
 		throw new Error('the database is dirty and cannot be seeded')
 
 	const seedFiles: string[] = glob.sync(__dirname + '/entity/**/seed.ts')
+		.filter(f => f.includes('File'))
 	await Promise.all(seedFiles.map(f => require(f).default()))
 
 	connection.close()
