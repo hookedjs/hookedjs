@@ -25,16 +25,20 @@ export default class FileEntity extends BaseEntity {
 	@Column({ type: 'varchar', length: 32 })
 	md5: l.FileType['md5']
 
-	// Bin is a base64 string that can be supplied to create/update the file contents
+	// Bin is a file string or buffer that can be supplied to create/update the file contents
 	// It is _not_ populated when reading a file entity
 	bin: l.FileType['bin']
 
 	// bin64 is a helplfer for bin to populate bin from a base64 str
-	set bin64(base64str: string) {this.bin = Buffer.from(base64str, 'base64')}
+	bin64: l.FileType['bin64']
 
 	constructor(seedObj?: Partial<l.FileCreate>) {super(seedObj)}
 	async saveSafe(): Promise<FileEntity> {
 		const file = await super.saveSafe()
+		if (file.bin64) {
+			this.bin = Buffer.from(file.bin64, 'base64')
+			delete file.bin64
+		}
 		if (file.bin) {
 			await fileStorage.put(file.id, file.bin, file.type)
 			delete file.bin

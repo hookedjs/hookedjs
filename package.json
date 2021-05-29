@@ -22,7 +22,7 @@
     "web:start": "ts-node --project server.tsconfig.json --transpile-only server.ts",
     "web:test": "web-test-runner \"src/**/*.test.tsx\"",
     "validate": "npm run lint && tsc --noEmit",
-    "lint": "eslint --cache --ext .ts,.tsx src server.ts",
+    "lint": "eslint --cache --ext .ts,.tsx src",
     "prepare": "if [ -d \".git\" ]; then husky install; fi",
     "dev": "PORT=4000 run-p api:dev web:dev"
   },
