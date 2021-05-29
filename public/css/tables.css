@@ -1,0 +1,30 @@
+table {
+  width: 100%;
+  border: 1px solid var(--gray3);
+  margin-bottom: .4rem;
+}
+table, th, td {
+  border-collapse: collapse;
+}
+td {
+  vertical-align: top;
+}
+thead, tfoot {
+  background: var(--gray3);
+}
+thead td, tfoot td {
+  padding: .5rem .2rem;
+}
+tbody tr:nth-child(odd) {
+  background: var(--gray1);
+}
+tbody td {
+  padding: .5rem .2rem .8rem;
+  font-size: .9rem;
+}
+td[data-clickable="true"] {
+  cursor: pointer
+}
+td[data-clickable="true"]:hover {
+  background: var(--gray4)
+}

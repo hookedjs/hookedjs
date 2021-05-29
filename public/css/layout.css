@@ -1,0 +1,14 @@
+body {
+  --vh: 100vh; /* this is set by App.tsx */
+  --body-height: var(--vh);
+	--header-height: 50px;
+  --button-height: 30px;
+  overflow: hidden;
+  margin: 0;
+  max-width: 100%;
+}
+@media (max-width: 700px) {
+  body {
+    --button-height: 38px;
+  }
+}

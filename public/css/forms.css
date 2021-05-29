@@ -1,0 +1,47 @@
+input,
+input:hover,
+input:focus,
+select,
+select:hover,
+select:focus,
+textarea,
+textarea:hover,
+textarea:focus {
+  font-size: 1rem;
+}
+
+input, select {
+  border: 1px solid var(--gray4);
+  color: var(--gray10);
+  padding-left: .3rem;
+  line-height: 1.3rem;
+  border-radius: 2px;
+  outline: none;
+  margin-right: .2rem;
+  background: var(--white);
+  height: var(--button-height);
+}
+input[type=checkbox] {
+  height: 1.5rem;
+  width: 1.5rem;
+  cursor: pointer;
+}
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%23666'><polygon points='0,0 100,0 50,50'/></svg>") no-repeat;
+  background-size: 11px;
+  background-position: calc(100% - 5px) .68rem;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  color: var(--gray10);
+  padding: .1rem 24px .12rem .5rem;
+  font-size: .9rem !important;
+}
+@media (max-width: 700px) {
+  select {
+    background-position: calc(100% - 5px) .88rem;
+    font-size: 1rem !important;
+  }
+}

@@ -4,6 +4,8 @@
     "target": "ES2019",
     "moduleResolution": "node",
     "sourceMap": true,
+		"jsx": "preserve",
+    "jsxFactory": "h",
     "baseUrl": ".",
     "strict": true,
     "skipLibCheck": true,
@@ -12,14 +14,17 @@
     "allowSyntheticDefaultImports": true,
     "importsNotUsedAsValues": "error",
     "allowUnreachableCode": true,
-    "lib": ["ES2019", "DOM"],
+    "lib": ["ES2019", "DOM", "dom.Iterable"],
 		"emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "paths": {
 			"#src/*": ["./src/*"],
       "#lib/*": ["./src/lib/*"],
-      "#db/*": ["./src/db/*"]
+      "#db/*": ["./src/db/*"],
+			"#lay/*": ["./src/layout/*"],
+      // Add this line to get types for streaming imports (packageOptions.source="remote"):
+      "*": [".snowpack/types/*"]
 		}
   },
   "include": ["src"],

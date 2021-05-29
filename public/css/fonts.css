@@ -1,0 +1,17 @@
+:root {
+	--font-primary: Helvetica, sans-serif;
+	--font-serif: serif;
+	--font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+b, .bold {font-weight: 700}
+code {
+  font-family: var(--font-mono)
+}
+html {
+  font-size: 16px;
+	font-family: var(--font-primary);
+	text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

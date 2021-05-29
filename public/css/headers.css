@@ -1,0 +1,21 @@
+h1,h2,h3,h4,h5,h6 {
+	line-height: 2rem;
+}
+h1 {
+  font-size: 1.4rem;
+}
+h2 {
+  font-size: 1.3rem;
+}
+h3 {
+  font-size: 1.25rem;
+}
+h4 {
+  font-size: 1.2rem;
+}
+h5 {
+  font-size: 1.15rem;
+}
+h6 {
+  font-size: 1.1rem;
+}

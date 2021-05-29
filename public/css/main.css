@@ -1,0 +1,20 @@
+@import './buttons.css';
+@import './colors.css';
+@import './fonts.css';
+@import './forms.css';
+@import './headers.css';
+@import './layout.css';
+@import './links.css';
+@import './scrollbar.css';
+@import './tables.css';
+
+* {
+  box-sizing:border-box;
+}
+
+.hidden {display: none !important}
+.block {display: block !important}
+.flex {display: flex !important}
+.inVisible {visibility: 0 !important}
+.visible {visibility: 1 !important}
+

@@ -1,0 +1,24 @@
+:root {
+	--scrollbar-width: 14px;
+}
+@supports (-webkit-touch-callout: none) {
+	:root {
+		--scrollbar-width: 0px;
+	}
+}
+.scrollbar,#content {
+	/* Firefox */
+	scrollbar-width: auto;          /* "auto" or "thin". auto ~= 14px  */
+	scrollbar-color: var(--gray7) var(--gray2);   /* scroll thumb & track */
+}
+.scrollbar::-webkit-scrollbar,#content::-webkit-scrollbar {
+	width: 14px; /* width of the entire scrollbar */
+}
+.scrollbar::-webkit-scrollbar-track,#content::-webkit-scrollbar-track {
+	background: var(--gray2); /* color of the tracking area */
+}
+.scrollbar::-webkit-scrollbar-thumb,#content::-webkit-scrollbar-thumb {
+	background-color: var(--gray7); /* color of the scroll thumb */
+	border-radius: 20px; /* roundness of the scroll thumb */
+	border: 3px solid var(--gray2); /* creates padding around scroll thumb */
+}

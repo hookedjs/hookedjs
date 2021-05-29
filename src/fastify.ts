@@ -22,8 +22,8 @@ const
 			http2: true,
 			https: { 
 				allowHTTP1: true, 
-				key: fs.readFileSync(__dirname + '/../ssl.key', 'utf8'), 
-				cert: fs.readFileSync(__dirname + '/../ssl.crt', 'utf8'),
+				key: fs.readFileSync(__dirname + '/../snowpack.key', 'utf8'), 
+				cert: fs.readFileSync(__dirname + '/../snowpack.crt', 'utf8'),
 			},
 		} : {}
 	})

@@ -1,0 +1,86 @@
+:root {
+  --primary-h: 0;--primary-s: 0%;--primary-l: 30%;
+  --primary: hsl(var(--primary-h),var(--primary-s),var(--primary-l));
+  --primary-hover: hsl(var(--primary-h),var(--primary-s),calc( var(--primary-l) + 10% ));
+
+  --secondary-h: 0;--secondary-s: 0%;--secondary-l: 40%;
+  --secondary: hsl(var(--secondary-h),var(--secondary-s),var(--secondary-l));
+  --secondary-hover: hsl(var(--secondary-h),var(--secondary-s),calc( var(--secondary-l) + 4% ));
+
+  --success-h: 0;--success-s: 0%;--success-l: 40%;
+  --success: hsl(var(--success-h),var(--success-s),var(--success-l));
+  --success-hover: hsl(var(--success-h),var(--success-s),calc( var(--success-l) + 4% ));
+  
+  --warning-h: 0;--warning-s: 0%;--warning-l: 40%;
+  --warning: hsl(var(--warning-h),var(--warning-s),var(--warning-l));
+  --warning-hover: hsl(var(--warning-h),var(--warning-s),calc( var(--warning-l) + 4% ));
+
+  --danger-h: 0;--danger-s: 0%;--danger-l: 40%;
+  --danger: hsl(var(--danger-h),var(--danger-s),var(--danger-l));
+  --danger-hover: hsl(var(--danger-h),var(--danger-s),calc( var(--danger-l) + 10% ));
+}
+
+:root, .light {
+	--black: black;
+  --white: hsl(0, 0%, 98%);
+  --gray1: hsl(0, 0%, 94%);
+  --gray2: hsl(0, 0%, 90%);
+  --gray3: hsl(0, 0%, 84%);
+  --gray4: hsl(0, 0%, 78%);
+  --gray5: hsl(0, 0%, 70%);
+  --gray6: hsl(0, 0%, 60%);
+  --gray7: hsl(0, 0%, 50%);
+  --gray8: hsl(0, 0%, 40%);
+  --gray9: hsl(0, 0%, 30%);
+  --gray10: hsl(0, 0%, 20%);
+  --gray11: hsl(0, 0%, 10%);
+  --links: hsl(var(--primary-h),var(--primary-s),calc( var(--primary-l) + 10% ));
+  --links-hover: var(--primary);
+  --header-background: hsl(0, 0%, 0%);
+  --sidebar-background: var(--gray2);
+  --sidebar-background-hover: var(--gray3);
+  --sidebar-background-active: hsl(var(--primary-h),calc( var(--primary-s) - 50% ),80%);
+  --nav-text-active: var(--primary);
+  --searchbar-background: var(--gray4);
+  --searchbar-background-active: var(--gray2);
+}
+
+.dark {
+  --black: white;
+  --white: black;
+  --gray1: hsl(0, 0%, 8%);
+  --gray2: hsl(0, 0%, 14%);
+  --gray3: hsl(0, 0%, 22%);
+  --gray4: hsl(0, 0%, 26%);
+  --gray5: hsl(0, 0%, 30%);
+  --gray6: hsl(0, 0%, 40%);
+  --gray7: hsl(0, 0%, 50%);
+  --gray8: hsl(0, 0%, 60%);
+  --gray9: hsl(0, 0%, 70%);
+  --gray10: hsl(0, 0%, 80%);
+  --gray11: hsl(0, 0%, 90%);
+  --links: hsl(var(--primary-h),var(--primary-s),calc( var(--primary-l) + 47% ));
+  --links-hover: hsl(var(--primary-h),var(--primary-s),calc( var(--primary-l) + 40% ));
+  --header-background: black;
+	--sidebar-background: var(--gray2);
+  --sidebar-background-hover: var(--gray3);
+  --sidebar-background-active: var(--primary);
+  --nav-text-active: var(--black);
+  --searchbar-background: var(--gray4);
+  --searchbar-background-active: var(--gray2);
+  background: var(--gray2);
+  color: var(--black);
+}
+
+@media (max-width: 700px) {
+	/* Darken background on IOS so that the scroll bar is visible */
+	:root {
+		--sidebar-background: var(--gray5)
+	}
+}
+
+html {
+  background: var(--sidebar-background);
+  color: var(--black);
+}
+

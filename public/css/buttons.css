@@ -1,0 +1,74 @@
+button, a.button {
+  font-family: var(--font-primary);
+  display: inline-block;
+  padding: .2rem .6rem;
+  font-weight: 500;
+  color: var(--gray10);
+  border: 1px solid var(--gray4);
+  border-radius: 2px;
+  cursor: pointer;
+  background: var(--gray1);
+  text-decoration: none;
+  font-size: .8rem;
+  height: var(--button-height);
+  line-height: 1.4rem;
+  text-align: center;
+}
+a.button { /* try to match button */
+  font-style: normal;
+  font-variant-ligatures: normal;
+  font-variant-caps: normal;
+  font-variant-numeric: normal;
+  font-variant-east-asian: normal;
+  font-stretch: normal;
+  font-size: 600;
+}
+@media (max-width: 700px) {
+  button, a.button {
+    min-width: 40px;
+    line-height: 2rem;
+  }
+}
+
+
+button.large, a.button.large {
+	font-size: 1.2rem;
+	padding: .7rem .8rem;
+	height: auto;
+	border: none;
+}
+
+button:hover, a.button:hover {
+  background: var(--gray3);
+}
+button:active, a.button:active {
+  transform: translateY(2px);
+}
+button:focus, a.button:focus {
+  outline: none;
+}
+button:disabled, button[data-disabled="true"], a.button[data-disabled="true"] {
+  color: var(--gray6);
+}
+.dark button,.dark a.button {
+  background: var(--gray2);
+}
+.dark button:hover,.dark a.button:hover {
+  background: var(--gray3);
+}
+button.primary, a.button.primary {
+  color: white;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+}
+button.primary:hover, a.button.primary:hover {
+  background: var(--primary-hover);
+}
+button.secondary, a.button.secondary {
+  color: white;
+  background: var(--secondary);
+  border: 1px solid var(--secondary);
+}
+button.secondary:hover, a.button.secondary:hover {
+  background: var(--secondary-hover);
+}

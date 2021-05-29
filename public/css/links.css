@@ -1,0 +1,13 @@
+a, a:active, a:focus, .body-link {
+  text-decoration: none;
+  color: var(--links);
+}
+@media (min-width: 700px) {
+	a:hover, .body-link:hover {
+		color: var(--links-hover);
+		text-decoration: underline;
+	}
+}
+p a, .body-link {
+  text-decoration: underline;
+}
