@@ -13,15 +13,14 @@ module.exports = {
 	},
 	exclude: [
 		'**/node_modules/**/*',
-		'**/src/fastify.ts',
 		'**/src/lambda.ts',
-		'**/src/server.ts',
-		'**/src/lib/fileStorage.ts',
-		'**/src/db/createConnection.ts',
-		'**/src/db/entity/base/BaseEntity.ts',
-		'**/src/db/entity/**/entity.ts',
+		'**/src/db/**/index.ts',
+		'**/src/db/migration/*',
+		'**/src/db/subscriber/*',
 		'**/src/**/*.api.ts',
-		'**/src/**/seed.ts',
+		'**/src/**/*.node.ts',
+		'**/*.api.ts',
+		'**/*.node.ts',
 	],
 	plugins: [
 		[
@@ -39,16 +38,19 @@ module.exports = {
 		/* Enable an SPA Fallback in development: */
 		// {"match": "routes", "src": ".*", "dest": "/index.html"},
 		// The recommend approach (above) doesn't work for deep routes for some reason
+		// eslint-disable-next-line no-useless-escape
 		{'match': 'all', 'src': `^(.(?!\.(${nonRouteExtensions})$))+$`, 'dest': '/index.html'},
 	],
 	optimize: {
-		bundle: isProd,
+		// bundle: isProd,
 		// minify: true, // sourcemaps dont work in minify yet :-(
 		// splitting: true, // app breaks with splitting
 		manifest: true,
 	},
 	packageOptions: {
 		/* ... */
+		// polyfillNode: true,
+
 	},
 	devOptions: {
 		output: 'stream',
@@ -57,11 +59,12 @@ module.exports = {
 	buildOptions: {
 		/* ... */
 		sourcemap: !isProd,
+		out: 'web-build',
 	},
 	alias: {
 		'#src': './src',
 		'#lib': './src/lib',
-		'#lay': './src/layout',
-		'#db': './src/db/'
+		'#layout': './src/layout',
+		'#db': './src/db'
 	}
 }

@@ -1,6 +1,6 @@
-import fileStorage from '#lib/fileStorage'
 import { throwNotFoundError } from '#lib/validation'
 import { FileEntity } from '#src/db/entity'
+import fileStorage from '#src/lib/fileStorage.node'
 
 import { fileByIdEndpoint } from './files.api.lib'
 

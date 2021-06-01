@@ -1,8 +1,8 @@
 import * as cuid from 'cuid'
 
-import fileStorage from '#lib/fileStorage'
 import { RequiredError, throwNotFoundError, throwValidationErrorSet } from '#lib/validation'
 import { FileEntity } from '#src/db/entity'
+import fileStorage from '#src/lib/fileStorage.node'
 
 import { fileByIdEndpoint, PostProps } from './file.api.lib'
 

@@ -2,10 +2,10 @@
  * An interface for config variables
  */
 import * as packageJson from '../../package.json'
+import configIso from './config.iso'
 
 const pe = process.env as Record<string, string>
-
-const isProd = process.env.NODE_ENV === 'production'
+const isProd = pe.NODE_ENV === 'production'
 
 const lambdaVars = ['jwtSecret', 'dbName', 'dbArn', 'dbSecretArn', 's3Bucket', 'region'] as const
 const lambdaEnv = Object.pick(pe, lambdaVars)
@@ -23,7 +23,7 @@ if (missing.length)
 export default {
 	version: packageJson.version,
 	isProd,
-	apiPrefix: '/api',
+	...configIso,
 	...lambdaEnv,
 	...localEnv,
 }

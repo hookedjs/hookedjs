@@ -1,7 +1,7 @@
 import { Fragment as F, h } from 'preact'
 import { useCallback } from 'preact/hooks'
 
-import { Logo } from '#lay/components/Logo'
+import { Logo } from '#layout/components/Logo'
 import { BooleanField, ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'

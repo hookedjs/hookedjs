@@ -12,7 +12,7 @@ import { UserEntity } from './entity';
 	if ((await UserEntity.find({take: 1})).length)
 		throw new Error('the database is dirty and cannot be seeded')
 
-	const seedFiles: string[] = glob.sync(__dirname + '/entity/**/seed.ts')
+	const seedFiles: string[] = glob.sync(__dirname + '/entity/**/seed.node.ts')
 		.filter(f => f.includes('File'))
 	await Promise.all(seedFiles.map(f => require(f).default()))
 

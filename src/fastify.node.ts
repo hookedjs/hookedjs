@@ -10,12 +10,12 @@ import * as glob from 'glob'
 import * as helmet from 'helmet'
 import * as path from 'path'
 
-import config from './lib/config'
+import config from './lib/config.node'
 import { ForbiddenError, NotFoundError, ValidationErrorSet } from './lib/validation'
 
 const 
-	htmlPath = path.join(__dirname, '/html')
-	,notFoundHtml = fs.readFileSync(path.join(htmlPath, '/not-found.html'))
+	htmlPath = path.join(__dirname, '/../web-build')
+	,notFoundHtml = fs.readFileSync(path.join(htmlPath, '/index.html'))
 	,app = fastify({
 		logger: true,
 		...!config.isProd ? {

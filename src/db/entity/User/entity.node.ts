@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 import {Column, Entity, OneToMany} from 'typeorm'
 
-import BaseEntity from '../base/BaseEntity'
+import BaseEntity from '../base/BaseEntity.node'
 import { FileEntity } from '../File'
 import * as l from './lib'
 

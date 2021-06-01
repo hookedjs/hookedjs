@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-import fileStorage from '#src/lib/fileStorage'
+import fileStorage from '#src/lib/fileStorage.node'
 
 import {UserEntity} from '..'
 import { FileCreate as CreateType, FileEntity as Entity } from '.'

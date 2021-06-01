@@ -1,7 +1,7 @@
 import { ComponentChildren, Fragment, h } from 'preact'
 import { useCallback, useLayoutEffect, useState } from 'preact/hooks'
 
-import OpenMap, { MapMarker } from '#lay/components/Map'
+import OpenMap, { MapMarker } from '#layout/components/Map'
 import {Checkbox} from '#lib/forms'
 import { useMedia, UseSet, useSet } from '#lib/hooks'
 import * as i from '#lib/icons'

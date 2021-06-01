@@ -9,7 +9,7 @@ module.exports = {
 	// migrationsRun: true,
 	logging: false,
 	entities: [
-		'src/db/entity/**/entity.ts'
+		'src/db/entity/**/entity.node.ts'
 	],
 	migrations: [
 		'src/db/migration/**/*.ts'

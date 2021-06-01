@@ -1,7 +1,7 @@
 import { h } from 'preact'
 
-import PaddedPage from '#lay/components/PaddedPage'
-import Section from '#lay/components/Section'
+import PaddedPage from '#layout/components/PaddedPage'
+import Section from '#layout/components/Section'
 
 export default function Account() {
 	return <PaddedPage>

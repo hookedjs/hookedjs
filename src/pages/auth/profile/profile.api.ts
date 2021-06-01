@@ -1,5 +1,5 @@
-import { UserEntity } from '#db/entity'
 import { throwForbiddenError } from '#lib/validation'
+import { UserEntity } from '#src/db/entity'
 
 import { profileEndpoint, ProfilePatchProps } from './profile.api.lib'
 

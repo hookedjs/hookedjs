@@ -5,7 +5,7 @@ import * as AWS from 'aws-sdk'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import config from './config'
+import config from './config.node'
 
 export default {
 	async put(key: string, data: string | Buffer, contentType: string) {

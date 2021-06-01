@@ -1,7 +1,7 @@
 import { h } from 'preact'
 import { useLayoutEffect } from 'preact/hooks'
 
-import SidebarLayout from '#lay/layout/SidebarLayout'
+import SidebarLayout from '#layout/layout/SidebarLayout'
 import * as i from '#lib/icons'
 import { Paths, routes } from '#src/routes'
 

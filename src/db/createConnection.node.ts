@@ -1,7 +1,7 @@
 import type { ConnectionOptions } from 'typeorm'
 import { createConnection as tCreateConnection } from 'typeorm'
 
-import config from '../lib/config'
+import config from '../lib/config.node'
 
 /**
  * Calls a memoized typeorm.createConnection. By memoizing, it can be 
@@ -45,7 +45,7 @@ const prodOrmconfig: ConnectionOptions = {
 	serviceConfigOptions: { maxRetries: 1 },
 	// synchronize: true,
 	migrationsRun: true,
-	entities: 		['src/db/entity/**/entity.js'],
+	entities: 		['src/db/entity/**/entity.node.js'],
 	migrations: 	['src/db/migration/**/*.js'],
 	subscribers: 	['src/db/subscriber/**/*.js'],
 }

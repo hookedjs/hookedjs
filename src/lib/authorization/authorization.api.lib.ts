@@ -1,4 +1,4 @@
-import config from '#lib/config'
+import config from '#src/lib/config.iso'
 
 import { assertAttrsWithin, assertValid, assertValidSet } from '../validation'
 

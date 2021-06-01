@@ -1,2 +1,2 @@
-export {default as FileEntity} from './entity'
+export {default as FileEntity} from './entity.node'
 export * from './lib'

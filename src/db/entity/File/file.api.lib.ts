@@ -1,5 +1,5 @@
-import config from '#lib/config'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
+import config from '#src/lib/config.iso'
 
 export function fileByIdEndpoint(id: string) { return `${config.apiPrefix}/crud/files/${id}/file` }
 

@@ -1,8 +1,8 @@
 import {Column, Entity, ManyToOne} from 'typeorm'
 
-import fileStorage from '#src/lib/fileStorage'
+import fileStorage from '#src/lib/fileStorage.node'
 
-import BaseEntity from '../base/BaseEntity'
+import BaseEntity from '../base/BaseEntity.node'
 import { UserEntity } from '../User'
 import * as l from './lib'
 

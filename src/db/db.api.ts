@@ -3,8 +3,8 @@ import { getManager } from 'typeorm'
 
 import { ForbiddenError, FormValidationErrorSet } from '#lib/validation'
 
-import config from '../lib/config'
-import createConnection from './createConnection'
+import config from '../lib/config.node'
+import createConnection from './createConnection.node'
 import { UserEntity, UserRoleEnum } from './entity'
 
 export default async function dbPlugin(app: FastifyInstance, options: FastifyOptions) {

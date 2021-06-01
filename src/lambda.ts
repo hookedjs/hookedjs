@@ -1,6 +1,6 @@
 import './lib/polyfills'
 
-import app from './fastify'
+import app from './fastify.node'
 
 const awsLambdaFastify = require('aws-lambda-fastify')
 

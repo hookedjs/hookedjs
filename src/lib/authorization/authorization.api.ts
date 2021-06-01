@@ -1,9 +1,9 @@
 import jwtPlugin from 'fastify-jwt'
 
-import createConnection from '#db/createConnection'
-import { UserEntity, UserRoleEnum, UserStatusEnum } from '#db/entity'
+import createConnection from '#src/db/createConnection.node'
+import { UserEntity, UserRoleEnum, UserStatusEnum } from '#src/db/entity'
 
-import config from '../config'
+import config from '../config.node'
 import { ForbiddenError, FormValidationErrorSet, RequiredError, ValidationErrorSet } from '../validation'
 import { authEndpoint, authLoginEndpoint, authRefreshEndpoint, authRegisterEndpoint, LoginProps, RegisterProps } from './authorization.api.lib'
 
