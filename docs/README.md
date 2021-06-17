@@ -1,19 +1,25 @@
-<h1> ☠️ AWS-SERVERLESS-FULLSTACK ☠️</h1>
+<h1> 🍰 HookedJS 🍰 </h1>
 
-...is a template to create a low-management, autoscaling NodeJS api + database on AWS
+<p align="center"><img src="https://github.com/hookedjs/hookedjs/blob/main/docs/hooked.png?raw=true" alt="Hookedjs" width="200"/></p>
+
+...is a template to create a low-management, autoscaling NodeJS api + Preact website + MySQL database on AWS
 
 What makes it cool:
 
-1. 100% serverless full-stack with Static frontend, NodeJS api and MySQL db
-1. Easy deploy management with AWS SAM + Cloudformation
-1. Run locally, AWS, or anywhere with generic file and db connectors
-1. All Javascript/Typescript
-1. Uses Fastify framework, which is mucho faster than Express
-2. DB ORM and schema management via Typeorm
-3. Type-strict
+1. 100% serverless full-stack -- even the DB is serverless
+2. Easy deploy management with AWS SAM + Cloudformation -- one command creates a stack, deploys, and tears down
+3. Run locally, AWS, or anywhere with generic file and db connectors
+4. All Javascript/Typescript
+5. Uses Fastify framework, which is mucho faster than Express
+6. DB ORM and schema management via Typeorm
+7. Type-strict
+8. Extremely anorexic with 3rd party libs = blazing fast, more secure, and easier to maintain
+
 
 <h2> Table of Contents 🌍</h2>
 
+- [Status 🚨](#status-)
+- [Setup ⚙️](#setup-️)
 - [Running locally 🏎](#running-locally-)
 - [API ☁](#api-)
 - [DB Schema Management 🗂](#db-schema-management-)
@@ -21,12 +27,40 @@ What makes it cool:
 - [Known Issues 🐞](#known-issues-)
 - [References and Special Thanks 😘](#references-and-special-thanks-)
 
+## Status 🚨
+
+Work In Progress
+
+Roadmap: https://github.com/hookedjs/hookedjs/projects/1
+
+## Setup ⚙️
+
+As of now, HookedJS requires MacOS in order to build IOS apps.
+
+1. [Install homebrew](https://brew.sh/)
+2. [Install nvm](https://github.com/nvm-sh/nvm#install--update-script)
+3. [Install Docker](https://docs.docker.com/docker-for-mac/install/)
+1. Install Xcode from the App Store and open it to accept the user agreement.
+2. Follow [the official React Native instructions](https://facebook.github.io/react-native/docs/getting-started.html) to configure your machine for IOS and Android using the "React Native CLI Quickstart" tab, NOT the "Expo CLI Quickstart" tab.
+
+Then, install more dependencies and bootstrap
+
+```
+sudo gem install cocoapods
+brew install gnu-sed
+brew install watchman
+brew tap AdoptOpenJDK/openjdk
+brew cask install adoptopenjdk8
+nvm install
+nvm use
+npm i
+```
+
 ## Running locally 🏎
 
-To run locally, ensure you have docker running and node v14.
+To run locally, ensure you have docker running
 
 ```bash
-npm i
 npm run db # Start the database in Docker as a daemon
 npm run dev # Start the API on https://0.0.0.0:3000
 ```
