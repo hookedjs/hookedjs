@@ -3,18 +3,24 @@ import { AuthStore } from '#src/stores'
 import { useInterval, useState } from './hooks'
 import { ValidationErrorSet } from './validation'
 
+const fetchCache = new Map<string, {time: number, snap: FetchResponse}>()
+
 /**
  * fetch helpers for the api
  */
 async function apiFetch(input: string, init: RequestInit = {}) {
 	init.headers = (init.headers || {}) as Record<string, any>
+	if (!init.headers['content-type'])
+		init.headers['content-type'] = 'application/json'
 	if (AuthStore.value.token)
 		init.headers.authorization = `Bearer ${AuthStore.value.token}`
 	
 	const res: FetchResponse = {raw: await fetch(input, init)}
-	if(res.raw.headers.get('Content-Type') === 'application/json') {
-		Object.assign(res, ...await res.raw.json())
-		if (res.error?.type === 'ValidationErrorSet') 
+	if(res.raw.headers.get('content-type').startsWith('application/json')) {
+		const json = await res.raw.json()
+		res.data = json.data
+		res.error = json.error
+		if (res.error?.type === 'ValidationErrorSet')
 			throw new ValidationErrorSet(input, res.error?.context.errorSet)
 		if (res.error?.type === 'ForbiddenError')
 			window.location.pathname = `/auth/login?from=${location.pathname}`
@@ -25,52 +31,64 @@ async function apiFetch(input: string, init: RequestInit = {}) {
 }
 const methods = {
 	get: (url: string) => apiFetch(url),
-	post: (url: string, bodyObj: any) => apiFetch(url, { method: 'POST', body: JSON.stringify(bodyObj)}),
+	post: (url: string, bodyObj: any) => apiFetch(url, { method: 'post', body: JSON.stringify(bodyObj)}),
 	put: (url: string, bodyObj: any) => apiFetch(url, { method: 'PUT', body: JSON.stringify(bodyObj) }),
 	patch: (url: string, bodyObj: any) => apiFetch(url, { method: 'PATCH', body: JSON.stringify(bodyObj)}),
 	del: (url: string) => apiFetch(url, { method: 'DELETE'}),
 }
 export default methods
 
-export function useGet<T>(uri: string, options: {refreshFreq?: number, throwOnError?: boolean} = {}): T {
-	const { refreshFreq = 5 * 60 * 1000, throwOnError = true } = options
-	const [res, setRes] = useState(getInitialValueOrPromise())
+/**
+ * useGet: React hook to fetch data from api
+ * @param uri 
+ * @param options 
+ * @returns value when ready, null when loading
+ */
+export function useGet<T>(uri: string, options: {refreshFreq?: number} = {}): T {
+	const { refreshFreq = 5 * 60 * 1000 } = options
+	const [res, setRes] = useState(getCacheOrPromise())
 	useInterval(refreshIfStale, refreshFreq)
+
+	if (res?.error) throw res.error
+	return res?.data
+
   
-	if (res?.data || res?.error) return res
-	throw res
-  
-	function getInitialValueOrPromise() {
+	function getCacheOrPromise() {
 		const cache = fetchCache.get(uri)
 		if (cache) {
-			if (Date.now() - cache[0] > 2000) getFresh()
-			return cache[1]
+			// If cache is old, refreshing in background
+			if (Date.now() - cache.time > 2000) getFresh()
+			return cache.snap
 		}
-		return getFresh()
+		getFresh()
+		return {} as FetchResponse
 	}
 	async function getFresh() {
-		const fresh = await methods.get(uri).catch(e => ({error: e}))
-		if (fresh?.error && throwOnError) throw fresh.error
-		fetchCache.set(uri, [Date.now(), fresh])
+		const cache = fetchCache.get(uri)
+		const fresh = await methods.get(uri)
+		// If fresh == cache, do nothing
+		if (!Object.equals(fresh, cache?.snap)) {
+			setRes(fresh)
+			fetchCache.set(uri, {time: Date.now(), snap: fresh})
+		}
 		return fresh
 	}
 	async function refreshIfStale() {
+		// Even though this only runs every refreshFreq, still check
+		// because there may be multiple consumers of the same cache
 		const cache = fetchCache.get(uri)
-		if (Date.now() - (cache?.[0] ?? 0) > refreshFreq) {
-			const next = await methods.get(uri)
-			if (!Object.equals(next, cache?.[1])) setRes(next)
-			fetchCache.set(uri, [Date.now(), next])
+		if (Date.now() - (cache?.time ?? 0) > refreshFreq) {
+			return getFresh()
 		}
 	} 
 }
 
-const fetchCache = new Map()
-;(function fetchCacheGarbageCollect() {
+(function fetchCacheGarbageCollect() {
 	const maxAge = 60*60*1000
 	setInterval(() => {
 		const now = Date.now()
 		fetchCache.forEach((value, key, map) => {
-			if(now - value[0] > maxAge) map.delete(key)
+			if(now - value.time > maxAge) map.delete(key)
 		})
 	}, 31*60*1000)
 })()

@@ -1,8 +1,6 @@
 import { ComponentChildren, Fragment as F, h } from 'preact'
 import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 
-import styled from '#lib/styled'
-
 import Toast from './Toast'
 
 /**
@@ -20,7 +18,6 @@ export function UnhandledErrorNotification() {
 
 		function handleReject(eventNext: any) {
 			setPromiseErrorEvent(eventNext)
-			// TODO: Log the error somewhere
 		}
 	}
 }
@@ -32,12 +29,18 @@ export function UnhandledErrorNotification() {
  */
 export function ErrorBoundary({children}: {children: ComponentChildren}) {
 	const [runtimeError] = useErrorBoundary()
-	useEffect(reportRuntimeError, [runtimeError])
-	return <F>{children}{runtimeError ? <ErrorC/> : ''}</F>
+	// useEffect on runtimeError does not work, so just report every time
+	// useEffect(reportRuntimeError, [runtimeError])
+	reportRuntimeError()
+	return (
+		<F>
+			{children}
+			{runtimeError ? <ErrorC /> : ''}
+		</F>
+	)
 	function reportRuntimeError() {
 		if (runtimeError) {
-			console.error(runtimeError)
-			// TODO: Log the error somewhere
+			console.log(runtimeError)
 		}
 	}
 }

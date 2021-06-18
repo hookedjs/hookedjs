@@ -1,15 +1,14 @@
-import { Fragment as F, h } from 'preact'
+import { h } from 'preact'
 import { useCallback } from 'preact/hooks'
 
 import { Logo } from '#layout/components/Logo'
-import { BooleanField, ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
+import { ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
 import styled from '#lib/styled'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
 import { Paths } from '#src/routes'
 import { AuthStore, ToastStore } from '#src/stores'
-import { Roles } from '#src/stores'
 
 export default function Login() {
 	const { from } = qs.parse()
@@ -47,17 +46,6 @@ export default function Login() {
 				disabled={submitting}
 				error={errors[LoginPropsEnum.password]?.note}
 			/>
-			<BooleanField
-				inputProps={{
-					name: LoginPropsEnum.asAdmin, 
-					disabled: submitting, 
-					'aria-label': 'Sign-in as tenant?' 
-				}}
-				labelText='Tenant Mode'
-				checkedLabelText='Admin Mode'
-				error={errors[LoginPropsEnum.asAdmin]?.note}
-				type="switch"
-			/>
 			<SubmitButton class="large">Login</SubmitButton>
 			<ErrorMessage>{errors.form?.note}</ErrorMessage>
 		</Form.Component>
@@ -69,8 +57,7 @@ export default function Login() {
 
 	async function _onSubmit(formValues: FormJson) {
 		const values = new LoginProps(formValues)
-		if (values.asAdmin) AuthStore.loginAsAdmin()
-		else AuthStore.loginAsTenant()
+		await AuthStore.login(values)
 		ToastStore.value = { message: 'Welcome to Stacks!', location: 'right' }
 	}
 }
@@ -89,20 +76,17 @@ const LoginDiv = styled.div`
 export class LoginProps {
 	email = ''
 	password = ''
-	asAdmin = false
 	constructor(props: any) {
 		assertAttrsWithin(props, this)
 		assertValidSet<LoginProps>(props, {
 			email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
 			password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty']),
-			asAdmin: assertValid('asAdmin', props.asAdmin, ['isDefined', 'isBoolean']),
 		})
 		Object.assign(this, props)
 	}
 }
 export const LoginPropsPlaceholder = new LoginProps({
-	email: 'admin@example.com',
+	email: 'admin@hookedjs.org',
 	password: 'Password8',
-	asAdmin: false,
 })
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsPlaceholder)

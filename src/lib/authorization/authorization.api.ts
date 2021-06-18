@@ -26,7 +26,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		if (!(user && await user.comparePassword(props.password)))
 			throw new FormValidationErrorSet(req.body, 'email and/or password invalid')
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
-		reply.send({token})
+		reply.send({data: {token, id: user.id, roles: user.roles}})
 	})
 	app.post(authRefreshEndpoint, async function authRefreshEndpoint(req, reply) {
 		if (!req.user.id)
@@ -39,7 +39,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		if (!user || passwordChanged || isBanned) 
 			throw new ForbiddenError()
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
-		reply.send({token})
+		reply.send({data: {token, id: user.id, roles: user.roles}})
 	})
 	app.post(authRegisterEndpoint, async function authRegisterEndpoint(req, reply) {
 		const props = {
@@ -48,7 +48,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		}
 		const user = await UserEntity.createSafe(props)
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
-		reply.send({token})
+		reply.send({data: {token, id: user.id, roles: user.roles}})
 	})
 
 	app.get(authEndpoint, async function getAuthStatusHandler(req, reply) {

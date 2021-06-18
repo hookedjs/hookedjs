@@ -2,7 +2,7 @@ window.addEventListener('submit', (e) => e.preventDefault())
 
 import EmptyPath from 'mdi-paths-split/CheckboxBlankOutline'
 import MarkedPath from 'mdi-paths-split/CheckboxMarked'
-import {ComponentChildren, Fragment as F,FunctionalComponent,h} from 'preact'
+import {ComponentChildren, Fragment as F, FunctionalComponent, h} from 'preact'
 
 import { useCallback, useEffect, useInterval, useRef, useState, useUpdateEffect } from '#lib/hooks'
 import { IconSvg } from '#lib/icons'
@@ -43,7 +43,6 @@ export function useForm(): UseFormReturn {
 		async function onSubmitStateWrapper(formEvent: FormEvent) {
 			setState(last => ({ ...last, submitting: true }))
 			try {
-				// TODO : Promisify onSubmits
 				if (onSubmitP) await onSubmitP(formEvent)
 				if (onSubmitJsonP) await onSubmitJsonP(formToJson(formEvent.target))
 				if (isMounted()) setState(last => ({ ...last, submitting: false, submitted: true, accepted: true, errors: {} }))
@@ -96,10 +95,6 @@ interface UseFormReturn {
 /**
  * A form with essential elements
  */
-interface FormEvent {
-	preventDefault(): null
-	target: HTMLFormElement
-}
 export type FormJson = Record<string, string | string[] | number | number[] | boolean | boolean[]>
 interface FormProps extends Omit<h.JSX.HTMLAttributes<HTMLFormElement>, 'onSubmit'> {
   onSubmit?: (formEvent: FormEvent) => any
@@ -108,6 +103,10 @@ interface FormProps extends Omit<h.JSX.HTMLAttributes<HTMLFormElement>, 'onSubmi
 	reset?: () => void
 	forwardRef?: Ref<HTMLFormElement>
   children: ComponentChildren
+}
+interface FormEvent {
+  preventDefault(): null;
+  target: HTMLFormElement;
 }
 export function Form({ onSubmit, onSubmitJson, reset, children, class: className, ...formProps }: FormProps) {
 	return (
@@ -118,9 +117,8 @@ export function Form({ onSubmit, onSubmitJson, reset, children, class: className
 
 	function onSubmitInner(formEvent: FormEvent) {
 		formEvent.preventDefault()
-		// @ts-ignore: ignore onSubmit Binding this
-		if (onSubmit) onSubmit(formEvent)
-		if (onSubmitJson) onSubmitJson(formToJson(formEvent.target))
+		onSubmit?.(formEvent)
+		onSubmitJson?.(formToJson(formEvent.target))
 	}
 }
 const FormForm = styled.form`

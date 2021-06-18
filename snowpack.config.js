@@ -58,7 +58,8 @@ module.exports = {
 	},
 	buildOptions: {
 		/* ... */
-		sourcemap: !isProd,
+		// sourcemap: !isProd,
+		sourcemap: true,
 		out: 'web-build',
 	},
 	alias: {

@@ -124,7 +124,7 @@ Resources:
       MemorySize: 256
       Runtime: nodejs14.x
       Timeout: 60 # Max=900; API Gateway times out at 28s, so no point in making much higher
-      # Tracing: Active # TODO: Get this working
+      # Tracing: Active
       Events:
         ProxyApiRoot:
           Type: HttpApi

@@ -15,7 +15,7 @@ import { ForbiddenError, NotFoundError, ValidationErrorSet } from './lib/validat
 
 const 
 	htmlPath = path.join(__dirname, '/../web-build')
-	,notFoundHtml = fs.readFileSync(path.join(htmlPath, '/index.html'))
+	,notFoundHtml = config.isProd ? fs.readFileSync(path.join(htmlPath, '/index.html')) : ''
 	,app = fastify({
 		logger: true,
 		...!config.isProd ? {

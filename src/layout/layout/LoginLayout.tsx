@@ -31,7 +31,7 @@ const LoginLayoutOuter = styled.div`
 		:root
 			--background-color: var(--background-color-dark)
 `
-// TODO: LoginlayoutInner w is too small on mobile
+
 const LoginLayoutInner = styled.div`
 	:root
 		z-index: 1

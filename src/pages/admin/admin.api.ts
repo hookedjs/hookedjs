@@ -8,8 +8,7 @@ export default async function adminPlugin(app: FastifyInstance, options: Fastify
 			req.url.startsWith(`${config.apiPrefix}/admin`) 
 			&& !req.user.roles.includes(UserRoleEnum.ADMIN)
 		) {
-			// TODO: Re-enable permission guard
-			// throw new ForbiddenError()
+			throw new ForbiddenError()
 		}
 	})
 }

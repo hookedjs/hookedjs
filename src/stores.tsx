@@ -1,4 +1,6 @@
+import { UserRoleEnum } from './db/entity/lib'
 import type { ToastProps } from './layout/components/Toast'
+import api from './lib/api.web'
 import { LoginProps, RegisterProps } from './lib/authorization/authorization.api.lib'
 import config from './lib/config.web'
 import { nav, navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
@@ -8,9 +10,9 @@ import { Paths } from './routes'
 
 
 // AuthStore: user id and roles
-export interface AuthStoreType { token: string, id: string, roles: Roles[], tenants: string[], currentTenant: string }
+export interface AuthStoreType { token: string, id: string, roles: UserRoleEnum[], tenants: string[], currentTenant: string }
 const AuthStoreLoggedOut: AuthStoreType = { token: '', id: '', roles: [], tenants: [], currentTenant: '' }
-export enum Roles { admin, tenant }
+
 export const AuthStore = Object.assign(
 	new StateStore<typeof AuthStoreLoggedOut>(AuthStoreLoggedOut, 'AuthStore'),
 	{
@@ -23,21 +25,19 @@ export const AuthStore = Object.assign(
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
-			const res = await fetch(`${config.apiPrefix}/auth/login`, {body: JSON.stringify(loginProps)}).then(r => r.json())
-			if (res.error?.type === 'ValidationErrorSet') 
-				throw new ValidationErrorSet(`${config.apiPrefix}/auth/login`, res.error?.context.errorSet)
-			AuthStore.value = res
+			const res = await api.post(`${config.apiPrefix}/auth/login`, loginProps)
+			AuthStore.value = {...res.data, tenants: [], currentTenant: '' }
 		},
 		async register(props: RegisterProps) {
 			const registerProps = new RegisterProps(props)
-			const res = await fetch(`${config.apiPrefix}/auth/register`, {body: JSON.stringify(registerProps)}).then(r => r.json())
+			const res = await fetch(`${config.apiPrefix}/auth/register`, {method: 'post', body: JSON.stringify(registerProps)}).then(r => r.json())
 			if (res.error?.type === 'ValidationErrorSet') 
 				throw new ValidationErrorSet(`${config.apiPrefix}/auth/register`, res.error?.context.errorSet)
 			AuthStore.value = res
 		},
-		loginAsAdmin() { AuthStore.value = { token: '1234', id: '1', roles: [Roles.admin], tenants: [], currentTenant: '' } },
-		loginAsTenant() { AuthStore.value = { token: '1234', id: '2', roles: [Roles.tenant], tenants: ['123', '311'], currentTenant: '123' } },
-		roles: Roles,
+		loginAsAdmin() { AuthStore.value = { token: '1234', id: '1', roles: [UserRoleEnum.ADMIN], tenants: [], currentTenant: '' } },
+		loginAsTenant() { AuthStore.value = { token: '1234', id: '2', roles: [UserRoleEnum.TENANT], tenants: ['123', '311'], currentTenant: '123' } },
+		roles: UserRoleEnum,
 	},
 )
 

@@ -24,6 +24,7 @@ export enum UserRoleEnum {
   ADMIN = 0,
   EDITOR = 1,
   AUTHOR = 2,
+  TENANT = 3,
 }
 export const UserRoleSet = new Set(Enum.getEnumValues(UserRoleEnum))
 

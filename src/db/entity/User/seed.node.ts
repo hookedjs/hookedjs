@@ -34,12 +34,14 @@ export const fakeRecords: CreateType[] = [
 	{
 		email: 'editor@hookedjs.org',
 		roles: [UserRoleEnum.EDITOR],
+		password: 'Password8',
 		givenName: 'Sally',
 		surname: 'Editor',
 	},
 	{
 		email: 'author@hookedjs.org',
 		roles: [UserRoleEnum.AUTHOR],
+		password: 'Password8',
 		givenName: 'Sally',
 		surname: 'Author',
 	}

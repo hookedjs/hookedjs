@@ -91,9 +91,9 @@ export const routes = Object.freeze({
 		path: '/dashboard',
 		Component: () => {
 			const [auth] = AuthStore.use()
-			if (auth.roles?.includes(AuthStore.roles.admin))
+			if (auth.roles?.includes(AuthStore.roles.ADMIN))
 				nav(Paths.AdminRoot, { replace: true })
-			else if (auth.roles?.includes(AuthStore.roles.tenant))
+			else if (auth.roles?.includes(AuthStore.roles.TENANT))
 				nav(Paths.TenantRoot, { replace: true })
 			else
 				nav(Paths.Login)
@@ -393,5 +393,5 @@ export const routesByPath = Object.fromEntries(Object.values(routes).map(r => [r
 export const Paths: Record<keyof typeof routes, string> = Object.fromEntries(Object.entries(routes).map(([name, r]) => [name, r.path]))
 
 
-function isAdmin() { return AuthStore.value.roles.includes(AuthStore.roles.admin) }
-function isTenant() { return AuthStore.value.roles.includes(AuthStore.roles.tenant)}
+function isAdmin() { return AuthStore.value.roles.includes(AuthStore.roles.ADMIN) }
+function isTenant() { return AuthStore.value.roles.includes(AuthStore.roles.TENANT)}

@@ -9,7 +9,6 @@ import styled from '#lib/styled'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
 import { Paths } from '#src/routes'
 import { AuthStore, ToastStore } from '#src/stores'
-import { Roles } from '#src/stores'
 
 export default function Register() {
 	const { from } = qs.parse()
@@ -107,7 +106,7 @@ const RegisterDiv = styled.div`
 
 const userPlaceholder = {
 	email: 'admin@example.com',
-	roles: [Roles.admin],
+	roles: [AuthStore.roles.ADMIN],
 	password: 'Password8',
 	givenName: 'Sally',
 	surname: 'Fields',
