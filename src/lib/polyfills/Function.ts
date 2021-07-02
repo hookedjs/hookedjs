@@ -15,7 +15,19 @@ declare global {
 		 * @returns - the fn wrapped in memoize logic
 		 */
 		memoize: typeof memoize
+
+		/**
+		 * Get the name of the current function.
+		 */
+		getName(): string
 	}
 }
 
 Function.memoize = memoize
+
+Function.getName = () => {
+	const stackLine = (new Error())!.stack!.split('\n')[2].trim()
+	const fncName = stackLine.match(/at Object.([^ ]+)/)![1]
+	return fncName
+}
+
