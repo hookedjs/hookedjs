@@ -11,7 +11,7 @@
  * 7. Easy option to persist to localStorage
  * 8. Super type-safe
  */
-import { StateUpdater, useLayoutEffect, useState as useStateP } from 'preact/hooks'
+import { StateUpdater, useLayoutEffect, useState as useStateP } from '#lib/hooks'
 
 class StateStore<T> {
 	private _value: T

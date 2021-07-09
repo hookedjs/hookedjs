@@ -1,8 +1,8 @@
 import '#lib/forms'
 
 import { h } from 'preact'
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 
+import { useCallback, useEffect, useRef, useState } from '#lib/hooks'
 import {useMedia} from '#lib/hooks'
 import * as i from '#lib/icons'
 import {LocationStore, nav} from '#lib/router'

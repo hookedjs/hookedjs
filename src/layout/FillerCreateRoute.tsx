@@ -1,7 +1,7 @@
 import { Fragment as F, h } from 'preact'
-import { useCallback } from 'preact/hooks'
 
 import { ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
+import { useCallback } from '#lib/hooks'
 import { nav, RouteType } from '#lib/router'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
 import { ToastStore } from '#src/stores'

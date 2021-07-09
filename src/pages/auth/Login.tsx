@@ -1,8 +1,8 @@
 import { h } from 'preact'
-import { useCallback } from 'preact/hooks'
 
 import { Logo } from '#layout/components/Logo'
 import { ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
+import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
 import styled from '#lib/styled'

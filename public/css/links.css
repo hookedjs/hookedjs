@@ -1,3 +1,7 @@
+/*
+A few link styles are also shared with buttons and are in buttons.css
+*/
+
 a, a:active, a:focus, .body-link {
   text-decoration: none;
   color: var(--links);

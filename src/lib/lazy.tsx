@@ -9,7 +9,8 @@
  */
 
 import { h } from 'preact'
-import { useEffect, useState } from 'preact/hooks'
+
+import { useEffect, useState } from '#lib/hooks'
 
 export default function lazy<T>(loader: () => Promise<{ default: T }>, loadingJsx = <div />): any {
 	return function Lazy(props: any = {}) {

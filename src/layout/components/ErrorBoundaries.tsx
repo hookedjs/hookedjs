@@ -1,6 +1,6 @@
 import { ComponentChildren, Fragment as F, h } from 'preact'
-import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 
+import { useEffect, useErrorBoundary, useState } from '../../lib/hooks'
 import Toast from './Toast'
 
 /**

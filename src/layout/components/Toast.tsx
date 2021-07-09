@@ -1,6 +1,6 @@
 import {ComponentChildren, h} from 'preact'
-import { useEffect, useLayoutEffect, useRef } from 'preact/hooks'
 
+import { useEffect, useLayoutEffect, useRef } from '#lib/hooks'
 import * as i from '#lib/icons'
 import styled from '#lib/styled'
 import { useMedia } from '#src/lib/hooks'

@@ -14,9 +14,9 @@
  */
 
 import { ComponentChildren, Fragment as F, FunctionalComponent, h } from 'preact'
-import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from 'preact/hooks'
 
 import { applyTheme, defaultTheme } from '#layout/theme'
+import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from '#lib/hooks'
 
 import StateStore from './StateStore'
 import styled from './styled'

@@ -1,6 +1,6 @@
 import { h } from 'preact'
-import { useLayoutEffect } from 'preact/hooks'
 
+import { useLayoutEffect } from '#lib/hooks'
 import styled from '#lib/styled'
 
 import { applyTheme, defaultTheme } from '../theme'

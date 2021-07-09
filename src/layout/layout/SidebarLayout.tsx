@@ -1,6 +1,6 @@
 import { ComponentChildren, h } from 'preact'
-import { useEffect, useRef } from 'preact/hooks'
 
+import { useEffect, useRef } from '#lib/hooks'
 import {useMedia} from '#lib/hooks'
 import styled from '#lib/styled'
 import { ThemeStore } from '#src/stores'

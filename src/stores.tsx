@@ -25,15 +25,17 @@ export const AuthStore = Object.assign(
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
-			const res = await api.post(`${config.apiPrefix}/auth/login`, loginProps)
-			AuthStore.value = {...res.data, tenants: [], currentTenant: '' }
+			const res = await api.post<AuthStoreType>(`${config.apiPrefix}/auth/login`, loginProps)
+			AuthStore.value = {...res, tenants: [], currentTenant: '' }
 		},
 		async register(props: RegisterProps) {
 			const registerProps = new RegisterProps(props)
-			const res = await fetch(`${config.apiPrefix}/auth/register`, {method: 'post', body: JSON.stringify(registerProps)}).then(r => r.json())
-			if (res.error?.type === 'ValidationErrorSet') 
-				throw new ValidationErrorSet(`${config.apiPrefix}/auth/register`, res.error?.context.errorSet)
-			AuthStore.value = res
+			const res = await api.post<AuthStoreType>(`${config.apiPrefix}/auth/register`, registerProps)
+			AuthStore.value = {...res, tenants: [], currentTenant: '' }
+			// const res = await fetch(`${config.apiPrefix}/auth/register`, {method: 'post', body: JSON.stringify(registerProps)}).then(r => r.json())
+			// if (res.error?.type === 'ValidationErrorSet') 
+			// 	throw new ValidationErrorSet(`${config.apiPrefix}/auth/register`, res.error?.context.errorSet)
+			// AuthStore.value = res
 		},
 		loginAsAdmin() { AuthStore.value = { token: '1234', id: '1', roles: [UserRoleEnum.ADMIN], tenants: [], currentTenant: '' } },
 		loginAsTenant() { AuthStore.value = { token: '1234', id: '2', roles: [UserRoleEnum.TENANT], tenants: ['123', '311'], currentTenant: '123' } },

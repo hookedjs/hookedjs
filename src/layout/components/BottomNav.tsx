@@ -1,6 +1,6 @@
 import { FunctionalComponent, h } from 'preact'
-import { useCallback, useEffect, useState } from 'preact/hooks'
 
+import { useCallback, useEffect, useState } from '#lib/hooks'
 import * as i from '#lib/icons'
 import {LocationStore} from '#lib/router'
 import styled from '#lib/styled'

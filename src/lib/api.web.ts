@@ -1,102 +1,55 @@
 import { AuthStore } from '#src/stores'
 
-import { useInterval, useState } from './hooks'
-import { ValidationErrorSet } from './validation'
-
-const fetchCache = new Map<string, {time: number, snap: FetchResponse}>()
+import { useCallback } from './hooks'
+import { useMutation, useQuery } from './query-hooks'
+import { ForbiddenError, FormValidationErrorSet, ValidationErrorSet } from './validation'
 
 /**
  * fetch helpers for the api
  */
-async function apiFetch(input: string, init: RequestInit = {}) {
+async function apiFetch<Data>(input: string, init: RequestInit = {}) {
 	init.headers = (init.headers || {}) as Record<string, any>
 	if (!init.headers['content-type'])
 		init.headers['content-type'] = 'application/json'
 	if (AuthStore.value.token)
 		init.headers.authorization = `Bearer ${AuthStore.value.token}`
+
+	const res = await fetch(input, init)
 	
-	const res: FetchResponse = {raw: await fetch(input, init)}
-	if(res.raw.headers.get('content-type').startsWith('application/json')) {
-		const json = await res.raw.json()
-		res.data = json.data
-		res.error = json.error
-		if (res.error?.type === 'ValidationErrorSet')
-			throw new ValidationErrorSet(input, res.error?.context.errorSet)
-		if (res.error?.type === 'ForbiddenError')
+	if(res.headers.get('content-type')?.startsWith('application/json')) {
+		const json: JsonResponse<Data> = await res.json()
+		if (json.error) {
+			if (json.error?.type === 'ValidationErrorSet' && json.error?.context?.errorSet) {
+				throw new ValidationErrorSet(input, json.error.context.errorSet)
+			}
+			if (json.error?.type === 'ForbiddenError') {
+				window.location.pathname = `/auth/login?from=${location.pathname}`
+				throw new ForbiddenError()
+			}
+			throw new FormValidationErrorSet(json, 'Server is unavailable, please try later.')
+		}
+		if (!json.data)
+			throw new FormValidationErrorSet(json, 'Server is unavailable, please try later.')
+		return json.data
+	}
+	else if (!res.ok) {
+		if (res.status === 403) {
 			window.location.pathname = `/auth/login?from=${location.pathname}`
-		if (res.error) 
-			throw res.error
-	}
-	return res
-}
-const methods = {
-	get: (url: string) => apiFetch(url),
-	post: (url: string, bodyObj: any) => apiFetch(url, { method: 'post', body: JSON.stringify(bodyObj)}),
-	put: (url: string, bodyObj: any) => apiFetch(url, { method: 'PUT', body: JSON.stringify(bodyObj) }),
-	patch: (url: string, bodyObj: any) => apiFetch(url, { method: 'PATCH', body: JSON.stringify(bodyObj)}),
-	del: (url: string) => apiFetch(url, { method: 'DELETE'}),
-}
-export default methods
-
-/**
- * useGet: React hook to fetch data from api
- * @param uri 
- * @param options 
- * @returns value when ready, null when loading
- */
-export function useGet<T>(uri: string, options: {refreshFreq?: number} = {}): T {
-	const { refreshFreq = 5 * 60 * 1000 } = options
-	const [res, setRes] = useState(getCacheOrPromise())
-	useInterval(refreshIfStale, refreshFreq)
-
-	if (res?.error) throw res.error
-	return res?.data
-
-  
-	function getCacheOrPromise() {
-		const cache = fetchCache.get(uri)
-		if (cache) {
-			// If cache is old, refreshing in background
-			if (Date.now() - cache.time > 2000) getFresh()
-			return cache.snap
+			throw new ForbiddenError()
 		}
-		getFresh()
-		return {} as FetchResponse
+		throw new FormValidationErrorSet(res, `Unknown server error: ${res.status}`)
 	}
-	async function getFresh() {
-		const cache = fetchCache.get(uri)
-		const fresh = await methods.get(uri)
-		// If fresh == cache, do nothing
-		if (!Object.equals(fresh, cache?.snap)) {
-			setRes(fresh)
-			fetchCache.set(uri, {time: Date.now(), snap: fresh})
-		}
-		return fresh
+	else if(res.headers.get('content-type')?.includes('text')) {
+		const data: Data = await res.text() as any
+		return data
 	}
-	async function refreshIfStale() {
-		// Even though this only runs every refreshFreq, still check
-		// because there may be multiple consumers of the same cache
-		const cache = fetchCache.get(uri)
-		if (Date.now() - (cache?.time ?? 0) > refreshFreq) {
-			return getFresh()
-		}
-	} 
+	else {
+		const data: Data = await res.blob() as any
+		return data
+	}
 }
-
-(function fetchCacheGarbageCollect() {
-	const maxAge = 60*60*1000
-	setInterval(() => {
-		const now = Date.now()
-		fetchCache.forEach((value, key, map) => {
-			if(now - value.time > maxAge) map.delete(key)
-		})
-	}, 31*60*1000)
-})()
-
-
-interface FetchResponse {
-	raw: any
-  data?: any
+interface JsonResponse<Data> {
+  data?: Data
   error?: {
     type: string
     note: string
@@ -106,3 +59,40 @@ interface FetchResponse {
     }
   }
 }
+
+
+const api = {
+	get<Data>(url: string) {return apiFetch<Data>(url)},
+	post<Data>(url: string, bodyObj: any) {return apiFetch<Data>(url, { method: 'post', body: JSON.stringify(bodyObj)})},
+	put<Data>(url: string, bodyObj: any) {return apiFetch<Data>(url, { method: 'PUT', body: JSON.stringify(bodyObj) })},
+	patch<Data>(url: string, bodyObj: any) {return apiFetch<Data>(url, { method: 'PATCH', body: JSON.stringify(bodyObj)})},
+	del<Data>(url: string) {return apiFetch<Data>(url, { method: 'DELETE'})},
+} as const
+export default api
+
+/**
+ * useGet: React hook to fetch data from api
+ * @param uri - string of uri to get
+ * @param options - useQuery options
+ * @returns typed useQuery response
+ */
+export function useBffQuery<Data>(uri: string, options: Parameters<typeof useQuery>[2]) {
+	// Wrap methods.get so that we can type-cast it from Data
+	const bffGet = useCallback(function bffGetCb(uri2: string) {return api.get<Data>(uri2)}, [])
+	const query = useQuery(bffGet, [uri], {...options, cacheKey: uri})
+	return query
+}
+
+export function useBffMutation<Data>(
+	method: typeof api['post'] | typeof api['put'] | typeof api['patch'] | typeof api['del'],
+	uri: string,
+	body: any,
+	options: Parameters<typeof useMutation>[1],
+) {
+	return useMutation(() => method<Data>(uri, body), options)
+}
+const useBffMutationC = Function.curry(useBffMutation)
+export const useBffPost = useBffMutationC(api.post)
+export const useBffPut = useBffMutationC(api.put)
+export const useBffPatch = useBffMutationC(api.patch)
+export const useBffDel = useBffMutationC(api.del)

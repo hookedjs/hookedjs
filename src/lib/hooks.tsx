@@ -1,8 +1,8 @@
 /**
  * A hook that watches a css media breakpoint
  */
-import { StateUpdater, useCallback, useEffect, useReducer, useRef,useState } from 'preact/hooks'
-export { useCallback, useEffect, useReducer, useRef, useState }
+import { StateUpdater, useCallback, useEffect, useReducer, useRef, useState } from 'preact/hooks'
+export * from 'preact/hooks'
 
 /**
  * useFirstMountState: check if current render is first.
