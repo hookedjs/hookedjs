@@ -6,6 +6,7 @@ import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
 import styled from '#lib/styled'
+import { RegisterProps, RegisterPropsEnum, RegisterPropsExample } from '#src/lib/authorization/authorization.api.lib'
 import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
 import { Paths } from '#src/routes'
 import { AuthStore, ToastStore } from '#src/stores'
@@ -28,8 +29,8 @@ export default function Register() {
 				labelText="First Name"
 				inputProps={{
 					type: 'text',
-					placeholder: RegisterPropsPlaceholder.givenName,
-					value: RegisterPropsPlaceholder.givenName,
+					placeholder: RegisterPropsExample.givenName,
+					value: RegisterPropsExample.givenName,
 					autoFocus: true,
 				}}
 				disabled={submitting}
@@ -40,8 +41,8 @@ export default function Register() {
 				labelText="Last Name"
 				inputProps={{
 					type: 'text',
-					placeholder: RegisterPropsPlaceholder.surname,
-					value: RegisterPropsPlaceholder.surname,
+					placeholder: RegisterPropsExample.surname,
+					value: RegisterPropsExample.surname,
 				}}
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.surname]?.note}
@@ -51,8 +52,8 @@ export default function Register() {
 				labelText="Email"
 				inputProps={{
 					type: 'text',
-					placeholder: RegisterPropsPlaceholder.email,
-					value: RegisterPropsPlaceholder.email,
+					placeholder: RegisterPropsExample.email,
+					value: RegisterPropsExample.email,
 				}}
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.email]?.note}
@@ -63,7 +64,7 @@ export default function Register() {
 				inputProps={{
 					type: 'password',
 					placeholder: '********',
-					value: RegisterPropsPlaceholder.password,
+					value: RegisterPropsExample.password,
 				}}
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.password]?.note}
@@ -72,13 +73,6 @@ export default function Register() {
 				inputProps={{ name: RegisterPropsEnum.acceptedTerms, disabled: submitting, 'aria-label': 'Do you agree to the terms at the following link? {put link here}'}}
 				labelText={<span>Do you agree to these<br/>terms?</span>}
 				error={errors[RegisterPropsEnum.acceptedTerms]?.note}
-			/>
-			<BooleanField
-				inputProps={{ name: RegisterPropsEnum.asAdmin, disabled: submitting, 'aria-label': 'Sign-in as tenant?' }}
-				labelText='Tenant Mode'
-				checkedLabelText='Admin Mode'
-				error={errors[RegisterPropsEnum.asAdmin]?.note}
-				type="switch"
 			/>
 			<SubmitButton class="large">Register</SubmitButton>
 			<ErrorMessage>{errors.form?.note}</ErrorMessage>
@@ -89,8 +83,7 @@ export default function Register() {
 
 	async function _onSubmit(formValues: FormJson) {
 		const values = new RegisterProps(formValues)
-		if (values.asAdmin) AuthStore.loginAsAdmin()
-		else AuthStore.loginAsTenant()
+		await AuthStore.register(values)
 		ToastStore.value = { message: 'Welcome to Stacks!', location: 'right' }
 	}
 }
@@ -103,41 +96,3 @@ const RegisterDiv = styled.div`
 		:root form
 			margin-top: 20px
 `
-
-const userPlaceholder = {
-	email: 'admin@example.com',
-	roles: [AuthStore.roles.ADMIN],
-	password: 'Password8',
-	givenName: 'Sally',
-	surname: 'Fields',
-} as const
-
-export class RegisterProps {
-	email = ''
-	password = ''
-	givenName = ''
-	surname = ''
-	acceptedTerms = ''
-	asAdmin = ''
-	constructor(props: any) {
-		assertAttrsWithin(props, this)
-		assertValidSet<RegisterProps>(props, {
-			email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
-			password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty', 'isPassword']),
-			givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString', 'isNoneEmpty']),
-			surname: assertValid('surname', props.surname, ['isDefined', 'isString', 'isNoneEmpty']),
-			acceptedTerms: assertValid('accept terms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
-			asAdmin: assertValid('asAdmin', props.asAdmin, ['isDefined', 'isBoolean']),
-		})
-		Object.assign(this, props)
-	}
-}
-export const RegisterPropsPlaceholder = new RegisterProps({
-	email: userPlaceholder.email,
-	password: userPlaceholder.password,
-	givenName: userPlaceholder.givenName,
-	surname: userPlaceholder.surname,
-	acceptedTerms: true,
-	asAdmin: false,
-})
-export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsPlaceholder)

@@ -44,7 +44,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 	app.post(authRegisterEndpoint, async function authRegisterEndpoint(req, reply) {
 		const props = {
 			...new RegisterProps(req.body),
-			roles: [UserRoleEnum.AUTHOR]
+			roles: [UserRoleEnum.TENANT]
 		}
 		const user = await UserEntity.createSafe(props)
 		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })

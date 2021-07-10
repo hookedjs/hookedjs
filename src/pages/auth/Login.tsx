@@ -6,7 +6,7 @@ import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
 import styled from '#lib/styled'
-import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
+import { LoginProps, LoginPropsEnum, LoginPropsExample } from '#src/lib/authorization/authorization.api.lib'
 import { Paths } from '#src/routes'
 import { AuthStore, ToastStore } from '#src/stores'
 
@@ -28,8 +28,8 @@ export default function Login() {
 				labelText="Email"
 				inputProps={{
 					type: 'text',
-					placeholder: LoginPropsPlaceholder.email,
-					value: LoginPropsPlaceholder.email,
+					placeholder: LoginPropsExample.email,
+					value: LoginPropsExample.email,
 					autoFocus: true,
 				}}
 				disabled={submitting}
@@ -41,7 +41,7 @@ export default function Login() {
 				inputProps={{
 					type: 'password',
 					placeholder: '********',
-					value: LoginPropsPlaceholder.password,
+					value: LoginPropsExample.password,
 				}}
 				disabled={submitting}
 				error={errors[LoginPropsEnum.password]?.note}
@@ -72,21 +72,3 @@ const LoginDiv = styled.div`
 		:root form
 			margin-top: 20px
 `
-
-export class LoginProps {
-	email = ''
-	password = ''
-	constructor(props: any) {
-		assertAttrsWithin(props, this)
-		assertValidSet<LoginProps>(props, {
-			email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
-			password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty']),
-		})
-		Object.assign(this, props)
-	}
-}
-export const LoginPropsPlaceholder = new LoginProps({
-	email: 'admin@hookedjs.org',
-	password: 'Password8',
-})
-export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsPlaceholder)

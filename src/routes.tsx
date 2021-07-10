@@ -91,12 +91,14 @@ export const routes = Object.freeze({
 		path: '/dashboard',
 		Component: () => {
 			const [auth] = AuthStore.use()
-			if (auth.roles?.includes(AuthStore.roles.ADMIN))
+			if (!auth.roles?.length)
+				nav(Paths.Login)
+			else if (auth.roles?.includes(AuthStore.roles.ADMIN))
 				nav(Paths.AdminRoot, { replace: true })
 			else if (auth.roles?.includes(AuthStore.roles.TENANT))
 				nav(Paths.TenantRoot, { replace: true })
 			else
-				nav(Paths.Login)
+				alert(`Unexpected Role: ${auth.roles}`)
 			return <div />
 		},
 	}),
