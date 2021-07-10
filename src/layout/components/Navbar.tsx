@@ -86,8 +86,8 @@ export interface SearchOption {
 function SearchBar(p: {options: SearchOption[]}) {
 	const [value, setValue] = useState('')
 	const [isFocused, setIsFocused] = useState(false)
-	const inputRef = useRef<HTMLInputElement>(null)
-	const selectRef = useRef<HTMLSelectElement>(null)
+	const inputRef = useRef<HTMLInputElement>()
+	const selectRef = useRef<HTMLSelectElement>()
 	const [option, setOption] = useState(p.options[0].value)
 	const onOptionChange = useCallback((e: any) => setOption(e.target.value), [])
 
@@ -103,7 +103,7 @@ function SearchBar(p: {options: SearchOption[]}) {
 					name="type"
 					onFocus={() => setIsFocused(true)}
 					onBlur={onBlur}
-					ref={selectRef}
+					ref={selectRef as Ref<HTMLSelectElement>}
 					value={option}
 					onChange={onOptionChange}
 				>
@@ -118,7 +118,7 @@ function SearchBar(p: {options: SearchOption[]}) {
 				placeholder="Search"
 				onFocus={() => setIsFocused(true)}
 				onBlur={onBlur}
-				ref={inputRef}
+				ref={inputRef as Ref<HTMLInputElement>}
 				aria-label="Search"
 			/>
 			<a
@@ -135,8 +135,8 @@ function SearchBar(p: {options: SearchOption[]}) {
 			if (document.activeElement === inputRef.current || document.activeElement === selectRef.current) return
 			if (e?.relatedTarget?.hash === '#search-clear') setValue('')
 			setIsFocused(false)
-			inputRef.current.blur()
-			selectRef.current.blur()
+			inputRef.current!.blur()
+			selectRef.current!.blur()
 		})
 	}
 	// I don't think this is ever actually fired due to blur event preventing it,
@@ -149,8 +149,8 @@ function SearchBar(p: {options: SearchOption[]}) {
 	function _onSubmit() { 
 		setValue('')
 		setIsFocused(false)
-		inputRef.current.blur()
-		selectRef.current.blur()
+		inputRef.current!.blur()
+		selectRef.current!.blur()
 		nav(option + '?search=' + value)
 	}
 }

@@ -126,7 +126,7 @@ function RouteHistoryReset() { localStorage.removeItem('RouteHistory'); RouteHis
 function RouteWrapper({ children }: any) {
 	const [_location] = LocationStore.use()
 	useEffect(handleEvents, [])
-	useLayoutEffect(function hide(){ ref.current.style.visibility = 'hidden' }, [_location])
+	useLayoutEffect(function hide(){ ref.current!.style.visibility = 'hidden' }, [_location])
 	useEffect(handleLocationChange, [_location])
 	const ref = useRef<HTMLDivElement>(null)
 
@@ -152,7 +152,7 @@ function RouteWrapper({ children }: any) {
 				e.scrollTop = 0
 			}
 		}
-		ref.current.style.visibility = 'visible'
+		ref.current!.style.visibility = 'visible'
 	}
 }
 
@@ -178,7 +178,7 @@ function StackFactory(basePath: string) {
 
 	return function StackHandler({ children }: any) {
 		const [_location] = LocationStore.use()
-		useLayoutEffect(function hide(){ ref.current.style.visibility = 'hidden' }, [_location])
+		useLayoutEffect(function hide(){ ref.current!.style.visibility = 'hidden' }, [_location])
 		useEffect(handleStackEvents, [])
 		useEffect(handleNavChange, [_location])
 		const ref = useRef<HTMLDivElement>(null)
@@ -217,7 +217,7 @@ function StackFactory(basePath: string) {
 			if (pathname === top.location.pathname && search === top.location.search) {
 				// console.log('top')
 				scrollTo(top.scroll)
-				ref.current.style.visibility = 'visible'
+				ref.current!.style.visibility = 'visible'
 				const e = document.getElementById('content')
 				if (e) cancelScrollListen = scrollListener(e, updateScrollPos)
 			}
@@ -228,7 +228,7 @@ function StackFactory(basePath: string) {
 				// console.log('forward')
 				Stack.push({ location: {pathname, search}, scroll: 0 })
 				scrollTo(0)
-				ref.current.style.visibility = 'visible'
+				ref.current!.style.visibility = 'visible'
 				const e = document.getElementById('content')
 				if (e) cancelScrollListen = scrollListener(e, updateScrollPos)
 			}

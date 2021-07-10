@@ -20,7 +20,7 @@ export function useForm(): UseFormReturn {
 	const [state, setState] = useState(formDefaultState)
 	const FormComponentMemoized = useCallback(FormComponent, [])
 
-	const formRef = useRef<HTMLFormElement>(null)
+	const formRef = useRef<HTMLFormElement>()
 	let initialValues: FormJson = {}
 
 	return {
@@ -36,7 +36,7 @@ export function useForm(): UseFormReturn {
 		const onSubmitP = onSubmit && (async (e: FormEvent) => onSubmit(e))
 		const onSubmitJsonP = onSubmitJson && (async (data: FormJson) => onSubmitJson(data))
 
-		useEffect(() => {initialValues = formToJson(formRef.current)}, [])
+		useEffect(() => {initialValues = formToJson(formRef.current!)}, [])
 
 		return <Form onSubmit={onSubmitStateWrapper} {...formProps} forwardRef={formRef}>{children}</Form>
 
@@ -62,7 +62,7 @@ export function useForm(): UseFormReturn {
 	}
 
 	function resetValues() {
-		for (const e of formRef.current.elements as unknown as HTMLInputElement[]) {
+		for (const e of formRef.current!.elements as unknown as HTMLInputElement[]) {
 			if (e.type !== 'submit') {
 				if (e.type === 'checkbox') e.checked = initialValues[e.name] as boolean
 				else e.value = initialValues[e.name] as any
@@ -101,7 +101,7 @@ interface FormProps extends Omit<h.JSX.HTMLAttributes<HTMLFormElement>, 'onSubmi
   onSubmitJson?: (formValues: FormJson) => any
 	useFormDataApi?: boolean
 	reset?: () => void
-	forwardRef?: Ref<HTMLFormElement>
+	forwardRef?: Ref<any>
   children: ComponentChildren
 }
 interface FormEvent {
@@ -129,14 +129,13 @@ const FormForm = styled.form`
 /**
  * A text input with label and error handling
  */
-type Ref<T> = { current: T }
 interface TextProps {
   name: string
   labelText: string
   error?: string
 	disabled?: boolean
-	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<HTMLDivElement>}
-	inputProps: h.JSX.HTMLAttributes<HTMLInputElement> & {forwardRef?: Ref<HTMLInputElement>}
+	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}
+	inputProps: h.JSX.HTMLAttributes<HTMLInputElement> & {forwardRef?: Ref<any>}
 }
 export function TextField({ name, labelText, error, disabled, inputProps, divProps }: TextProps) {
 	return (
@@ -192,14 +191,14 @@ interface BooleanFieldProps {
   labelText: ComponentChildren
 	checkedLabelText?: ComponentChildren
   error?: string
-	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<HTMLDivElement>}
+	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}
 	inputProps: CheckboxProps['inputProps']
 	type?: 'checkbox' | 'switch'
 }
 export function BooleanField(p: BooleanFieldProps) {
 	const [checked, setChecked] = useState(p.inputProps?.checked)
 	const toggleBox = useCallback(function _toggleBox() { setChecked(curr => !curr) }, [])
-	const ref = useRef<HTMLInputElement>(null)
+	const ref = useRef<HTMLInputElement>()
 
 	// Keep the state in sync with dom
 	useInterval(() => {
@@ -217,7 +216,7 @@ export function BooleanField(p: BooleanFieldProps) {
 						onClick: toggleBox, 
 						checked: checked, 
 						value: 'true', 
-						forwardRef: p.inputProps.forwardRef || ref 
+						forwardRef: p.inputProps.forwardRef || ref as Ref<HTMLInputElement>
 					}} 
 					hasError={!!p.error} 
 				/>
@@ -251,11 +250,11 @@ const BooleanFieldDiv = styled.div`
  * Checkbox: A fancy wrapper for HTML Checkboxes, bc they are not style-able :-(
  */
 interface CheckboxProps {
-	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<HTMLInputElement>}
+	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}
 	inputProps: Omit<h.JSX.HTMLAttributes<HTMLInputElement>, 'name'> & {
 		name: string
 		'aria-label': string
-		forwardRef?: Ref<HTMLInputElement>
+		forwardRef?: Ref<any>
 	}
 	hasError?: boolean
 }
@@ -267,7 +266,7 @@ export function Checkbox({ divProps = {}, inputProps, hasError }: CheckboxProps)
 		<CheckboxDiv {...divProps} class={divProps.class + ' checkbox'} ref={divProps.forwardRef} data-checked={checked} data-error={hasError}>
 			<IconSvg fill="var(--gray6)" class="marked" path={MarkedPath} />
 			<IconSvg fill="var(--gray4)" class="empty" path={EmptyPath} />
-			<input type="checkbox" {...inputProps} ref={inputProps.forwardRef} checked={checked} onClick={onClick} />
+			<input type="checkbox" {...inputProps} ref={inputProps.forwardRef!} checked={checked} onClick={onClick} />
 		</CheckboxDiv>
 	)
 	function _onClick(e: any) {
@@ -313,7 +312,7 @@ export function Switch({ divProps = {}, inputProps, hasError }: CheckboxProps) {
 				<div class='track' onClick={onClick} />
 				<div class='circle' onClick={onClick} />
 			</div>
-			<input type="checkbox" {...inputProps} ref={inputProps.forwardRef} checked={checked} onClick={onClick} />
+			<input type="checkbox" {...inputProps} ref={inputProps.forwardRef!} checked={checked} onClick={onClick} />
 		</SwitchDiv>
 	)
 	function _onClick(e: any) {
@@ -359,13 +358,13 @@ const SwitchDiv = styled.div`
     border: 1px solid var(--danger)
 `
 
-export function ErrorMessage({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<HTMLDivElement>}) {
+export function ErrorMessage({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}) {
 	return children ? (
 		<div class={`form-error-message ${className}`} {...buttonProps} ref={forwardRef}>{children}</div>
 	) : <F></F>
 }
 
-export function SubmitButton({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLButtonElement> & {forwardRef?: Ref<HTMLButtonElement>}) {
+export function SubmitButton({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLButtonElement> & {forwardRef?: Ref<any>}) {
 	return (
 		<button style={{marginBottom:'.3rem'}} class={`form-submit-button ${className}`} {...buttonProps} ref={forwardRef} type="submit">{children}</button>
 	)
