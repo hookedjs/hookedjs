@@ -34,6 +34,7 @@ module.exports = {
 		['snowpack-plugin-hash',{ hashLength: 4,logLevel: 'error' }], // fails when Leaflet is in public/lib folder
 	],
 	routes: [
+		{src: '/db/.*', dest: (req, res) => {req.url = req.url.slice(3); console.dir(req.url) ;proxy.web(req, res, {hostname: 'localhost',port: 5984, protocol:'http', rejectUnauthorized: false})}},
 		{src: '/api/.*', dest: (req, res) => proxy.web(req, res, {hostname: 'localhost',port: 4000, protocol:'https', rejectUnauthorized: false})},
 		/* Enable an SPA Fallback in development: */
 		// {"match": "routes", "src": ".*", "dest": "/index.html"},
@@ -63,9 +64,11 @@ module.exports = {
 		out: 'web-build',
 	},
 	alias: {
+		'react': 'preact/compat',
+		'react-dom': 'preact/compat',
 		'#src': './src',
 		'#lib': './src/lib',
 		'#layout': './src/layout',
-		'#db': './src/db'
+		'#db': './src/db',
 	}
 }

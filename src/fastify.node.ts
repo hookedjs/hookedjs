@@ -28,6 +28,8 @@ const
 		} : {}
 	})
 
+app.get('/version', function getVersion(req, reply) {reply.send(config.version)})
+
 ///////////////////////////////
 // Default Headers
 ///////////////////////////////
@@ -51,7 +53,6 @@ app.register(helmetPlugin, {
 })
 app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
 app.register(staticPlugin, { root: htmlPath })
-app.get('/version', function getVersion(req, reply) {reply.send(config.version)})
 
 
 ///////////////////////////////

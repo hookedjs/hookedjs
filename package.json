@@ -9,7 +9,7 @@
     "dev": "PORT=4000 run-p api:dev web:dev",
     "build": "pnpm web:build && pnpm api:build",
     "start": "pnpm api:start",
-    "web:dev": "snowpack dev --secure",
+    "web:dev": "snowpack dev --secure --polyfill-node",
     "//web:build:hint": "must mv lib out of public to avoid adding hashes to the filenames",
     "web:build": "mv public/lib . && NODE_ENV=production snowpack build && cp -r lib web-build && mv lib public && workbox generateSW && date > web-build/buildTime.txt",
     "web:test": "web-test-runner \"src/**/*.test.tsx\"",
@@ -25,7 +25,8 @@
     "typeorm": "ts-node --require ./src/lib/polyfills ./node_modules/typeorm/cli.js",
     "typeorm:migration-gen": "pnpm typeorm -- schema:drop && pnpm typeorm -- migration:run && pnpm typeorm -- migration:generate -n ",
     "validate": "pnpm lint && tsc --noEmit",
-    "lint": "eslint --cache --ext .ts,.tsx"
+    "lint": "eslint --cache --ext .ts,.tsx",
+    "couch:db": "pouchdb-server --port 5984 -d db -n -c couchdb.config.json"
   },
   "files": [
     "src",
@@ -38,6 +39,7 @@
     "#db/": "./src/db/"
   },
   "dependencies": {
+    "@types/pouchdb": "^6.4.0",
     "aws-lambda-fastify": "~1.4.4",
     "aws-sdk": "~2.888.0",
     "cuid": "~2.1.8",
@@ -51,6 +53,9 @@
     "http2-proxy": "~5.0.53",
     "mysql2": "~2.2.5",
     "npm-run-all": "~4.1.5",
+    "pouchdb": "^7.2.2",
+    "pouchdb-find": "^7.2.2",
+    "pouchdb-server": "^4.2.0",
     "typeorm": "~0.2.32",
     "typeorm-aurora-data-api-driver": "~2.0.5"
   },
