@@ -10,7 +10,7 @@ import HeaderLayout from './HeaderLayout'
 export default function MarketingLayout({ children }: { children: any }) {
 	const [auth] = AuthStore.use()
 	useLayoutEffect(() => applyTheme(defaultTheme))
-	const loginNavLink = { ...(auth.id ? routes.Dashboard : routes.Login), isButton: true }
+	const loginNavLink = { ...(auth.username ? routes.Dashboard : routes.Login), isButton: true }
 	return (
 		<HeaderLayout
 			topLinks={[

@@ -21,10 +21,11 @@ export type UserCreate = UserCreateRequired & Partial<UserCreateOptional>
 export type UserUpdate = Partial<UserCreate>
 
 export enum UserRoleEnum {
-  ADMIN = 0,
+  ADMIN = '_admin',
   EDITOR = 1,
   AUTHOR = 2,
-  TENANT = 3,
+  TENANT_ADMIN = 3,
+  TENANT_USER = 4,
 }
 export const UserRoleSet = new Set(Enum.getEnumValues(UserRoleEnum))
 

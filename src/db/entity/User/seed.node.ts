@@ -47,7 +47,7 @@ export const fakeRecords: CreateType[] = [
 	},
 	{
 		email: 'tenant@hookedjs.org',
-		roles: [UserRoleEnum.TENANT],
+		roles: [UserRoleEnum.TENANT_ADMIN],
 		password: 'Password8',
 		givenName: 'Sally',
 		surname: 'Tenant',

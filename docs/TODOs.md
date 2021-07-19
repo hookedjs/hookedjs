@@ -1,0 +1,2 @@
+- [ ] useFind hook
+- [ ] connecting to remote && authentication

@@ -1,43 +1,29 @@
-import cuid from 'cuid'
+import {nanoid} from 'nanoid'
 import PouchDB from 'pouchdb'
 import FindPlugin from 'pouchdb-find'
+
+import { NotFoundError, throwNotFoundError } from '#lib/validation'
+
 PouchDB.plugin(FindPlugin)
 
 interface IDb {
 	name: string
-	host: string
-	user: string
-	password: string
+	host?: string
 }
 
 class Database {
 	_db = new PouchDB('loading')
 	name: IDb['name']
 	host: IDb['host']
-	user: IDb['user']
-	password: IDb['password']
 	
-	constructor(defaults: {name: IDb['name'], host?: IDb['host']}) {
-		Object.assign(this, defaults)
-		const db = new PouchDB(this.name)
+	constructor(name: Database['name'], host?: Database['host']) {
+		this.name = name
+		this.host = host
+		this._db = new PouchDB(name)
+		if (host) this.connect()
 	}
-	connect({user, password}: Pick<IDb, 'user' | 'password'>) {
-		this.user = user
-		// TODO: cookie based password
-		this.password = password
-		// TODO: Support connection modes, like localonly, remote only, both
-		// const remote = new PouchDB(`${this.host}/db/${this.name}`, {
-		// 	auth: {
-		// 		username: this.user,
-		// 		password: this.password,
-		// 	}
-		// })
-		const remote = new PouchDB(`${this.host}/${this.name}`, {
-			auth: {
-				username: this.user,
-				password: this.password,
-			}
-		})
+	connect() {
+		const remote = new PouchDB(`${this.host}/${this.name}`)
 		const opts = {live: true, retry: true}
 		this._db.replicate.to(remote, opts, e => {console.dir(e)})
 		this._db.replicate.from(remote, opts, e => {console.dir(e)})
@@ -46,19 +32,21 @@ class Database {
 	get<T extends IStandardFields>(id: string): Promise<T> {
 		return new Promise<any>((resolve, reject) => {
 			this._db.get<T>(id, {}, (err, doc) => {
-				if (err || !doc) return reject('Error getting')
+				if (err?.status === 404) return reject(new NotFoundError())
+				if (err?.message) return reject(new Error(err.message))
+				if (!doc) return reject(new Error('Unexpected response'))
 				resolve(doc)
 			})
 		})
 	}
 	set<T extends IStandardFieldsCreate>(doc: T): Promise<T & IStandardFields> {
 		const now = new Date()
-		if (!doc._id) doc._id = cuid()
+		if (!doc._id) doc._id = nanoid()
 		if (!doc.createdAt) doc.createdAt = now
 		doc.updatedAt = now
 		return new Promise<any>((resolve, reject) => {
 			this._db.put<T>(doc, {}, (err, idAndRev) => {
-				if (err || !idAndRev || !idAndRev.ok) return reject('Error putting')
+				if (err || !idAndRev || !idAndRev.ok) return reject(new Error('Error putting'))
 				resolve({...doc, _id: idAndRev!.id, _rev: idAndRev!.rev})
 			})
 		})
@@ -66,14 +54,14 @@ class Database {
 	find<T extends IStandardFields>(props: IFindProps<T>): Promise<T[]> {
 		return new Promise((resolve, reject) => {
 			this._db.find({selector: {}, ...props as any}, (err, res) => {
-				if (!res?.docs.length || err) return reject(err)
+				if (!res?.docs || err) return reject(err)
 				resolve(res.docs as T[])
 			})
 		})
 	}
 	async findOne<T extends IStandardFields>(props: IFindProps<T>): Promise<T> {
 		const docs = await this.find(props)
-		if (!docs.length) throw Error('Document not found')
+		if (!docs.length) throwNotFoundError()
 		return docs[0]
 	}
 	delete<T extends IStandardFields>(doc: T): Promise<T> {
@@ -82,7 +70,7 @@ class Database {
 		doc.deletedAt = now
 		return new Promise<any>((resolve, reject) => {
 			this._db.put<T>(doc, {}, (err, idAndRev) => {
-				if (err || !idAndRev) return reject('Error deleting')
+				if (err || !idAndRev) return reject(new Error('Error deleting'))
 				resolve({...doc, _id: idAndRev!.id, _rev: idAndRev!.rev})
 			})
 		})
@@ -90,7 +78,7 @@ class Database {
 	deletePermanent(doc: {_id: string, _rev: string}) {
 		return new Promise<any>((resolve, reject) => {
 			this._db.remove(doc, {}, (err, res) => {
-				if (err) return reject('Error permanent delete')
+				if (err) return reject(new Error('Error permanent delete'))
 				resolve(null)
 			})
 		})
@@ -114,6 +102,21 @@ class Database {
 }
 export default Database
 
+export const loadingDb = new Database('loading')
+loadingDb.destroy = () => {throw new DatabaseLoadingError()}
+loadingDb.get = () => {throw new DatabaseLoadingError()}
+loadingDb.set = () => {throw new DatabaseLoadingError()}
+loadingDb.find = () => {throw new DatabaseLoadingError()}
+loadingDb.findOne = () => {throw new DatabaseLoadingError()}
+loadingDb.delete = () => {throw new DatabaseLoadingError()}
+loadingDb.deletePermanent = () => {throw new DatabaseLoadingError()}
+loadingDb.subscribe = () => {throw new DatabaseLoadingError()}
+
+class DatabaseLoadingError extends Error {
+	constructor() {
+		super('Database is loading')
+	}
+}
 export interface IStandardFieldsCreate {
 	_id?: string
 	type: string

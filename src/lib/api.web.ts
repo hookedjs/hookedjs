@@ -11,8 +11,8 @@ async function apiFetch<Data>(input: string, init: RequestInit = {}) {
 	init.headers = (init.headers || {}) as Record<string, any>
 	if (!init.headers['content-type'])
 		init.headers['content-type'] = 'application/json'
-	if (AuthStore.value.token)
-		init.headers.authorization = `Bearer ${AuthStore.value.token}`
+	// if (AuthStore.value.token)
+	// 	init.headers.authorization = `Bearer ${AuthStore.value.token}`
 
 	const res = await fetch(input, init)
 	

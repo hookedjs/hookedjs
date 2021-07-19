@@ -25,7 +25,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		const user = await UserEntity.findOne({ where: { email: props.email } })
 		if (!(user && await user.comparePassword(props.password)))
 			throw new FormValidationErrorSet(req.body, 'email and/or password invalid')
-		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
+		const token = app.jwt.sign({ id: user.id, roles: user.roles as any, createdAt: Date.now() })
 		reply.send({data: {token, id: user.id, roles: user.roles}})
 	})
 	app.post(authRefreshEndpoint, async function authRefreshEndpoint(req, reply) {
@@ -38,16 +38,16 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 			,isBanned = user.status === UserStatusEnum.BANNED
 		if (!user || passwordChanged || isBanned) 
 			throw new ForbiddenError()
-		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
+		const token = app.jwt.sign({ id: user.id, roles: user.roles as any, createdAt: Date.now() })
 		reply.send({data: {token, id: user.id, roles: user.roles}})
 	})
 	app.post(authRegisterEndpoint, async function authRegisterEndpoint(req, reply) {
 		const props = {
 			...new RegisterProps(req.body),
-			roles: [UserRoleEnum.TENANT]
+			roles: [UserRoleEnum.TENANT_ADMIN]
 		}
 		const user = await UserEntity.createSafe(props)
-		const token = app.jwt.sign({ id: user.id, roles: user.roles, createdAt: Date.now() })
+		const token = app.jwt.sign({ id: user.id, roles: user.roles as any, createdAt: Date.now() })
 		reply.send({data: {token, id: user.id, roles: user.roles}})
 	})
 

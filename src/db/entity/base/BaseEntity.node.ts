@@ -7,7 +7,7 @@
  * Note: You should override the functions and call 'super'
  *       so that types are forwarded properly.
  */
-import * as cuid from 'cuid'
+import {nanoid} from 'nanoid'
 import {BaseEntity as tBaseEntity, CreateDateColumn, DeleteDateColumn, PrimaryColumn, UpdateDateColumn, VersionColumn} from 'typeorm'
 
 import { FormValidationErrorSet, ValidationErrorSet, ValueError } from '#lib/validation'
@@ -28,7 +28,7 @@ class BaseEntity extends tBaseEntity {
 
 	constructor(seedObj?: any) {
 		super()
-		this.id = cuid()
+		this.id = nanoid()
 		if(seedObj) Object.assign(this, seedObj)
 	}
 	// Generic save helpers which apply sanitize

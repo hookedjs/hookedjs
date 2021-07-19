@@ -1,4 +1,4 @@
-import * as cuid from 'cuid'
+import {nanoid} from 'nanoid'
 
 import { RequiredError, throwNotFoundError, throwValidationErrorSet } from '#lib/validation'
 import { FileEntity } from '#src/db/entity'
@@ -9,7 +9,7 @@ import { fileByIdEndpoint, PostProps } from './file.api.lib'
 export default async function filePlugin(app: FastifyInstance, options: FastifyOptions) {
 	app.post(fileByIdEndpoint(':id'), async function upsertFile(req, reply) {
 		const 
-			id = cuid()
+			id = nanoid()
 			,files = req.raw.files || {}
 			,file = files?.file as PostProps || new PostProps(req.body) || throwValidationErrorSet({}, {file: new RequiredError('file')})
 		await fileStorage.put(id, file.data, file.mimetype)

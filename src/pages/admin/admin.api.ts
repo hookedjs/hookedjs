@@ -6,7 +6,7 @@ export default async function adminPlugin(app: FastifyInstance, options: Fastify
 	app.addHook('preValidation', async function adminAuthGuard(req, reply) {
 		if (
 			req.url.startsWith(`${config.apiPrefix}/admin`) 
-			&& !req.user.roles.includes(UserRoleEnum.ADMIN)
+			&& !req.user.roles.includes(UserRoleEnum.ADMIN as any)
 		) {
 			throw new ForbiddenError()
 		}

@@ -95,7 +95,7 @@ export const routes = Object.freeze({
 				nav(Paths.Login)
 			else if (auth.roles?.includes(AuthStore.roles.ADMIN))
 				nav(Paths.AdminRoot, { replace: true })
-			else if (auth.roles?.includes(AuthStore.roles.TENANT))
+			else if (auth.roles?.includes(AuthStore.roles.TENANT_ADMIN))
 				nav(Paths.TenantRoot, { replace: true })
 			else
 				alert(`Unexpected Role: ${auth.roles}`)
@@ -396,4 +396,4 @@ export const Paths: Record<keyof typeof routes, string> = Object.fromEntries(Obj
 
 
 function isAdmin() { return AuthStore.value.roles.includes(AuthStore.roles.ADMIN) }
-function isTenant() { return AuthStore.value.roles.includes(AuthStore.roles.TENANT)}
+function isTenant() { return AuthStore.value.roles.includes(AuthStore.roles.TENANT_ADMIN)}

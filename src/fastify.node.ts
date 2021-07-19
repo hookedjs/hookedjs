@@ -3,6 +3,7 @@ import 'reflect-metadata'
 import fastify from 'fastify'
 import fileUploadPlugin from 'fastify-file-upload'
 import helmetPlugin from 'fastify-helmet'
+const proxyPlugin = require('fastify-http-proxy')
 import fastifyPluginize from 'fastify-plugin'
 import staticPlugin from 'fastify-static'
 import * as fs from 'fs'
@@ -52,6 +53,7 @@ app.register(helmetPlugin, {
 	},
 })
 app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
+app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5984', prefix: '/db'})
 app.register(staticPlugin, { root: htmlPath })
 
 

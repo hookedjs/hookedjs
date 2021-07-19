@@ -1,6 +1,6 @@
 import Database from '../lib/Database'
 
-const tenantDb = new Database({name: 'hooked', host: 'http://localhost:5984'})
+const tenantDb = new Database({name: 'hooked', host: 'https://localhost:3000/db'})
 export default tenantDb
 
 async function test() {

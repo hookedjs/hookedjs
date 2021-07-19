@@ -33,7 +33,7 @@ export default class UserEntity extends BaseEntity {
 
 	constructor(seedObj?: Partial<l.UserCreate>) {
 		const defaults: Partial<UserEntity> = {
-			roles: [l.UserRoleEnum.TENANT],
+			roles: [l.UserRoleEnum.TENANT_ADMIN],
 			status: l.UserStatusEnum.ACTIVE
 		}	
 		super({...defaults, ...seedObj})

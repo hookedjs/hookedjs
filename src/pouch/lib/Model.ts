@@ -1,7 +1,7 @@
-import Database, { IStandardFields } from './Database'
+import { IStandardFields, loadingDb } from './Database'
 
 class PouchModel<ExtraFields extends Record<string, any>> {
-	_db = new Database({name: 'loading'})
+	_db = loadingDb
 
 	_id: IStandardFields['_id'] = ''
 	_rev: IStandardFields['_rev'] = ''

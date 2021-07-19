@@ -1,8 +1,8 @@
-import Database, { IFindProps, IStandardFields } from './Database'
+import { IFindProps, IStandardFields, loadingDb } from './Database'
 import type PouchModel from './Model'
 
 class PouchCollection<PM extends PouchModel<any>> {
-	_db = new Database({name: 'loading'})
+	_db = loadingDb
 	_model: any
 	_type: string
 	
@@ -12,7 +12,8 @@ class PouchCollection<PM extends PouchModel<any>> {
 	async find(props: IFindProps<IStandardFields> = {}): Promise<PM[]> {
 		if (!props.selector) props.selector = {}
 		props.selector.type = this._type
-		return new this._model(await this._db.find<PM>(props as any))
+		const res = await this._db.find<PM>(props as any)
+		return res.map(d => new this._model(d))
 	}
 	async findOne(props: Parameters<PouchCollection<PM>['find']>[0] = {}): Promise<PM> {
 		if (!props.selector) props.selector = {}

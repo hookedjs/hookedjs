@@ -5,44 +5,49 @@ import { LoginProps, RegisterProps } from './lib/authorization/authorization.api
 import config from './lib/config.web'
 import { nav, navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
-import { ValidationErrorSet } from './lib/validation'
+import { throwValidationErrorSet, ValidationErrorSet } from './lib/validation'
+import { login, Persons, Profiles } from './pouch'
 import { Paths } from './routes'
 
 
 // AuthStore: user id and roles
-export interface AuthStoreType { token: string, id: string, roles: UserRoleEnum[], tenants: string[], currentTenant: string }
-const AuthStoreLoggedOut: AuthStoreType = { token: '', id: '', roles: [], tenants: [], currentTenant: '' }
+export interface AuthStoreType { username: string, roles: UserRoleEnum[], currentTenant: string }
+const AuthStoreLoggedOut: AuthStoreType = { username: '', roles: [], currentTenant: '' }
 
 export const AuthStore = Object.assign(
 	new StateStore<typeof AuthStoreLoggedOut>(AuthStoreLoggedOut, 'AuthStore'),
 	{
 		logout() { 
 			AuthStore.value = AuthStoreLoggedOut
-			StackHistoriesReset() 
-			RouteHistoryReset() 
+			StackHistoriesReset()
+			RouteHistoryReset()
 			ToastStore.value = { message: 'You\'ve been logged out.', location: 'right' }
 			nav(Paths.Login)
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
-			const res = await api.post<AuthStoreType>(`${config.apiPrefix}/auth/login`, loginProps)
-			AuthStore.value = {...res, tenants: [], currentTenant: '' }
+			// const res = await login(loginProps.email, loginProps.password)
+			const res = await login('admin', 'password')
+			const profile = await Profiles.findOne()
+			// const tenantProfile = await Persons.findOne({selector: {_id: res.name}})
+			const tenantProfile = await Persons.findOne()
+			AuthStore.value = {username: res.name, roles: [...res.roles, ...tenantProfile.roles], currentTenant: profile.defaultTenant ?? '' }
 		},
 		async register(props: RegisterProps) {
 			const registerProps = new RegisterProps(props)
 			const res = await api.post<AuthStoreType>(`${config.apiPrefix}/auth/register`, registerProps)
-			AuthStore.value = {...res, tenants: [], currentTenant: '' }
+			// AuthStore.value = {...res, tenants: [], currentTenant: '' }
 			// const res = await fetch(`${config.apiPrefix}/auth/register`, {method: 'post', body: JSON.stringify(registerProps)}).then(r => r.json())
 			// if (res.error?.type === 'ValidationErrorSet') 
 			// 	throw new ValidationErrorSet(`${config.apiPrefix}/auth/register`, res.error?.context.errorSet)
 			// AuthStore.value = res
 		},
-		loginAsAdmin() { AuthStore.value = { token: '1234', id: '1', roles: [UserRoleEnum.ADMIN], tenants: [], currentTenant: '' } },
-		loginAsTenant() { AuthStore.value = { token: '1234', id: '2', roles: [UserRoleEnum.TENANT], tenants: ['123', '311'], currentTenant: '123' } },
+		loginAsAdmin() { AuthStore.value = { username: '1', roles: [UserRoleEnum.ADMIN], currentTenant: '' } },
+		loginAsTenant() { AuthStore.value = { username: '1234', roles: [UserRoleEnum.TENANT_ADMIN], currentTenant: '123' } },
 		roles: UserRoleEnum,
 	},
 )
-
+// setTimeout(() => AuthStore.login({email: 'admin@admin.com', password: 'password'}), 2000)
 
 // ThemeStore: can be dark | light, persists to disk, and can be toggled with #theme-toggle event
 export const ThemeStore = Object.assign(

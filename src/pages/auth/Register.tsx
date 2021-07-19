@@ -19,7 +19,7 @@ export default function Register() {
 	
 	const { submitting, errors } = Form.state
 
-	if (auth.id) nav(from || Paths.Dashboard, { replace: true })
+	if (auth.username) nav(from || Paths.Dashboard, { replace: true })
 
 	return <RegisterDiv>
 		<Logo size={4} style={{ margin: '0 -10px 10px', textAlign: 'center', display: 'block' }} />

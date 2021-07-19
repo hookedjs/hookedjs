@@ -44,10 +44,10 @@ export default async function dbPlugin(app: FastifyInstance, options: FastifyOpt
 
 	// CRUD
 	app.addHook('preValidation', async function adminAuthGuard(req, reply) {
-		console.log(req.user.roles, req.user.roles.includes(UserRoleEnum.ADMIN) )
+		console.log(req.user.roles, req.user.roles.includes(UserRoleEnum.ADMIN as any) )
 		if (
 			req.url.startsWith(`${config.apiPrefix}/crud`) 
-			&& !req.user.roles.includes(UserRoleEnum.ADMIN)
+			&& !req.user.roles.includes(UserRoleEnum.ADMIN as any)
 		) {
 			throw new ForbiddenError()
 		}
