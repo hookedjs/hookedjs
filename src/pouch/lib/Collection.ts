@@ -1,24 +1,34 @@
-import { IFindProps, IStandardFields, loadingDb } from './Database'
+import Database, { IFindProps, IStandardFields, loadingDb } from './Database'
 import type PouchModel from './Model'
 
 class PouchCollection<PM extends PouchModel<any>> {
-	_db = loadingDb
-	_model: any
-	_type: string
+	model: any = {db: loadingDb}
+
+	get db() { return this.model.db }
 	
+	get isReady() { return this.db !== loadingDb }
+	
+	// init(database: Database) {
+	// 	this._db = database
+	// 	this.initialized = true
+	// }
+	// destroy() {
+	// 	this._db = loadingDb
+	// 	this.initialized = false
+	// }
 	async get(id: string): Promise<PM> {
-		return new this._model(await this._db.get<PM>(id))
+		return new this.model(await this.db.get(id))
 	}
 	async find(props: IFindProps<IStandardFields> = {}): Promise<PM[]> {
 		if (!props.selector) props.selector = {}
-		props.selector.type = this._type
-		const res = await this._db.find<PM>(props as any)
-		return res.map(d => new this._model(d))
+		props.selector.type = this.model.type
+		const res = await this.db.find(props as any)
+		return res.map((d: any) => new this.model(d))
 	}
 	async findOne(props: Parameters<PouchCollection<PM>['find']>[0] = {}): Promise<PM> {
 		if (!props.selector) props.selector = {}
-		props.selector.type = this._type
-		return new this._model(await this._db.findOne(props) as any)
+		props.selector.type = this.model.type
+		return new this.model(await this.db.findOne(props) as any)
 	}
 	async save(docs: PM[]) {
 		return Promise.all(docs.map(d => d.save())) as Promise<PM[]>
@@ -34,7 +44,7 @@ class PouchCollection<PM extends PouchModel<any>> {
 		return Promise.all(docs.map(d => d.deletePermanent()))
 	}
 	subscribe(ids: string[], callback: (doc: PM) => any) {
-		return this._db.subscribe(ids, callback)
+		return this.db.subscribe(ids, callback)
 	}
 }
 export default PouchCollection

@@ -6,7 +6,7 @@ import config from './lib/config.web'
 import { nav, navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
 import { throwValidationErrorSet, ValidationErrorSet } from './lib/validation'
-import { login, Persons, Profiles } from './pouch'
+import { login, TenantPersons,UserProfiles } from './pouch'
 import { Paths } from './routes'
 
 
@@ -28,9 +28,9 @@ export const AuthStore = Object.assign(
 			const loginProps = new LoginProps(props)
 			// const res = await login(loginProps.email, loginProps.password)
 			const res = await login('admin', 'password')
-			const profile = await Profiles.findOne()
+			const profile = await UserProfiles.findOne()
 			// const tenantProfile = await Persons.findOne({selector: {_id: res.name}})
-			const tenantProfile = await Persons.findOne()
+			const tenantProfile = await TenantPersons.findOne()
 			AuthStore.value = {username: res.name, roles: [...res.roles, ...tenantProfile.roles], currentTenant: profile.defaultTenant ?? '' }
 		},
 		async register(props: RegisterProps) {

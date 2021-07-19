@@ -103,7 +103,7 @@ class Database {
 export default Database
 
 export const loadingDb = new Database('loading')
-loadingDb.destroy = () => {throw new DatabaseLoadingError()}
+loadingDb.destroy = async () => {}
 loadingDb.get = () => {throw new DatabaseLoadingError()}
 loadingDb.set = () => {throw new DatabaseLoadingError()}
 loadingDb.find = () => {throw new DatabaseLoadingError()}

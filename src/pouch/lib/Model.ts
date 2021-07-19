@@ -1,7 +1,10 @@
 import { IStandardFields, loadingDb } from './Database'
 
 class PouchModel<ExtraFields extends Record<string, any>> {
-	_db = loadingDb
+	static get db() {return loadingDb}
+	get db() {return loadingDb}
+	static type: IStandardFields['type'] = 'base'
+	type = PouchModel.type
 
 	_id: IStandardFields['_id'] = ''
 	_rev: IStandardFields['_rev'] = ''
@@ -10,17 +13,18 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 	_revisions?: IStandardFields['_revisions']
 	_attachments?: IStandardFields['_attachments']
 	_conflicts?: IStandardFields['_conflicts']
-	type: IStandardFields['type']
 	createdAt = new Date()
 	updatedAt = new Date()
 	deletedAt: IStandardFields['deletedAt']
+
+	get isReady() { return this.db !== loadingDb }
 
 	constructor(data: Partial<PouchModel<any> & ExtraFields> = {}) {
 		Object.assign(this, data)
 	}
 
 	extractSaveObject() {
-		return Object.omit(this, ['_db'])
+		return Object.omit(this, ['db'])
 	}
 	clearStandardFields() {
 		return Object.assign(this, {
@@ -37,21 +41,21 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 	}
 
 	async refresh() {
-		return Object.assign(this, await this._db.get(this._id))
+		return Object.assign(this, await this.db.get(this._id))
 	}
 	// async save(): Promise<PouchModel<any> & ExtraFields> {
 	async save() {
-		return Object.assign(this, await this._db.set(this.extractSaveObject()))
+		return Object.assign(this, await this.db.set(this.extractSaveObject()))
 	}
 	async delete() {
-		return Object.assign(this, await this._db.delete(this.extractSaveObject()))
+		return Object.assign(this, await this.db.delete(this.extractSaveObject()))
 	}
 	async deletePermanent() {
-		await this._db.deletePermanent(this.extractSaveObject())
+		await this.db.deletePermanent(this.extractSaveObject())
 		this.clearStandardFields()
 	}
 	subscribe(callback: (doc: PouchModel<any> & ExtraFields) => any) {
-		return this._db.subscribe([this._id], doc => {
+		return this.db.subscribe([this._id], doc => {
 			callback(Object.assign(this, doc) as any)
 		})
 	}

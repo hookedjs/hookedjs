@@ -34,7 +34,7 @@ export function useDoc<T>(collection: any, id: string) {
 	function watch() {
 		setState({isLoading: true})
 		refetch()
-		const listener = collection._db.subscribe([id], (doc: any) => {
+		const listener = collection.db.subscribe([id], (doc: any) => {
 			setState({
 				isLoading: false,
 				error: undefined,
@@ -61,7 +61,7 @@ export function useDocS<T extends {_id: string}>(collection: any, id: string) {
 	}
 	
 	function watch() {
-		const listener = collection._db.subscribe([id], (doc: any) => setState(doc))
+		const listener = collection.db.subscribe([id], (doc: any) => setState(doc))
 		return () => listener.cancel()
 	}
 }
@@ -71,7 +71,7 @@ export function createModelUseHook<PM extends PouchModel<any>>(collection: any) 
 		const doc = useDoc<PM>(collection, id)
 		return {
 			...doc,
-			data: doc.data ? new collection._model(doc.data) : undefined,
+			data: doc.data ? new collection.model(doc.data) : undefined,
 		}
 	}
 }
@@ -79,7 +79,7 @@ export function createModelUseHook<PM extends PouchModel<any>>(collection: any) 
 export function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDocS(id: string): PM {
 		const doc = useDocS<PM>(collection, id)
-		return new collection._model(doc)
+		return new collection.model(doc)
 	}
 }
 

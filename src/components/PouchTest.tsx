@@ -5,7 +5,7 @@ import {Suspense} from 'preact/compat'
 
 import { useErrorBoundary } from '#lib/hooks'
 import { NotFoundError } from '#lib/validation'
-import { DbProvider, usePerson, usePersonS } from '#src/pouch'
+import { DbProvider, useTenantPerson, useTenantPersonS } from '#src/pouch'
 
 export function NotFoundErrorBoundary({children}: {children: ComponentChildren}) {
 	const [runtimeError] = useErrorBoundary()
@@ -32,13 +32,13 @@ export default function PouchTest() {
 }
 
 function PouchTestStateful() {
-	const doc = usePerson('DajKc7aNdpFTFZkSroNKX')
+	const doc = useTenantPerson('DajKc7aNdpFTFZkSroNKX')
 	if (doc.isLoading) return <div>loading</div>
 	if (doc.error) return <div>{doc.error.message}</div>
 	return <div>{doc.data!.name}</div>
 }
 
 function PouchTestSuspense() {
-	const doc = usePersonS('DajKc7aNdpFTFZkSroNKX')
+	const doc = useTenantPersonS('DajKc7aNdpFTFZkSroNKX')
 	return <div>{doc.name}</div>
 }

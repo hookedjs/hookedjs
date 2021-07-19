@@ -3,10 +3,9 @@ import { loadingDb } from '#src/pouch/lib/Database'
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
+import db from '../db'
 
-export const ProfileCtx = {db: loadingDb}
-
-interface IProfileExtra {
+interface IUserProfileExtra {
 	name: string
 	age: number
 	email: string
@@ -15,30 +14,30 @@ interface IProfileExtra {
 	otherInfo: Record<string, any>
 }
 
-export class Profile extends PouchModel<IProfileExtra> {
-	_db = ProfileCtx.db
-	type = 'profile'
-	name: IProfileExtra['name']
-	age: IProfileExtra['age']
-	email: IProfileExtra['email']
-	tenants: IProfileExtra['tenants'] = []
-	defaultTenant: IProfileExtra['defaultTenant']
-	otherInfo: IProfileExtra['otherInfo'] = {}
+export class UserProfile extends PouchModel<IUserProfileExtra> {
+	static get db() {return db.handle}
+	get db() {return db.handle}
+	static type = 'profile'
+	type = UserProfile.type
+	name: IUserProfileExtra['name']
+	age: IUserProfileExtra['age']
+	email: IUserProfileExtra['email']
+	tenants: IUserProfileExtra['tenants'] = []
+	defaultTenant: IUserProfileExtra['defaultTenant']
+	otherInfo: IUserProfileExtra['otherInfo'] = {}
 }
 
-class ProfileCollection extends PouchCollection<Profile> {
-	_db = ProfileCtx.db
-	_type = 'profile'
-	_model = Profile
+class UserProfileCollection extends PouchCollection<UserProfile> {
+	model = UserProfile
 }
-export const Profiles = new ProfileCollection()
+export const UserProfiles = new UserProfileCollection()
 
-export const [useProfile, useProfileS] = createModelHooks<Profile>(Profiles)
+export const [useUserProfile, useUserProfileS] = createModelHooks<UserProfile>(UserProfiles)
 
 
 
 async function test() {
-	let profile = new Profile({
+	let profile = new UserProfile({
 		name: 'John',
 		age: 25,
 	})
@@ -55,7 +54,7 @@ async function test() {
 	// await profile.deletePermanent()
 	// console.log(profile._id ? 'Delete permanenet failed' : 'Delete permanent succeeded!')
 
-	const collection = new ProfileCollection()
+	const collection = new UserProfileCollection()
 	await profile.save()
 	profile = await collection.get(profile._id)
 	console.log(profile._rev && profile.save ? 'Get Success' : 'Get failed')

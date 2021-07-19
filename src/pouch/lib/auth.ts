@@ -1,8 +1,7 @@
 import type { UserRoleEnum } from '#src/db/entity/lib'
 import { throwValidationErrorSet } from '#src/lib/validation'
 
-import {tenantDb, userDb } from '../databases'
-import { initDatabases } from './state'
+import { destroyDatabases, initDatabases } from './state'
 
 const host = 'https://localhost:3000/db'
 
@@ -16,9 +15,13 @@ export async function login(username: string, password: string) {
 
 export async function logout() {
 	await cookieClear()
-	userDb.destroy()
-	tenantDb.destroy()
+	await destroyDatabases()
 	localStorage.removeItem('auth')
+}
+
+export function readAuth() {
+	const auth = localStorage.getItem('auth')
+	return auth ? JSON.parse(auth) : null
 }
 
 export async function cookieAuth(username: string, password: string) {
