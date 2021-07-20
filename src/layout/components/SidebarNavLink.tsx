@@ -1,13 +1,13 @@
 import { FunctionalComponent, h } from 'preact'
 
 import * as i from '#lib/icons'
-import {LocationStore} from '#lib/router'
+import {useLocationStore} from '#lib/router'
 import styled from '#lib/styled'
 
 interface NavLinkProps { path: string, title: string, Icon?: FunctionalComponent }
 
 export default function NavLink(p: NavLinkProps) {
-	const [{pathname}] = LocationStore.use()
+	const [{pathname}] = useLocationStore()
 	const isActive = p.path === '/' ? pathname === '/' : pathname.startsWith(p.path)
 	const Icon = p.Icon ?? i.Info
 	return (

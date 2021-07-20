@@ -69,6 +69,5 @@ module.exports = {
 		'#src': './src',
 		'#lib': './src/lib',
 		'#layout': './src/layout',
-		'#db': './src/db',
 	}
 }

@@ -6,7 +6,7 @@ import { useCallback, useLayoutEffect, useState } from '#lib/hooks'
 import { useMedia, UseSet, useSet } from '#lib/hooks'
 import * as i from '#lib/icons'
 import qs from '#lib/queryStrings'
-import { LocationStore, nav } from '#lib/router'
+import { nav, useLocationStore } from '#lib/router'
 import styled from '#lib/styled'
 import { routesByPath } from '#src/routes'
 import { ToastStore } from '#src/stores'
@@ -22,7 +22,7 @@ interface CmsTableProps {
 }
 type CmsRow = ComponentChildren[]
 export default function CmsTable(p: CmsTableProps) {
-	const [_location] = LocationStore.use()
+	const [_location] = useLocationStore()
 	const checked = useSet<CmsRow>()
 	useLayoutEffect(() => checked.reset(), [_location])
 	const q = qs.parse()

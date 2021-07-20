@@ -6,14 +6,13 @@ import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
 import styled from '#lib/styled'
-import { RegisterProps, RegisterPropsEnum, RegisterPropsExample } from '#src/lib/authorization/authorization.api.lib'
-import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
+import { RegisterProps, RegisterPropsEnum, RegisterPropsExample } from '#src/pouch'
 import { Paths } from '#src/routes'
-import { AuthStore, ToastStore } from '#src/stores'
+import { AuthStore, ToastStore, useAuthStore } from '#src/stores'
 
 export default function Register() {
 	const { from } = qs.parse()
-	const [auth] = AuthStore.use()
+	const [auth] = useAuthStore()
 	const Form = useForm()
 	const onSubmit = useCallback(_onSubmit, [])
 	

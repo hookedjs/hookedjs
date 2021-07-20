@@ -3,15 +3,18 @@ import { Fragment, h } from 'preact'
 import {ErrorBoundary, UnhandledErrorNotification} from './layout/components/ErrorBoundaries'
 import Toast, { ToastFromContext } from './layout/components/Toast'
 import { RouterComponent as Router } from './lib/router'
+import { DbProvider } from './pouch'
 import { routesByPath } from './routes'
 
 export default function App() {
 	return (
 		<ErrorBoundary>
-			<StaleBrowserWarning />
-			<UnhandledErrorNotification />
-			<Router routesByPath={routesByPath} />
-			<ToastFromContext />
+			<DbProvider>
+				<StaleBrowserWarning />
+				<UnhandledErrorNotification />
+				<Router routesByPath={routesByPath} />
+				<ToastFromContext />
+			</DbProvider>
 		</ErrorBoundary>
 	)
 

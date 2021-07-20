@@ -15,18 +15,26 @@ class Database {
 	_db = new PouchDB('loading')
 	name: IDb['name']
 	host: IDb['host']
+	connected = false
 	
 	constructor(name: Database['name'], host?: Database['host']) {
 		this.name = name
 		this.host = host
 		this._db = new PouchDB(name)
-		if (host) this.connect()
 	}
-	connect() {
+	async connect() {
 		const remote = new PouchDB(`${this.host}/${this.name}`)
-		const opts = {live: true, retry: true}
-		this._db.replicate.to(remote, opts, e => {console.dir(e)})
-		this._db.replicate.from(remote, opts, e => {console.dir(e)})
+		// const opts = {live: true, retry: true}
+		// this._db.replicate.to(remote, opts, e => e && console.error(e))
+		// this._db.replicate.from(remote, opts, e => e && console.error(e))
+		await new Promise((resolve, reject) => {
+			this._db
+				.sync(remote, {retry: true})
+				.on('complete', resolve)
+				.on('error', err => {console.log('Sync failed', err); reject(err)})
+		})
+		this._db.sync(remote, {retry: true, live: true})
+		this.connected = true
 	}
 	destroy() {return this._db.destroy()}
 	get<T extends IStandardFields>(id: string): Promise<T> {

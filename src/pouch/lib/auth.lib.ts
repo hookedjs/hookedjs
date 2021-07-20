@@ -1,11 +1,15 @@
+import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
 import config from '#src/lib/config.iso'
-
-import { assertAttrsWithin, assertValid, assertValidSet } from '../validation'
 
 export const authEndpoint = `${config.apiPrefix}/auth`
 export const authLoginEndpoint = `${authEndpoint}/login`
 export const authRefreshEndpoint = `${authEndpoint}/refresh`
 export const authRegisterEndpoint = `${authEndpoint}/register`
+
+export enum DbUserRoleEnum {
+  ADMIN = '_admin',
+}
+export const DbUserRoleSet = new Set(Enum.getEnumValues(DbUserRoleEnum))
 
 export class LoginProps {
 		email = ''

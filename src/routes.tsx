@@ -8,7 +8,7 @@ import * as i from '#lib/icons'
 import lazy from '#lib/lazy'
 import { nav, PassThrough, Redirect, RouteFactory } from '#lib/router'
 
-import { AuthStore } from './stores'
+import { AuthStore, useAuthStore } from './stores'
 
 const LoginLayout = lazy(() => import('#layout/layout/LoginLayout'))
 const AdminLayout = lazy(() => import('#layout/layout/AdminLayout'))
@@ -90,15 +90,17 @@ export const routes = Object.freeze({
 		Icon: i.Counter,
 		path: '/dashboard',
 		Component: () => {
-			const [auth] = AuthStore.use()
-			if (!auth.roles?.length)
+			const [auth] = useAuthStore()
+			if (!auth.dbRoles?.length && !auth.tRoles?.length)
 				nav(Paths.Login)
-			else if (auth.roles?.includes(AuthStore.roles.ADMIN))
+			else if (auth.dbRoles?.includes(AuthStore.dbRoles.ADMIN))
 				nav(Paths.AdminRoot, { replace: true })
-			else if (auth.roles?.includes(AuthStore.roles.TENANT_ADMIN))
-				nav(Paths.TenantRoot, { replace: true })
-			else
-				alert(`Unexpected Role: ${auth.roles}`)
+			else {
+				if (auth.tRoles?.includes(AuthStore.tRoles.ADMIN))
+					nav(Paths.TenantRoot, { replace: true })
+				else
+					alert(`Unexpected Role(s): ${auth.tRoles}`)
+			}
 			return <div />
 		},
 	}),
@@ -395,5 +397,5 @@ export const routesByPath = Object.fromEntries(Object.values(routes).map(r => [r
 export const Paths: Record<keyof typeof routes, string> = Object.fromEntries(Object.entries(routes).map(([name, r]) => [name, r.path]))
 
 
-function isAdmin() { return AuthStore.value.roles.includes(AuthStore.roles.ADMIN) }
-function isTenant() { return AuthStore.value.roles.includes(AuthStore.roles.TENANT_ADMIN)}
+function isAdmin() { return AuthStore.value.dbRoles.includes(AuthStore.dbRoles.ADMIN) }
+function isTenant() { return AuthStore.value.tRoles.length > 0}

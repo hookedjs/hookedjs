@@ -4,12 +4,12 @@ import { useEffect, useLayoutEffect, useRef } from '#lib/hooks'
 import * as i from '#lib/icons'
 import styled from '#lib/styled'
 import { useMedia } from '#src/lib/hooks'
-import { ToastStore } from '#src/stores'
+import { useToastStore } from '#src/stores'
 
 const timeouts = new Set<any>()
 
 export function ToastFromContext() {
-	const [Store] = ToastStore.use()
+	const [Store] = useToastStore()
 	return <Toast {...Store} />
 }
 

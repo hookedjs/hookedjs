@@ -1,10 +1,10 @@
-import { FunctionalComponent, h } from 'preact'
+import { h } from 'preact'
 
 import { useCallback, useEffect, useState } from '#lib/hooks'
 import * as i from '#lib/icons'
-import {LocationStore} from '#lib/router'
+import {useLocationStore} from '#lib/router'
 import styled from '#lib/styled'
-import { SidebarRightStore } from '#src/stores'
+import { useSidebarRightStore } from '#src/stores'
 
 import type { NavLinkProps, NavLinks } from '../types'
 
@@ -35,8 +35,8 @@ const Nav = styled.div`
 
 
 function NavLink(p: NavLinkProps) {
-	const [_location] = LocationStore.use()
-	const [isSidebarActive] = SidebarRightStore.use()
+	const [_location] = useLocationStore()
+	const [isSidebarActive] = useSidebarRightStore()
 	const isActive = _location.pathname.startsWith(p.path)
 	const Icon = p.Icon ?? i.Info
 	return (
@@ -83,7 +83,7 @@ const NavLinkA = styled.a`
  */
 function NavBurger() {
 	const [isActive, setIsActive] = useState(false)
-	const [isSidebarActive, setIsSidebarActive] = SidebarRightStore.use()
+	const [isSidebarActive, setIsSidebarActive] = useSidebarRightStore()
 	const onClick = useCallback(_onClick, [])
 	useEffect(() => {if (!isSidebarActive) setIsActive(false)}, [isSidebarActive])
 	return (

@@ -7,8 +7,10 @@ export async function initTenantDb() {
 	destroyTenantDb()
 	if (UserProfiles.isReady) {
 		const profile = await UserProfiles.findOne()
-		if (profile.defaultTenant)
-			db.handle = new Database(profile.defaultTenant, db.host)
+		if (profile.defaultTenant) {
+			db.handle = new Database(`tenantdb-${profile.defaultTenant}`, db.host)
+			await db.handle.connect()
+		}
 	}
 }
 

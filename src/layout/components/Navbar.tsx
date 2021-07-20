@@ -5,10 +5,10 @@ import { h } from 'preact'
 import { useCallback, useEffect, useRef, useState } from '#lib/hooks'
 import {useMedia} from '#lib/hooks'
 import * as i from '#lib/icons'
-import {LocationStore, nav} from '#lib/router'
+import {nav, useLocationStore} from '#lib/router'
 import styled from '#lib/styled'
-import { Paths } from '#src/routes'
-import { SidebarRightStore } from '#src/stores'
+// import { Paths } from '#src/routes'
+import { useSidebarRightStore } from '#src/stores'
 
 import type { NavLinkProps, NavLinks } from '../types'
 
@@ -245,8 +245,8 @@ const NavButtonA = styled.a`
 `
 
 function NavLink(p: NavLinkProps) {
-	const [_location] = LocationStore.use()
-	const [isSidebarActive] = SidebarRightStore.use()
+	const [_location] = useLocationStore()
+	const [isSidebarActive] = useSidebarRightStore()
 	const isActive = _location.pathname.startsWith(p.path)
 	return (
 		<NavLinkA
@@ -285,7 +285,7 @@ const NavLinkA = styled.a`
  */
 function RightBurger() {
 	const [isLinkActive, setIsLinkActive] = useState(false)
-	const [isSidebarActive, setIsSidebarActive] = SidebarRightStore.use()
+	const [isSidebarActive, setIsSidebarActive] = useSidebarRightStore()
 	useEffect(() => {if (!isSidebarActive) setIsLinkActive(false)}, [isSidebarActive])
 	const onClick = useCallback(_onClick, [])
 	return (

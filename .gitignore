@@ -7,4 +7,5 @@ npm-debug.log
 .aws-sam
 .fileStorage
 .eslintcache
+.graveyard
 web-build

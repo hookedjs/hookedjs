@@ -1,6 +1,6 @@
-import type { UserRoleEnum } from '#src/db/entity/lib'
 import { throwValidationErrorSet } from '#src/lib/validation'
 
+import type { DbUserRoleEnum } from './auth.lib'
 import { destroyDatabases, initDatabases } from './state'
 
 const host = 'https://localhost:3000/db'
@@ -33,7 +33,7 @@ export async function cookieAuth(username: string, password: string) {
 	})
 	if (!res.ok) throw new Error(`Could not login: ${res.status}`)
 	const json = await res.json()
-	return json as unknown as {ok: boolean, name: string, roles: UserRoleEnum[]}
+	return json as unknown as {ok: boolean, name: string, roles: DbUserRoleEnum[]}
 }
 
 export async function cookieClear() {

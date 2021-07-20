@@ -37,7 +37,7 @@ export function SidebarHeader() {
 			<div class='left'>
 				<i.Person size={76} class="svg-div full"/>
 				<i.Person size={50} class="svg-div mini" />
-				<div class='label full'>{AuthStore.value.roles.includes(AuthStore.roles.ADMIN) ? 'Admin' : 'Tenant'}</div>
+				<div class='label full'>{AuthStore.value.dbRoles.includes(AuthStore.dbRoles.ADMIN) ? 'Admin' : 'Tenant'}</div>
 				<div class='label mini'>Nancy</div>
 			</div>
 			<div class='right'>

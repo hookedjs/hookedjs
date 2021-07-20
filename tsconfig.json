@@ -21,7 +21,6 @@
     "paths": {
 			"#src/*": ["./src/*"],
       "#lib/*": ["./src/lib/*"],
-      "#db/*": ["./src/db/*"],
 			"#layout/*": ["./src/layout/*"],
       // Add this line to get types for streaming imports (packageOptions.source="remote"):
       "*": [".snowpack/types/*"]

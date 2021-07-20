@@ -1,5 +1,3 @@
-import { loadingDb } from '#src/pouch/lib/Database'
-
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
@@ -24,7 +22,7 @@ export class UserProfile extends PouchModel<IUserProfileExtra> {
 	email: IUserProfileExtra['email']
 	tenants: IUserProfileExtra['tenants'] = []
 	defaultTenant: IUserProfileExtra['defaultTenant']
-	otherInfo: IUserProfileExtra['otherInfo'] = {}
+	otherInfo: IUserProfileExtra['otherInfo']
 }
 
 class UserProfileCollection extends PouchCollection<UserProfile> {

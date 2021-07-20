@@ -85,7 +85,7 @@ function RouterComponent(props: RouterProps) {
  */
 const stacks = new Map<string, any>()
 function RouterSwitch({ routesByPath }: RouterProps) {
-	const [_location] = LocationStore.use()
+	const [_location] = useLocationStore()
 	const r = routesByPath[_location.pathname] || routesByPath['/notfound']
 	setPageMeta(r)
 	let Stack = RouteWrapper
@@ -124,7 +124,7 @@ let RouteHistory: Record<string, number> = localStorage.getItem('RouteHistory') 
 setInterval(function _saveRouteHistory() { localStorage.setItem('RouteHistory', JSON.stringify(RouteHistory)) }, 2000)
 function RouteHistoryReset() { localStorage.removeItem('RouteHistory'); RouteHistory = {} }
 function RouteWrapper({ children }: any) {
-	const [_location] = LocationStore.use()
+	const [_location] = useLocationStore()
 	useEffect(handleEvents, [])
 	useLayoutEffect(function hide(){ ref.current!.style.visibility = 'hidden' }, [_location])
 	useEffect(handleLocationChange, [_location])
@@ -177,7 +177,7 @@ function StackFactory(basePath: string) {
 	}
 
 	return function StackHandler({ children }: any) {
-		const [_location] = LocationStore.use()
+		const [_location] = useLocationStore()
 		useLayoutEffect(function hide(){ ref.current!.style.visibility = 'hidden' }, [_location])
 		useEffect(handleStackEvents, [])
 		useEffect(handleNavChange, [_location])
@@ -427,6 +427,7 @@ const setPageMeta = (function createSetPageMeta() {
  */
 interface LocationType { pathname: string, search: string }
 const LocationStore = new StateStore({ pathname: location.pathname, search: location.search })
+export const useLocationStore = LocationStore.use
 navListener(() => LocationStore.setValue({ pathname: location.pathname, search: location.search}))
 
 
