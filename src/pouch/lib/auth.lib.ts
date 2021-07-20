@@ -24,8 +24,8 @@ export class LoginProps {
 		}
 }
 export const LoginPropsExample = new LoginProps({
-	email: 'admin@example.com',
-	password: 'Password8',
+	email: 'tenant@hookedjs.org',
+	password: 'password',
 })
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
 

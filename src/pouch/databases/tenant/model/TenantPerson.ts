@@ -5,8 +5,9 @@ import db from '../db'
 
 interface ITenantPersonExtra {
 	name: string
+	email: string
 	age: number
-	tRoles: TenantUserRoleEnum[]
+	roles: TenantUserRoleEnum[]
 	otherInfo: Record<string, any>
 }
 
@@ -16,13 +17,15 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	static type = 'person'
 	type = TenantPerson.type
 	name: ITenantPersonExtra['name']
+	email: ITenantPersonExtra['email']
 	age: ITenantPersonExtra['age']
-	tRoles: ITenantPersonExtra['tRoles']
+	roles: ITenantPersonExtra['roles']
 	otherInfo: ITenantPersonExtra['otherInfo']
 }
 
 class TenantPersonCollection extends PouchCollection<TenantPerson> {
 	model = TenantPerson
+	indexes = ['email']
 }
 export const TenantPersons = new TenantPersonCollection()
 

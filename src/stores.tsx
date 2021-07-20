@@ -23,14 +23,14 @@ export const AuthStore = Object.assign(
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
-			// TODO: Fix this
-			// const res = await login(loginProps.email, loginProps.password)
-			const res = await login('dbreader', 'plaintext_password')
+			const res = await login(loginProps.email, loginProps.password)
 			const profile = await UserProfiles.findOne()
-			// TODO: Fix this
-			// const tenantProfile = await TenantPersons.findOne({selector: {_id: res.name}})
-			const tenantProfile = await TenantPersons.findOne()
-			AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles: tenantProfile.tRoles, currentTenant: profile.defaultTenant ?? '' }
+			let tRoles: TenantUserRoleEnum[] = []
+			if (profile.defaultTenant) {
+				const tenantProfile = await TenantPersons.findOne({ selector: { email: loginProps.email } }).catch(e => undefined)
+				tRoles = tenantProfile?.roles ?? []
+			}
+			AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles, currentTenant: profile.defaultTenant ?? '' }
 		},
 		async register(props: RegisterProps) {
 			const registerProps = new RegisterProps(props)

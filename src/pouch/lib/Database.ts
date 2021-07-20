@@ -69,8 +69,7 @@ class Database {
 	}
 	async findOne<T extends IStandardFields>(props: IFindProps<T>): Promise<T> {
 		const docs = await this.find(props)
-		if (!docs.length) throwNotFoundError()
-		return docs[0]
+		return docs?.[0] ?? throwNotFoundError()
 	}
 	delete<T extends IStandardFields>(doc: T): Promise<T> {
 		const now = new Date()

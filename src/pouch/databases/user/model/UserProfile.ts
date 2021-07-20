@@ -7,7 +7,7 @@ interface IUserProfileExtra {
 	name: string
 	age: number
 	email: string
-	tenants: {slug: string, name: string}[]
+	tenants: {id: string, name: string}[]
 	defaultTenant?: string
 	otherInfo: Record<string, any>
 }
@@ -20,7 +20,7 @@ export class UserProfile extends PouchModel<IUserProfileExtra> {
 	name: IUserProfileExtra['name']
 	age: IUserProfileExtra['age']
 	email: IUserProfileExtra['email']
-	tenants: IUserProfileExtra['tenants'] = []
+	tenants: IUserProfileExtra['tenants']
 	defaultTenant: IUserProfileExtra['defaultTenant']
 	otherInfo: IUserProfileExtra['otherInfo']
 }

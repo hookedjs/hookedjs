@@ -21,13 +21,13 @@ export default function PouchTest() {
 }
 
 function PouchTestStateful() {
-	const doc = useTenantPerson('72ff88753a64d9bb2cd014d7f802a2f3')
+	const doc = useTenantPerson('72ff88753a64d9bb2cd014d7f803573b')
 	if (doc.isLoading) return <div>loading</div>
 	if (doc.error) return <div>{doc.error.message}</div>
 	return <div>{doc.data!.name}</div>
 }
 
 function PouchTestSuspense() {
-	const doc = useTenantPersonS('72ff88753a64d9bb2cd014d7f802a2f3')
+	const doc = useTenantPersonS('72ff88753a64d9bb2cd014d7f803573b')
 	return <div>{doc.name}</div>
 }

@@ -9,7 +9,7 @@ export async function initUserDb() {
 	destroyUserDb()
 	const auth = readAuth()
 	if (auth) {
-		db.handle = new Database(`userdb-${auth.name}`, db.host)
+		db.handle = new Database(`userdb-${auth.name.replace('@','$').replace(/\./g,'$')}`, db.host)
 		await db.handle.connect()
 	}
 }
