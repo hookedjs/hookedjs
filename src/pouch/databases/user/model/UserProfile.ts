@@ -16,6 +16,8 @@ export class UserProfile extends PouchModel<IUserProfileExtra> {
 	static get db() {return db.handle}
 	get db() {return db.handle}
 	static type = 'profile'
+	static indexes = []
+	
 	type = UserProfile.type
 	name: IUserProfileExtra['name']
 	age: IUserProfileExtra['age']
@@ -30,7 +32,7 @@ class UserProfileCollection extends PouchCollection<UserProfile> {
 }
 export const UserProfiles = new UserProfileCollection()
 
-export const [useUserProfile, useUserProfileS] = createModelHooks<UserProfile>(UserProfiles)
+export const [useUserProfile, useUserProfiles, useUserProfileS, useUserProfilesS] = createModelHooks<UserProfile>(UserProfiles)
 
 
 

@@ -16,6 +16,8 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	get db() {return db.handle}
 	static type = 'person'
 	type = TenantPerson.type
+	static indexes = ['email']
+
 	name: ITenantPersonExtra['name']
 	email: ITenantPersonExtra['email']
 	age: ITenantPersonExtra['age']
@@ -25,11 +27,10 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 
 class TenantPersonCollection extends PouchCollection<TenantPerson> {
 	model = TenantPerson
-	indexes = ['email']
 }
 export const TenantPersons = new TenantPersonCollection()
 
-export const [useTenantPerson, useTenantPersonS] = createModelHooks<TenantPerson>(TenantPersons)
+export const [useTenantPerson, useTenantPersons, useTenantPersonS, useTenantPersonsS] = createModelHooks<TenantPerson>(TenantPersons)
 
 
 // import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull } from '#lib/validation'
@@ -42,7 +43,7 @@ export const [useTenantPerson, useTenantPersonS] = createModelHooks<TenantPerson
 
 export enum TenantUserRoleEnum {
   ADMIN = 'admin',
-  STAFF = 'staff',
+  // STAFF = 'staff',
 }
 export const TenantUserRoleSet = new Set(Enum.getEnumValues(TenantUserRoleEnum))
 

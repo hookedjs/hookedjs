@@ -1,8 +1,86 @@
-/**
- * A hook that watches a css media breakpoint
- */
-import { StateUpdater, useCallback, useEffect, useReducer, useRef, useState } from 'preact/hooks'
+import { StateUpdater, useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'preact/hooks'
 export * from 'preact/hooks'
+
+/**
+ * useEffectDeep: Like useEffect, but does a deep compare instead default compare
+ * to avoid misfires
+ */
+export function useEffectDeep(callback: FunctionType, varsToWatch: any[]) {
+	const lastSeenProps = useRef('')
+	useEffect(() => {
+		const next = JSON.stringify(varsToWatch)
+		if (lastSeenProps.current !== next) {
+			lastSeenProps.current = next
+			return callback()
+		}
+	}, [varsToWatch])
+}
+
+/**
+ * useLayoutEffectDeep: Like useEffect, but does a deep compare instead default compare
+ * to avoid misfires
+ */
+export function useLayoutEffectDeep(callback: FunctionType, varsToWatch: any[]) {
+	const lastSeenProps = useRef('')
+	useLayoutEffect(() => {
+		const next = JSON.stringify(varsToWatch)
+		if (lastSeenProps.current !== next) {
+			lastSeenProps.current = next
+			return callback()
+		}
+	}, [varsToWatch])
+}
+
+/**
+ * useEffectDeep: Like useEffect, but does a deep compare instead default compare
+ * to avoid misfires
+ */
+export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
+	const [lastSeenProps, setLastSeenProps] = useState(JSON.stringify(varsToWatch))
+	useEffect(() => {
+		const nextProps = JSON.stringify(varsToWatch)
+		if (lastSeenProps !== nextProps)
+			console.log(nextProps)
+		if (lastSeenProps !== nextProps)
+			setLastSeenProps(nextProps)
+	}, [varsToWatch])
+	return useMemo(callback, [lastSeenProps])
+}
+
+// export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
+// 	const lastSeenPropsJson = useRef(JSON.stringify(varsToWatch))
+// 	const [memo, setMemo] = useState(callback)
+// 	const memoLastJson = useRef(JSON.stringify(memo))
+// 	useEffect(() => {
+// 		const nextPropsJson = JSON.stringify(varsToWatch)
+// 		if (lastSeenPropsJson.current !== nextPropsJson) {
+// 			lastSeenPropsJson.current = nextPropsJson
+// 			const nextMemo = callback()
+// 			const nextMemoJson = JSON.stringify(nextPropsJson)
+// 			if (memoLastJson.current !== nextMemoJson) {
+// 				memoLastJson.current = nextMemoJson
+// 				console.log('useDeepMemo')
+// 				setMemo(nextMemo)
+// 			}
+// 		}
+// 	}, [varsToWatch])
+// 	return memo
+// }
+
+// export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
+// 	const [memo, setMemo] = useState(callback)
+// 	const memoLastJson = useRef(JSON.stringify(memo))
+// 	useEffectDeep(() => {
+// 		const nextMemo = callback()
+// 		const nextMemoJson = JSON.stringify(nextMemo)
+// 		if (memoLastJson.current !== nextMemoJson) {
+// 			memoLastJson.current = nextMemoJson
+// 			console.log('useDeepMemo')
+// 			setMemo(nextMemo)
+// 		}
+// 	}, [varsToWatch])
+// 	return memo
+// }
 
 /**
  * useFirstMountState: check if current render is first.
@@ -51,8 +129,7 @@ export function useMountedState() {
 }
 
 /**
- * useMedia: use the @media handler from css
- * from react-use
+ * A hook that watches a css media breakpoint
  */
 export function useMedia(query: string) {
 	const [state, setState] = useState(window.matchMedia(query).matches)
@@ -111,7 +188,6 @@ export function useTimeout(cb: () => any, ms = 0, cancelOnDismount = true) {
 
 /**
  * useUpdate: returns a callback, which re-renders component when called
- * from react-use
  * @param ms - if supplied, will automatically re-render after ms milliseconds
  */
 export function useUpdate(ms = 0) {

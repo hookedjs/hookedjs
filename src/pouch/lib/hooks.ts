@@ -1,5 +1,7 @@
-import { useLayoutEffect, useState } from '#lib/hooks'
+import { useEffect, useEffectDeep, useLayoutEffect, useLayoutEffectDeep, useMemo, useMemoDeep, useRef, useState, useUpdate } from '#lib/hooks'
+import { NotFoundError, throwError, throwNotFoundError } from '#src/lib/validation'
 
+import type { IFindProps } from './Database'
 import type PouchModel from './Model'
 
 interface State<T> {
@@ -8,77 +10,182 @@ interface State<T> {
 	isLoading: boolean
 }
 
+
 // export default function useDoc<T>(collection: keyof typeof db, id: string) {
-export function useDoc<T>(collection: any, id: string) {
-	const [state, setState] = useState<State<T>>({isLoading: true})
+export function useDocs<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): State<PM[]> {
+	const rerender = useUpdate()
+	useEffect(watch, [findProps])
+	const listener = useRef({cancel(){}})
 
-	useLayoutEffect(watch, [id])
+	const mapped = Object.clone({
+		selector: {},
+		...(typeof findProps === 'string' ? {selector: {_id: {$in: findProps}}} as any: findProps),
+	})
+	mapped.selector.type = collection.model.type
+
+	const
+		cacheKey = JSON.stringify(mapped),
+		cached = collection.db.findCache.get(cacheKey)
+
+	if (cached?.error)
+		return {isLoading: false, error: cached.error}
+	if (cached?.value)
+		return {isLoading: false, data: cached.value.map((doc: any) => new collection.model(doc))}
 	
-	return state
-	
-	async function refetch() {
-		return collection.get(id)
-			.then((doc: T) => setState({
-				isLoading: false,
-				error: undefined,
-				data: doc as any,
-			}))
-			.catch((error: any) => {
-				setState({
-					isLoading: false,
-					error,
-				})
-			})
-	}
+	return {isLoading: true}
+
 	
 	function watch() {
-		setState({isLoading: true})
-		refetch()
-		const listener = collection.db.subscribe([id], (doc: any) => {
-			setState({
-				isLoading: false,
-				error: undefined,
-				data: doc,
-			})
+		refetchIfStale().then(listenForChanges)
+		return () => listener.current.cancel()
+	}
+
+	async function refetchIfStale() {
+		if (!cached || !cached.fetching && Date.now() - cached.time > 3000) {
+			await collection.find(mapped)
+			rerender()
+		}
+	}
+
+	// This is exactly the same as listenForChanges in useDocsS
+	function listenForChanges() {
+		const cached = collection.db.findCache.get(cacheKey)
+		// Watch for future changes
+		listener.current = collection.db.subscribe(cached.value.map((d: any) => d._id), (changed: any) => {
+			// Update cache if not already caught up.
+			const
+				latest = collection.db.findCache.get(cacheKey),
+				cachedVersionOfChanged = latest.value.find((doc: any) => doc._id === changed._id)
+			if (changed._rev != cachedVersionOfChanged._rev) {
+				const next = {
+					...latest,
+					value: latest.value.map((doc: any) => doc._id === changed._id ? changed : doc),
+					time: new Date(),
+				}
+				collection.db.findCache.set(cacheKey, next)
+			}
+			// Trigger re-render so the view updates from cache
+			rerender()
 		})
-		return () => listener.cancel()
 	}
 }
 
-export function useDocS<T extends {_id: string}>(collection: any, id: string) {
-	const [state, setState] = useState<T | Promise<void> | Error>(refetch)
 
-	useLayoutEffect(watch, [id])
-	
-	if (state instanceof Promise) throw state
-	if (state instanceof Error) throw state
-	return state as T
-	
-	async function refetch() {
-		return collection.get(id)
-			.then((doc: T) => setState(doc))
-			.catch((error: any) => setState(error))
+export function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM> {
+	const mapped: IFindProps<PM> = {
+		...(typeof findProps === 'string' ? {selector: {_id: findProps}} as any: findProps),
+		limit: 1,
 	}
+	const docs = useDocs<PM>(collection, mapped)
+	
+	return {
+		isLoading: docs.isLoading,
+		error: docs.error || (docs.data?.length ? undefined : new NotFoundError()),
+		data: docs.data?.length ? docs.data[0]: undefined,
+	}
+}
+
+export function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM[] {
+	const listener = useRef({cancel(){}})
+	useEffect(watch, [findProps])
+	const rerender = useUpdate()
+
+	const mapped = Object.clone({
+		selector: {},
+		...(typeof findProps === 'string' ? {selector: {_id: {$in: findProps}}} as any: findProps),
+	})
+	mapped.selector.type = collection.model.type
+
+	const
+		cacheKey = JSON.stringify(mapped),
+		cached = collection.db.findCache.get(cacheKey)
+
+	if (cached) {
+		if (cached.fetching) throw cached.fetchP
+		if (cached.error) throw cached.error
+		return cached.value.map((doc: any) => new collection.model(doc))
+	}
+
+	throw collection.find(mapped)
 	
 	function watch() {
-		const listener = collection.db.subscribe([id], (doc: any) => setState(doc))
-		return () => listener.cancel()
+		if (cached?.value)
+			refetchIfStale().then(listenForChanges)
+		return () => listener.current.cancel()
+	}
+
+	async function refetchIfStale() {
+		if (!cached.fetching && Date.now() - cached.time > 3000) {
+			await collection.find(mapped)
+			rerender()
+		}
+	}
+
+	// This is exactly the same as listenForChanges in useDocs
+	function listenForChanges() {
+		const cached = collection.db.findCache.get(cacheKey)
+		// Watch for future changes
+		listener.current = collection.db.subscribe(cached.value.map((d: any) => d._id), (changed: any) => {
+			// Update cache if not already caught up.
+			const
+				latest = collection.db.findCache.get(cacheKey),
+				cachedVersionOfChanged = latest.value.find((doc: any) => doc._id === changed._id)
+			if (changed._rev != cachedVersionOfChanged._rev) {
+				const next = {
+					...latest,
+					value: latest.value.map((doc: any) => doc._id === changed._id ? changed : doc),
+					time: new Date(),
+				}
+				collection.db.findCache.set(cacheKey, next)
+			}
+			// Trigger re-render so the view updates from cache
+			rerender()
+		})
 	}
 }
 
+export function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM {
+	const findPropsMapped = useMemoDeep(mapProps, [findProps])
+	const docs = useDocsS<PM>(collection, findPropsMapped)
+	return docs?.[0] ?? throwNotFoundError()
+
+	function mapProps() {
+		const mapped: IFindProps<PM> = {
+			...(typeof findProps === 'string' ? {selector: {_id: findProps}} as any: findProps),
+			limit: 1,
+		}
+		return mapped
+	}		
+}
+
+
+export function createModelUseManyHook<PM extends PouchModel<any>>(collection: any) {
+	return function useModelDocs(findProps?: IFindProps<PM> | string): State<PM[]> {
+		const docs = useDocs<PM>(collection, findProps as any)
+		return {
+			...docs,
+			data: docs.data ? docs.data.map(doc => new collection.model(doc)) : undefined,
+		}
+	}
+}
 export function createModelUseHook<PM extends PouchModel<any>>(collection: any) {
-	return function useModelDoc(id: string): State<PM> {
-		const doc = useDoc<PM>(collection, id)
+	return function useModelDoc(findProps?: IFindProps<PM> | string): State<PM> {
+		const doc = useDoc<PM>(collection, findProps)
 		return {
 			...doc,
 			data: doc.data ? new collection.model(doc.data) : undefined,
 		}
 	}
 }
-
+export function createModelUseManyHookS<PM extends PouchModel<any>>(collection: any) {
+	return function useModelDocsS(findProps?: IFindProps<PM> | string): PM[] {
+		const docs = useDocsS<PM>(collection, findProps)
+		return docs.map(doc => new collection.model(doc))
+	}
+}
 export function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
-	return function useModelDocS(id: string): PM {
-		const doc = useDocS<PM>(collection, id)
+	return function useModelDocS(findProps?: IFindProps<PM> | string): PM {
+		const doc = useDocS<PM>(collection, findProps)
 		return new collection.model(doc)
 	}
 }
@@ -86,6 +193,8 @@ export function createModelUseHookS<PM extends PouchModel<any>>(collection: any)
 export function createModelHooks<PM extends PouchModel<any>>(collection: any) {
 	return [
 		createModelUseHook<PM>(collection),
+		createModelUseManyHook<PM>(collection),
 		createModelUseHookS<PM>(collection),
+		createModelUseManyHookS<PM>(collection),
 	] as const
 }

@@ -20,6 +20,8 @@ export const routes = Object.freeze({
 
 	// Access Control Routes
 
+	// TODO: hasAccess denied page does not link to login correclty. The state 
+	// doesn't seem to understand the route changed and stays stuck on denied page even though the url changed.
 	Login: RouteFactory({
 		title: 'Login',
 		Icon: i.Login,

@@ -1,25 +1,22 @@
 import type { ToastProps } from './layout/components/Toast'
-import config from './lib/config.web'
-import { nav, navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
+import { navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
 import { DbUserRoleEnum, login, LoginProps, logout, RegisterProps, TenantPersons, TenantUserRoleEnum, UserProfiles } from './pouch'
-import { Paths } from './routes'
+
 
 
 // AuthStore: user id and roles
 export interface AuthStoreType { username: string, dbRoles: DbUserRoleEnum[], tRoles: TenantUserRoleEnum[], currentTenant: string }
 const AuthStoreLoggedOut: AuthStoreType = { username: '', dbRoles: [], tRoles: [], currentTenant: '' }
-
 export const AuthStore = Object.assign(
 	new StateStore<typeof AuthStoreLoggedOut>(AuthStoreLoggedOut, 'AuthStore'),
 	{
-		logout() { 
+		async logout() {
 			AuthStore.value = AuthStoreLoggedOut
 			StackHistoriesReset()
 			RouteHistoryReset()
+			await logout()
 			ToastStore.value = { message: 'You\'ve been logged out.', location: 'right' }
-			nav(Paths.Login)
-			return logout()
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
@@ -48,10 +45,20 @@ export const AuthStore = Object.assign(
 	},
 )
 export const useAuthStore = AuthStore.use
-// setTimeout(async () => {
+setInterval(async function watchRoles() {
+	if (AuthStore.value.username && TenantPersons.isReady) {
+		const tenantProfile = await TenantPersons.findOne({ selector: { email: AuthStore.value.username } }).catch(e => undefined)
+		const tRoles = tenantProfile?.roles ?? []
+		if (`${tRoles}` !== `${AuthStore.value.tRoles}`)
+			AuthStore.value.tRoles = tRoles
+	}
+}, 4000)
+// setTimeout(async funciton logoutAndInTest() {
 // 	await AuthStore.logout()
 // 	setTimeout(() => AuthStore.login({email: 'admin@admin.com', password: 'password'}), 1000)
 // }, 1000)
+
+
 
 // ThemeStore: can be dark | light, persists to disk, and can be toggled with #theme-toggle event
 export const ThemeStore = Object.assign(
@@ -63,9 +70,13 @@ export const ThemeStore = Object.assign(
 export const useThemeStore = ThemeStore.use
 window.addEventListener('#theme-toggle', ThemeStore.toggle)
 
+
+
 // ToastStore: display a Toast at the bottom or right of the page
 export const ToastStore = new StateStore<ToastProps>({ location: 'right', message: '', duration: 2e3 })
 export const useToastStore = ToastStore.use
+
+
 
 // SidebarLeftStore: can be full | mini, persists to disk, and can be toggled with #sidebar-toggle event
 const bc = document.body.classList
@@ -86,9 +97,12 @@ window.addEventListener('#sidebar-toggle', SidebarLeftStore.toggle)
 SidebarLeftStore.subscribe(next => next === 'mini' ? bc.add('miniSidebar') : bc.remove('miniSidebar'))
 
 
+
 // SidebarRightStore: can be active or inactive, resets on navigation
 export const SidebarRightStore = new StateStore(false)
 export const useSidebarRightStore = SidebarRightStore.use
 navListener(() => SidebarRightStore.setValue(false))
 ThemeStore.subscribe(() => SidebarRightStore.setValue(false))
 
+
+Object.assign(window, {AuthStore, ToastStore, ThemeStore, SidebarLeftStore, SidebarRightStore})

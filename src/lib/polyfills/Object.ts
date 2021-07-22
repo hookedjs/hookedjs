@@ -10,6 +10,7 @@ declare global {
 		omit<T extends Record<string, any>, K extends (keyof T)>(obj: T, keys: readonly K[] | K[]): Omit<T, K>
 		rmFalseyAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 		equals(foo: any, bar: any): boolean
+		clone<T extends any>(obj: T): T
 	}
 }
 
@@ -124,4 +125,19 @@ Object.equals = function (foo, bar) {
 			if (Object.equals(key, tar)) return key
 		}
 	}
+}
+
+// Ref: https://stackoverflow.com/a/46692810/1202757
+Object.clone = (obj: any) => {
+	if (obj === null || typeof(obj) !== 'object' || 'isActiveClone' in obj)
+		return obj
+	const temp = obj.constructor() // changed
+	for (const key in obj) {
+		if (Object.prototype.hasOwnProperty.call(obj, key)) {
+			obj['isActiveClone'] = null
+			temp[key] = Object.clone(obj[key])
+			delete obj['isActiveClone']
+		}
+	}
+	return temp
 }

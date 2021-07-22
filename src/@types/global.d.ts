@@ -1,3 +1,5 @@
+type FunctionType = (...args: any) => any
+
 type PromiseFnc = (...args: any) => Promise<any>
 
 type ReturnType<T extends (...args: any[]) => any> =

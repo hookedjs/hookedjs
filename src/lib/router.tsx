@@ -14,15 +14,14 @@
  */
 
 import { ComponentChildren, Fragment as F, FunctionalComponent, h } from 'preact'
+import {Suspense} from 'preact/compat'
 
 import { applyTheme, defaultTheme } from '#layout/theme'
 import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from '#lib/hooks'
 
 import StateStore from './StateStore'
 import styled from './styled'
-
-class ForbiddenError extends Error { type = 'Forbidden' }
-class NotFoundError extends Error { type = 'NotFound' }
+import { ForbiddenError, NotFoundError } from './validation'
 
 
 /**
@@ -66,6 +65,7 @@ function RouterComponent(props: RouterProps) {
 		return navListener(onLocationChange)
 
 		function onLocationChange() {
+			resetError()
 			const match = props.routesByPath[location.pathname]
 
 			// only update the layout if it's changed
@@ -96,7 +96,7 @@ function RouterSwitch({ routesByPath }: RouterProps) {
 			stacks.set(r.stack, Stack)
 		}
 	}
-	if (!r.hasAccess()) throw new ForbiddenError('Forbidden!')
+	if (!r.hasAccess()) throw new ForbiddenError()
 	return <Stack>
 		<r.Component route={r} />
 	</Stack>
@@ -306,6 +306,17 @@ function BlankLayout({ children }: { children: any }) {
 	</div>
 }
 
+function NotFoundErrorBoundary({children}: {children: ComponentChildren}) {
+	const [runtimeError, resetError] = useErrorBoundary()
+	const [_location] = useLocationStore()
+	useLayoutEffect(() => {resetError()}, [_location])
+	if (runtimeError instanceof NotFoundError)
+		return <div>Sorry, we can't find the record you seek.</div>
+	if (runtimeError)
+		throw runtimeError
+	return <Suspense fallback={<div>Suspense...</div>}>{children as any}</Suspense>
+}
+
 /**
  * Call a function on scroll event
  * 
@@ -430,7 +441,6 @@ const LocationStore = new StateStore({ pathname: location.pathname, search: loca
 export const useLocationStore = LocationStore.use
 navListener(() => LocationStore.setValue({ pathname: location.pathname, search: location.search}))
 
-
 const PageMetaStore = new StateStore<SetPageMetaProps>({ title: '' })
 PageMetaStore.subscribe(setPageMeta)
 
@@ -496,11 +506,10 @@ PageMetaStore.subscribe(setPageMeta)
 export {
 	BlankLayout,
 	Content,
-	ForbiddenError,
 	LocationStore,
 	nav,
 	navListener,
-	NotFoundError,
+	NotFoundErrorBoundary,
 	PageMetaStore,
 	PassThrough,
 	Redirect,

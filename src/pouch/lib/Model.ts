@@ -5,6 +5,8 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 	get db() {return loadingDb}
 	static type: IStandardFields['type'] = 'base'
 	type = PouchModel.type
+	// indexes: A comma separated list of field names to index.
+	static indexes: string[] = []
 
 	_id: IStandardFields['_id'] = ''
 	_rev: IStandardFields['_rev'] = ''

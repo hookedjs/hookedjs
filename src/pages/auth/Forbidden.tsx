@@ -2,18 +2,30 @@ import {h} from 'preact'
 
 import {Auth} from '#lib/icons'
 import styled from '#lib/styled'
+import { nav } from '#src/lib/router'
+import { Paths } from '#src/routes'
+import { AuthStore, useAuthStore } from '#src/stores'
 
 
 export default function Forbidden() {
+	const [auth] = useAuthStore()
+	const LoginUrl = Paths.Login + '?from=' + location.pathname + location.search
 	return <ForbiddenDiv>
 		<div>
 			<Auth size={200} />
-			<h1>You lack access to this page.</h1>
+			<h1>You lack access to this record.</h1>
 			<br />
-			<a href='/'>Home</a>&nbsp;&nbsp;&nbsp;
-			<a href={'/login?from=' + location.pathname + location.search}>Login</a>
+			<a href={Paths.Home}>Home</a>&nbsp;&nbsp;&nbsp;
+			{auth.username
+				? <a href={LoginUrl} onClick={onSwitchClick}>Switch User</a>
+				: <a href={LoginUrl}>Login</a>
+			}
 		</div>
 	</ForbiddenDiv>
+	function onSwitchClick(e: any) {
+		e.preventDefault()
+		AuthStore.logout().then(() => nav(LoginUrl))
+	}
 }
 // Background thanks to transparenttextures.com
 const ForbiddenDiv = styled.div`

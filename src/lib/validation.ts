@@ -1,5 +1,7 @@
 import type { FastifyRequest } from 'fastify'
 
+export function throwError(message: string): never {throw new Error(message)}
+
 export class NotFoundError extends Error {
 	type = 'NotFound'
 	note = 'The article you seek doth not exist'
@@ -15,13 +17,13 @@ export function throwNotFoundError(): never {throw new NotFoundError()}
 
 export class ForbiddenError extends Error {
 	type = 'ForbiddenError'
-	note = 'You lack permission to this endpoint'
+	note = 'You lack permission to this record'
 	context = {
 		entity: null,
 		errorSet: {}
 	}
 	constructor() {
-		super('You lack permission to this endpoint')
+		super('You lack permission to this record')
 	}
 }
 export function throwForbiddenError(): never {throw new ForbiddenError()}

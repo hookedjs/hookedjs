@@ -11,7 +11,7 @@
  * 7. Easy option to persist to localStorage
  * 8. Super type-safe
  */
-import { StateUpdater, useLayoutEffect, useState as useStateP } from '#lib/hooks'
+import { StateUpdater, useLayoutEffect, useState } from '#lib/hooks'
 
 class StateStore<T> {
 	private _value: T
@@ -50,7 +50,7 @@ class StateStore<T> {
 	}
 	
 	use = () => {
-		const [_state, _setState] = useStateP(this._value)
+		const [_state, _setState] = useState(this._value)
 		useLayoutEffect(() => this.subscribe(next => _setState(next)), [])
 		return [_state, this.setValue] as [T, StateUpdater<T>]
 	}
