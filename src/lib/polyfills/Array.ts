@@ -22,7 +22,7 @@ declare global {
 		duplicateCheck(): boolean
 		deDuplicate(): T[]
 		keyBy(key: string): Record<string, T>
-		subtract(otherArr: T): T[]
+		subtract(otherArr: T[]): T[]
 	}
 }
 

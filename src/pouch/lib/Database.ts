@@ -24,8 +24,6 @@ class Database {
 			value: any
 			error?: Error
 			time: number
-			// subscribers: Map<number, () => any>
-			// refetch(): Promise<any>
 		}
 	>()
 	findCacheGarbageCollectInterval: NodeJS.Timeout // an interval
@@ -38,48 +36,63 @@ class Database {
 	}
 	async connect() {
 		const remote = new PouchDB(`${this.host}/${this.name}`)
-		// const opts = {live: true, retry: true}
-		// this._db.replicate.to(remote, opts, e => e && console.error(e))
-		// this._db.replicate.from(remote, opts, e => e && console.error(e))
-		await new Promise((resolve, reject) => {
-			this._db
-				.sync(remote, {retry: true})
-				.on('complete', resolve)
-				.on('error', err => {console.log('Sync failed', err); reject(err)})
-		})
+		await this._db
+			.sync(remote, {retry: true})
+			.catch(err => {console.log('Sync failed', err); throw err})
 		this._db.sync(remote, {retry: true, live: true})
 		this.connected = true
 	}
 	destroy() {
 		clearInterval(this.findCacheGarbageCollectInterval)
+		this.connected = false
 		return this._db.destroy()
 	}
-	get<T extends IStandardFields>(id: string): Promise<T> {
-		return new Promise<any>((resolve, reject) => {
-			this._db.get<T>(id, {}, (err, doc) => {
-				if (err?.status === 404) return reject(new NotFoundError())
-				if (err?.message) return reject(new Error(err.message))
-				if (!doc) return reject(new Error('Unexpected response'))
-				resolve(doc)
-			})
-		})
+	get<T extends IStandardFields>(id: string): Promise<T>
+	get<T extends IStandardFields>(ids: string[]): Promise<T[]>
+	get<T extends IStandardFields>(idOrIds: string | string[]): Promise<any> {
+		const getter = (id: string) => this._db
+			.get<T>(id, {})
+			.catch(err => {throw err.status === 404 ? new NotFoundError(id) : err})
+		if (Array.isArray(idOrIds))
+			// The format for bulkGet is really strange, so just do brute force	
+			return Promise.all(idOrIds.map(getter))
+		else
+			return getter(idOrIds)
 	}
 	set<T extends IStandardFieldsCreate>(doc: T): Promise<T & IStandardFields> {
 		const now = new Date()
-		if (!doc._id) doc._id = nanoid()
-		if (!doc.createdAt) doc.createdAt = now
-		doc.updatedAt = now
-		return new Promise<any>((resolve, reject) => {
-			this._db.put<T>(doc, {}, (err, idAndRev) => {
-				if (err || !idAndRev || !idAndRev.ok) return reject(new Error('Error putting'))
-				resolve({...doc, _id: idAndRev!.id, _rev: idAndRev!.rev})
-			})
+		const doc2 = {
+			...doc,
+			_id: doc._id || nanoid(),
+			createdAt: doc.createdAt || now,
+			updatedAt: now
+		}
+		return this._db
+			.put<T>(doc2, {})
+			.then(idAndRev => ({...doc2, _rev: idAndRev.rev}))
+	}
+	setMany<T extends IStandardFieldsCreate>(docs: T[]) {
+		const now = new Date()
+		const docs2 = docs.map(doc => {
+			if (!doc._id) doc._id = nanoid()
+			if (!doc.createdAt) doc.createdAt = now
+			doc.updatedAt = now
 		})
+		return this._db.bulkDocs<any>(docs2, {})
+			.then((idAndRevs)  => {
+				const errors = idAndRevs
+					.filter(idAndRev => 'error' in idAndRev)
+					.map((idAndRev, i) => ({error: idAndRev, doc: docs2[i]}))
+				if (errors.length)
+					throw {...new Error('Put Errors'), errors}
+				return idAndRevs
+			})
 	}
 	/**
 	 * A smart find feature that:
 	 *   1. Detects and de-dup simultaneous duplicate queries (race queries)
 	 *   2. Sets a cach that can be accessed externally for hooks
+	 *   3. Uses db.get for simple getbyid queries
 	 */
 	find<T extends IStandardFields>(props: IFindProps<T>): Promise<T[]> {
 		const key = JSON.stringify(props)
@@ -99,50 +112,67 @@ class Database {
 		// }
 
 		if (cached.fetching) return cached.fetchP as any
-		
 		cached.fetching = true
-		cached.fetchP = new Promise((resolve, reject) => {
-			this._db.find({selector: {}, ...props as any}, (err, res) => {
+
+		// If simple get by id(s), prefer this.get
+		if (
+			(
+				typeof props.selector?._id === 'string'
+				|| props.selector?._id?.$in
+			)
+			// ...and there aren't other modifiers
+			&& Object.keys(props.selector).subtract(['_id', 'type']).length === 0
+			&& !props.sort && !props.fields && !props.skip
+		) {
+			if (typeof props.selector?._id === 'string')
+				cached.fetchP = this.get<T>(props.selector._id)
+					.then(doc => ({docs: [doc]}))
+			else
+				cached.fetchP = this.get<T>(props.selector._id.$in as string[])
+					.then(docs => ({docs}))
+		}
+		// Else do full search
+		else {
+			cached.fetchP = this._db.find({selector: {}, ...props as any})
+		}
+
+		cached.fetchP
+			.then(res => {
 				const cached = this.findCache.get(key)!
-				if (!res?.docs || err) {
-					this.findCache.set(key, {
-						...cached,
-						fetching: false,
-						value: undefined,
-						error: err as Error || new Error('Unknown error'),
-						time: Date.now()
-					})
-					reject(err)
-				}
-				else {
-					this.findCache.set(key, {
-						...cached,
-						fetching: false,
-						value: res.docs,
-						error: undefined,
-						time: Date.now()
-					})
-					resolve(res.docs as any)
-				}
+				this.findCache.set(key, {
+					...cached,
+					fetching: false,
+					value: res.docs,
+					error: undefined,
+					time: Date.now()
+				})
 			})
-		})
+			.catch(err => {
+				const cached = this.findCache.get(key)!
+				this.findCache.set(key, {
+					...cached,
+					fetching: false,
+					value: undefined,
+					error: err as Error || new Error('Unknown error'),
+					time: Date.now()
+				})
+			})
+
 		this.findCache.set(key, cached)
-		return cached.fetchP
+		return cached.fetchP.then(res => res.docs)
 	}
 	findOne<T extends IStandardFields>(props: IFindProps<T>): Promise<T> {
-		// TODO: If props.selector._id is set, use this.get instead of this.find. Maybe make this.get private?
 		return this.find({...props, limit: 1}).then(docs => docs?.[0] ?? throwNotFoundError())
 	}
 	delete<T extends IStandardFields>(doc: T): Promise<T> {
 		const now = new Date()
-		doc.updatedAt = now
-		doc.deletedAt = now
-		return new Promise<any>((resolve, reject) => {
-			this._db.put<T>(doc, {}, (err, idAndRev) => {
-				if (err || !idAndRev) return reject(new Error('Error deleting'))
-				resolve({...doc, _id: idAndRev!.id, _rev: idAndRev!.rev})
-			})
-		})
+		const doc2 = {
+			...doc,
+			updatedAt: now,
+			deletedAt: now,
+		}
+		return this._db.put<T>(doc2, {})
+			.then(idAndRev => ({...doc2, _rev: idAndRev.rev}))
 	}
 	deletePermanent(doc: {_id: string, _rev: string}) {
 		return new Promise<any>((resolve, reject) => {
@@ -225,6 +255,16 @@ export interface IStandardFields {
 	_conflicts?: string[] | undefined
 }
 
+
+interface IdAndRev {
+	ok?: boolean
+	id?: string
+	rev?: string
+	error?: boolean
+	status?: number
+	name?: string
+	message?: string
+}
 
 /**
  * Stub attachments are returned by PouchDB by default (attachments option set to false)

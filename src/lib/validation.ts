@@ -4,26 +4,28 @@ export function throwError(message: string): never {throw new Error(message)}
 
 export class NotFoundError extends Error {
 	type = 'NotFound'
-	note = 'The article you seek doth not exist'
+	note: string
 	context = {
 		entity: null,
 		errorSet: {}
 	}
-	constructor() {
-		super('The article you seek doth not exist')
+	constructor(id?: string) {
+		super(`The article${id ? `(id:${id})`: ''} you seek doth not exist`)
+		this.note = this.message
 	}
 }
-export function throwNotFoundError(): never {throw new NotFoundError()}
+export function throwNotFoundError(id?: string): never {throw new NotFoundError(id)}
 
 export class ForbiddenError extends Error {
 	type = 'ForbiddenError'
-	note = 'You lack permission to this record'
+	note: string
 	context = {
 		entity: null,
 		errorSet: {}
 	}
 	constructor() {
 		super('You lack permission to this record')
+		this.note = this.message
 	}
 }
 export function throwForbiddenError(): never {throw new ForbiddenError()}
