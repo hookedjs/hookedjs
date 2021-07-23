@@ -8,11 +8,20 @@ interface State<T> {
 	data?: T
 	error?: Error
 	isLoading: boolean
+	fetchP?: PromiseFnc
 }
 
-
-// export default function useDoc<T>(collection: keyof typeof db, id: string) {
-export function useDocs<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): State<PM[]> {
+/**
+ * A Stateful db query hook to get many docs
+ * 
+ * Strategically doesn't rely on local state bc state is reset when used with Suspense
+ */
+function useDocs<PM extends PouchModel<any>>(
+	collection: any,
+	findProps?: IFindProps<PM> | string,
+	// limit can also go in findProps, but this extra field is convenient for useDoc
+	limit?: number,
+): State<PM[]> {
 	const rerender = useUpdate()
 	useEffect(watch, [findProps])
 	const listener = useRef({cancel(){}})
@@ -20,37 +29,56 @@ export function useDocs<PM extends PouchModel<any>>(collection: any, findProps: 
 	const mapped = Object.clone({
 		selector: {},
 		...(typeof findProps === 'string' ? {selector: {_id: {$in: findProps}}} as any: findProps),
+		...limit && {limit}
 	})
 	mapped.selector.type = collection.model.type
 
 	const
 		cacheKey = JSON.stringify(mapped),
 		cached = collection.db.findCache.get(cacheKey)
-
+	
+	if (!cached)
+		return {isLoading: true, fetchP: collection.db.find(mapped)}
 	if (cached?.error)
 		return {isLoading: false, error: cached.error}
 	if (cached?.value)
 		return {isLoading: false, data: cached.value.map((doc: any) => new collection.model(doc))}
+	if (cached?.fetching)	
+		return {isLoading: true, fetchP: cached.fetchP}
 	
-	return {isLoading: true}
+	throw new Error('Unhandled cache error')
 
-	
 	function watch() {
 		refetchIfStale().then(listenForChanges)
 		return () => listener.current.cancel()
 	}
 
 	async function refetchIfStale() {
-		if (!cached || !cached.fetching && Date.now() - cached.time > 3000) {
-			await collection.find(mapped)
+		const cached = collection.db.findCache.get(cacheKey)
+		if (cached?.fetching) {
+			await cached.fetchP
+			rerender()
+		}
+		else if (
+			// At this point, cached should always be truthy, but just in case...
+			!cached 
+			|| ((Date.now() - cached.time > 3000)) && !cached.fetching
+		) {
+			await collection.db.find(mapped)
 			rerender()
 		}
 	}
 
-	// This is exactly the same as listenForChanges in useDocsS
-	function listenForChanges() {
-		const cached = collection.db.findCache.get(cacheKey)
+	async function listenForChanges() {
+		let cached = collection.db.findCache.get(cacheKey)
+		// Since listenForChanges comes after refetchIfStale, fetching should always be falsey. But just in case...
+		if (cached?.fetching) {
+			await cached.fetchP
+			rerender()
+			cached = collection.db.findCache.get(cacheKey)
+		}
 		// Watch for future changes
+		listener.current.cancel()
 		listener.current = collection.db.subscribe(cached.value.map((d: any) => d._id), (changed: any) => {
 			// Update cache if not already caught up.
 			const
@@ -68,16 +96,14 @@ export function useDocs<PM extends PouchModel<any>>(collection: any, findProps: 
 			rerender()
 		})
 	}
+
 }
 
-
-export function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM> {
-	const mapped: IFindProps<PM> = {
-		...(typeof findProps === 'string' ? {selector: {_id: findProps}} as any: findProps),
-		limit: 1,
-	}
-	const docs = useDocs<PM>(collection, mapped)
-	
+/**
+ * A Stateful db query hook to get a single doc
+ */
+function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM> {
+	const docs = useDocs<PM>(collection, findProps, 1)
 	return {
 		isLoading: docs.isLoading,
 		error: docs.error || (docs.data?.length ? undefined : new NotFoundError()),
@@ -85,108 +111,43 @@ export function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: 
 	}
 }
 
-export function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM[] {
-	const listener = useRef({cancel(){}})
-	useEffect(watch, [findProps])
-	const rerender = useUpdate()
-
-	const mapped = Object.clone({
-		selector: {},
-		...(typeof findProps === 'string' ? {selector: {_id: {$in: findProps}}} as any: findProps),
-	})
-	mapped.selector.type = collection.model.type
-
-	const
-		cacheKey = JSON.stringify(mapped),
-		cached = collection.db.findCache.get(cacheKey)
-
-	if (cached) {
-		if (cached.fetching) throw cached.fetchP
-		if (cached.error) throw cached.error
-		return cached.value.map((doc: any) => new collection.model(doc))
-	}
-
-	throw collection.find(mapped)
-	
-	function watch() {
-		if (cached?.value)
-			refetchIfStale().then(listenForChanges)
-		return () => listener.current.cancel()
-	}
-
-	async function refetchIfStale() {
-		if (!cached.fetching && Date.now() - cached.time > 3000) {
-			await collection.find(mapped)
-			rerender()
-		}
-	}
-
-	// This is exactly the same as listenForChanges in useDocs
-	function listenForChanges() {
-		const cached = collection.db.findCache.get(cacheKey)
-		// Watch for future changes
-		listener.current = collection.db.subscribe(cached.value.map((d: any) => d._id), (changed: any) => {
-			// Update cache if not already caught up.
-			const
-				latest = collection.db.findCache.get(cacheKey),
-				cachedVersionOfChanged = latest.value.find((doc: any) => doc._id === changed._id)
-			if (changed._rev != cachedVersionOfChanged._rev) {
-				const next = {
-					...latest,
-					value: latest.value.map((doc: any) => doc._id === changed._id ? changed : doc),
-					time: new Date(),
-				}
-				collection.db.findCache.set(cacheKey, next)
-			}
-			// Trigger re-render so the view updates from cache
-			rerender()
-		})
-	}
+/**
+ * A Suspenseful db query hook to get many docs
+ */
+function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string, limit?: number): PM[] {
+	const state = useDocs(collection, findProps, limit)
+	if (state.isLoading) throw state.fetchP
+	if (state.error) throw state.error
+	return state.data!
 }
 
-export function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM {
-	const findPropsMapped = useMemoDeep(mapProps, [findProps])
-	const docs = useDocsS<PM>(collection, findPropsMapped)
+/**
+ * A Suspenseful db query hook to get a single doc
+ */
+function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM {
+	const docs = useDocsS<PM>(collection, findProps, 1)
 	return docs?.[0] ?? throwNotFoundError()
-
-	function mapProps() {
-		const mapped: IFindProps<PM> = {
-			...(typeof findProps === 'string' ? {selector: {_id: findProps}} as any: findProps),
-			limit: 1,
-		}
-		return mapped
-	}		
 }
 
 
-export function createModelUseManyHook<PM extends PouchModel<any>>(collection: any) {
+function createModelUseManyHook<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDocs(findProps?: IFindProps<PM> | string): State<PM[]> {
-		const docs = useDocs<PM>(collection, findProps as any)
-		return {
-			...docs,
-			data: docs.data ? docs.data.map(doc => new collection.model(doc)) : undefined,
-		}
+		return useDocs<PM>(collection, findProps as any)
 	}
 }
-export function createModelUseHook<PM extends PouchModel<any>>(collection: any) {
+function createModelUseHook<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDoc(findProps?: IFindProps<PM> | string): State<PM> {
-		const doc = useDoc<PM>(collection, findProps)
-		return {
-			...doc,
-			data: doc.data ? new collection.model(doc.data) : undefined,
-		}
+		return useDoc<PM>(collection, findProps)
 	}
 }
-export function createModelUseManyHookS<PM extends PouchModel<any>>(collection: any) {
+function createModelUseManyHookS<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDocsS(findProps?: IFindProps<PM> | string): PM[] {
-		const docs = useDocsS<PM>(collection, findProps)
-		return docs.map(doc => new collection.model(doc))
+		return useDocsS<PM>(collection, findProps)
 	}
 }
-export function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
+function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDocS(findProps?: IFindProps<PM> | string): PM {
-		const doc = useDocS<PM>(collection, findProps)
-		return new collection.model(doc)
+		return useDocS<PM>(collection, findProps)
 	}
 }
 

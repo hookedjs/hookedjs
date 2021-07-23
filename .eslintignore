@@ -1,6 +1,7 @@
 .aws-sam/
 .fileStorage/
 .history/
+.graveyard
 .husky/
 .vscode/
 docs/

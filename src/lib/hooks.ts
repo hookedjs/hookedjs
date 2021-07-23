@@ -7,13 +7,15 @@ export * from 'preact/hooks'
  */
 export function useEffectDeep(callback: FunctionType, varsToWatch: any[]) {
 	const lastSeenProps = useRef('')
-	useEffect(() => {
+	useEffect(watchProps, [varsToWatch])
+
+	function watchProps() {
 		const next = JSON.stringify(varsToWatch)
 		if (lastSeenProps.current !== next) {
 			lastSeenProps.current = next
 			return callback()
 		}
-	}, [varsToWatch])
+	}
 }
 
 /**
@@ -22,13 +24,15 @@ export function useEffectDeep(callback: FunctionType, varsToWatch: any[]) {
  */
 export function useLayoutEffectDeep(callback: FunctionType, varsToWatch: any[]) {
 	const lastSeenProps = useRef('')
-	useLayoutEffect(() => {
+	useLayoutEffect(watchProps, [varsToWatch])
+
+	function watchProps() {
 		const next = JSON.stringify(varsToWatch)
 		if (lastSeenProps.current !== next) {
 			lastSeenProps.current = next
 			return callback()
 		}
-	}, [varsToWatch])
+	}
 }
 
 /**
@@ -37,50 +41,17 @@ export function useLayoutEffectDeep(callback: FunctionType, varsToWatch: any[]) 
  */
 export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
 	const [lastSeenProps, setLastSeenProps] = useState(JSON.stringify(varsToWatch))
-	useEffect(() => {
+	useEffect(watchProps, [varsToWatch])
+	return useMemo(callback, [lastSeenProps])
+
+	function watchProps() {
 		const nextProps = JSON.stringify(varsToWatch)
 		if (lastSeenProps !== nextProps)
 			console.log(nextProps)
 		if (lastSeenProps !== nextProps)
 			setLastSeenProps(nextProps)
-	}, [varsToWatch])
-	return useMemo(callback, [lastSeenProps])
+	}
 }
-
-// export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
-// 	const lastSeenPropsJson = useRef(JSON.stringify(varsToWatch))
-// 	const [memo, setMemo] = useState(callback)
-// 	const memoLastJson = useRef(JSON.stringify(memo))
-// 	useEffect(() => {
-// 		const nextPropsJson = JSON.stringify(varsToWatch)
-// 		if (lastSeenPropsJson.current !== nextPropsJson) {
-// 			lastSeenPropsJson.current = nextPropsJson
-// 			const nextMemo = callback()
-// 			const nextMemoJson = JSON.stringify(nextPropsJson)
-// 			if (memoLastJson.current !== nextMemoJson) {
-// 				memoLastJson.current = nextMemoJson
-// 				console.log('useDeepMemo')
-// 				setMemo(nextMemo)
-// 			}
-// 		}
-// 	}, [varsToWatch])
-// 	return memo
-// }
-
-// export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
-// 	const [memo, setMemo] = useState(callback)
-// 	const memoLastJson = useRef(JSON.stringify(memo))
-// 	useEffectDeep(() => {
-// 		const nextMemo = callback()
-// 		const nextMemoJson = JSON.stringify(nextMemo)
-// 		if (memoLastJson.current !== nextMemoJson) {
-// 			memoLastJson.current = nextMemoJson
-// 			console.log('useDeepMemo')
-// 			setMemo(nextMemo)
-// 		}
-// 	}, [varsToWatch])
-// 	return memo
-// }
 
 /**
  * useFirstMountState: check if current render is first.

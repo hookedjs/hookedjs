@@ -92,11 +92,11 @@ class Database {
 			...this.findCache.get(key)
 		}
 
-		if (props.selector?._id) {
-			// console.log('Find:', key)
-			if (cached.fetching) console.log('Find: hit')
-			else console.log('Find: miss', JSON.stringify(cached))
-		}
+		// if (props.selector?._id) {
+		// 	// console.log('Find:', key)
+		// 	if (cached.fetching) console.log('Find: hit')
+		// 	else console.log('Find: miss', JSON.stringify(cached))
+		// }
 
 		if (cached.fetching) return cached.fetchP as any
 		
@@ -161,7 +161,7 @@ class Database {
 		})
 			.on('change', ({doc}) => callback(doc))
 			.on('complete', info => {
-				console.log('changes() was canceled')
+				console.log(`changes(${ids}) was canceled`)
 			})
 			.on('error', (err) => {
 				console.log(err)
