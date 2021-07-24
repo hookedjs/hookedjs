@@ -34,31 +34,3 @@ export const UserProfiles = new UserProfileCollection()
 
 export const [useUserProfile, useUserProfiles, useUserProfileS, useUserProfilesS] = createModelHooks<UserProfile>(UserProfiles)
 
-
-
-async function test() {
-	let profile = new UserProfile({
-		name: 'John',
-		age: 25,
-	})
-	profile = await profile.save()
-	console.log(profile._rev ? 'Save success' : 'Save failed')
-	const listener = profile.subscribe(doc => console.log(doc.name === 'John2' ? 'Subscribe works!' : 'Subscribe Failed.'))
-	profile.name = 'John2'
-	await profile.save()
-	await Promise.sleep(1000)
-	await listener.cancel()
-	profile.name = 'John' // If cancel failed, this will cause error.
-	await profile.delete()
-	console.log(profile.deletedAt ? 'Delete success' : 'Delete failed')
-	// await profile.deletePermanent()
-	// console.log(profile._id ? 'Delete permanenet failed' : 'Delete permanent succeeded!')
-
-	const collection = new UserProfileCollection()
-	await profile.save()
-	profile = await collection.get(profile._id)
-	console.log(profile._rev && profile.save ? 'Get Success' : 'Get failed')
-	profile = await collection.findOne({selector: {_id: {$in: [profile._id]}}})
-	console.log(profile._rev && profile.save ? 'Find Success' : 'Find failed')
-}
-// test()
