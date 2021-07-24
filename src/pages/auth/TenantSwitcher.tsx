@@ -6,8 +6,7 @@ import { Paths } from '#src/routes'
 import { AuthStore } from '#src/stores'
 
 export default function TenantSwitcher() {
-	// TODO: Get useUserProfile to show available tenants
-	const profile = useUserProfile('')
+	const profile = useUserProfile()
 	
 	if (profile.isLoading) return <F></F>
 	if (profile.error) throw profile.error
@@ -15,24 +14,24 @@ export default function TenantSwitcher() {
 	return (
 		<div>
 			<h1>Select Account</h1>
-			<ul>
-				{!!profile.data?.tenants.length && (
-					<li>(none available)</li>
-				)}
-				{profile.data?.tenants.map(tenant => (
-					<li key={tenant.id} onClick={() => selectTenant(tenant.id)}>
-						{tenant.name}
-					</li>
-				))}
-			</ul>
-			<p><a href={Paths.TenantCreate}><button>Add New</button></a></p>
+			{profile.data?.tenants?.map(tenant => (
+				<p key={tenant.id}>
+					<a href={Paths.TenantDashboardStack} onClick={e => selectTenant(e, tenant.id)}>
+						<button>{tenant.name}</button>
+					</a>
+				</p>
+			) ?? (
+				<p>Welcome! Looks like you don't have an account yet. How about create one?</p>
+			))}
+			<p><a href={Paths.TenantCreate}><button>Create New</button></a></p>
 		</div>
 	)
 
-	function selectTenant(tenantId: string) {
+	function selectTenant(e: any, tenantId: string) {
+		e.preventDefault()
 		profile.data!.defaultTenant = tenantId
 		profile.data!.save()
 		AuthStore.value.currentTenant = tenantId
-		nav(Paths.Dashboard)
+		nav(e.target.href)
 	}
 }
