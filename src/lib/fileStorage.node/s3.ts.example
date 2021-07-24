@@ -1,0 +1,39 @@
+/**
+ * An interface for isomorphic file storage
+ */
+// @ts-ignore: aws-sdk bc we aren't using this file atm
+import * as AWS from 'aws-sdk'
+
+import config from '../config.node'
+import type { GetResult } from './types'
+
+const	s3 = new AWS.S3()
+
+export default {
+	async get(key: string): Promise<GetResult> {
+		try {
+			const params = {
+				Bucket: config.s3Bucket,
+				Key: key
+			}
+			const obj = await s3.getObject(params).promise()
+			return {
+				contentType: obj.ContentType as GetResult['contentType'],
+				createdAt: obj.LastModified!,
+				data: obj.Body as string
+			}
+		} catch(err) {
+		// S3 403s for not-founds, so err isn't helpful.
+			throw {...new Error('ENOENT: File not found'), code: 'ENOENT'}
+		}
+	},
+	async put(key: string, data: any, contentType: string) {
+		const params = {
+			Bucket: config.s3Bucket,
+			Key: key,
+			Body: data,
+			ContentType: contentType,
+		}
+		await s3.putObject(params).promise()
+	},
+}

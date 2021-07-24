@@ -1,13 +1,10 @@
-import 'reflect-metadata'
-
 import fastify from 'fastify'
 import fileUploadPlugin from 'fastify-file-upload'
 import helmetPlugin from 'fastify-helmet'
 const proxyPlugin = require('fastify-http-proxy')
-import fastifyPluginize from 'fastify-plugin'
+// import fastifyPluginize from 'fastify-plugin'
 import staticPlugin from 'fastify-static'
 import * as fs from 'fs'
-import * as glob from 'glob'
 import * as helmet from 'helmet'
 import * as path from 'path'
 
@@ -60,11 +57,11 @@ app.register(staticPlugin, { root: htmlPath })
 ///////////////////////////////
 // Dynamic Modules
 ///////////////////////////////
-const dynamicMiddlewares: string[] = glob.sync(`${__dirname}/**/*.api.ts`)
-dynamicMiddlewares.forEach(file => {
-	const plugin = require(file.slice(0, -3))?.default
-	if (plugin) app.register(fastifyPluginize(plugin))
-})
+// const dynamicMiddlewares: string[] = glob.sync(`${__dirname}/**/*.api.ts`)
+// dynamicMiddlewares.forEach(file => {
+// 	const plugin = require(file.slice(0, -3))?.default
+// 	if (plugin) app.register(fastifyPluginize(plugin))
+// })
 
 
 ///////////////////////////////

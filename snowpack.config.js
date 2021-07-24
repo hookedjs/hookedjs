@@ -13,7 +13,6 @@ module.exports = {
 	},
 	exclude: [
 		'**/node_modules/**/*',
-		'**/src/lambda.ts',
 		'**/src/db/**/index.ts',
 		'**/src/db/migration/*',
 		'**/src/db/subscriber/*',
@@ -21,6 +20,7 @@ module.exports = {
 		'**/src/**/*.node.ts',
 		'**/*.api.ts',
 		'**/*.node.ts',
+		'**/*.node/**/*',
 	],
 	plugins: [
 		[
