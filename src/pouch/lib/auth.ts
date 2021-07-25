@@ -1,6 +1,6 @@
+import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
 import { throwValidationErrorSet } from '#src/lib/validation'
 
-import type { DbUserRoleEnum } from './auth.lib'
 import { destroyDatabases, initDatabases } from './state'
 
 const host = 'https://localhost:3000/db'
@@ -33,11 +33,64 @@ export async function cookieAuth(username: string, password: string) {
 	})
 	if (!res.ok) throw new Error(`Could not login: ${res.status}`)
 	const json = await res.json()
-	return json as unknown as {ok: boolean, name: string, roles: DbUserRoleEnum[]}
+	return json as unknown as {ok: boolean, name: string, roles: CouchUserRoleEnum[]}
 }
 
 export async function cookieClear() {
 	const res = await fetch(`${host}/_session`, {method: 'DELETE'})
 	if (!res.ok) throw new Error(`Could not clear cookie: ${res.status}`)
 }
+
+
+export enum CouchUserRoleEnum {
+  ADMIN = '_admin',
+}
+export const CouchUserRoleSet = new Set(Enum.getEnumValues(CouchUserRoleEnum))
+
+export class LoginProps {
+		email = ''
+		password = ''
+		constructor(props: any) {
+			assertAttrsWithin(props, this)
+			assertValidSet<LoginProps>(props, {
+				email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
+				password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty']),
+			})
+			Object.assign(this, props)
+		}
+}
+export const LoginPropsExample = new LoginProps({
+	email: 'tenant@hookedjs.org',
+	password: 'password',
+})
+export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
+
+
+export class RegisterProps {
+		email = ''
+		password = ''
+		givenName = ''
+		surname = ''
+		acceptedTerms = false
+		constructor(props: any) {
+			assertAttrsWithin(props, this)
+			assertValidSet<RegisterProps>(props, {
+				email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
+				password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty', 'isPassword']),
+				givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString', 'isNoneEmpty']),
+				surname: assertValid('surname', props.surname, ['isDefined', 'isString', 'isNoneEmpty']),
+				acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
+			})
+			Object.assign(this, props)
+		}
+}
+export const RegisterPropsExample = new RegisterProps({
+	email: 'admin@example.com',
+	password: 'Password8',
+	givenName: 'Sally',
+	surname: 'Fields',
+	acceptedTerms: true,
+})
+export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)
+
 

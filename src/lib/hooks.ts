@@ -5,7 +5,7 @@ export * from 'preact/hooks'
  * useEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useEffectDeep(callback: FunctionType, varsToWatch: any[]) {
+export function useEffectDeep(callback: Fnc, varsToWatch: any[]) {
 	const lastSeenProps = useRef('')
 	useEffect(watchProps, [varsToWatch])
 
@@ -22,7 +22,7 @@ export function useEffectDeep(callback: FunctionType, varsToWatch: any[]) {
  * useLayoutEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useLayoutEffectDeep(callback: FunctionType, varsToWatch: any[]) {
+export function useLayoutEffectDeep(callback: Fnc, varsToWatch: any[]) {
 	const lastSeenProps = useRef('')
 	useLayoutEffect(watchProps, [varsToWatch])
 
@@ -39,7 +39,7 @@ export function useLayoutEffectDeep(callback: FunctionType, varsToWatch: any[]) 
  * useEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useMemoDeep(callback: FunctionType, varsToWatch: any[]) {
+export function useMemoDeep(callback: Fnc, varsToWatch: any[]) {
 	const [lastSeenProps, setLastSeenProps] = useState(JSON.stringify(varsToWatch))
 	useEffect(watchProps, [varsToWatch])
 	return useMemo(callback, [lastSeenProps])

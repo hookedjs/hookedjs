@@ -1,20 +1,5 @@
-import Database, { IFindProps, IStandardFields, loadingDb } from './Database'
+import { IFindProps, IStandardFields, loadingDb } from './Database'
 import type PouchModel from './Model'
-
-function cloneObject(obj: any) {
-	if (obj === null || typeof(obj) !== 'object' || 'isActiveClone' in obj)
-		return obj
-	const temp = obj.constructor() // changed
-	for (const key in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, key)) {
-			obj['isActiveClone'] = null
-			temp[key] = cloneObject(obj[key])
-			delete obj['isActiveClone']
-		}
-	}
-	return temp
-}
-
 
 class PouchCollection<PM extends PouchModel<any>> {
 	model: any = {db: loadingDb}

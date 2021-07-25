@@ -62,13 +62,14 @@ class Database {
 	set<T extends IStandardFieldsCreate>(doc: T): Promise<T & IStandardFields> {
 		const now = new Date()
 		const doc2 = {
+			createdAt: now,
 			...doc,
+			version: doc.version ? doc.version+1 : 0,
 			_id: doc._id || nanoid(),
-			createdAt: doc.createdAt || now,
 			updatedAt: now
 		}
 		return this._db
-			.put<T>(doc2, {})
+			.put(doc2, {})
 			.then(idAndRev => ({...doc2, _rev: idAndRev.rev}))
 	}
 	setMany<T extends IStandardFieldsCreate>(docs: T[]) {
@@ -239,20 +240,22 @@ export interface IStandardFieldsCreate {
 	createdAt?: Date
 	updatedAt?: Date
 	deletedAt?: Date | undefined
+	version: number
 }
 
 export interface IStandardFields {
 	_id: string
-	type: string
-	createdAt: Date
-	updatedAt: Date
-	deletedAt?: Date | undefined
 	_rev: string
 	// _revs_info is included if option {revs_info: true} was passed to the get() call
 	_revs_info?: {rev: string, status: 'available' | 'compacted' | 'not compacted' | 'missing'}[] | undefined
 	_revisions?: {ids: string[], start: number} | undefined
 	_attachments?: {[attachmentId: string]: IAttachment} | undefined
 	_conflicts?: string[] | undefined
+	type: string
+	createdAt: Date
+	updatedAt: Date
+	deletedAt?: Date | undefined
+	version: number
 }
 
 

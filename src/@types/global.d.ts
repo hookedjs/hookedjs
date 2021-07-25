@@ -1,4 +1,4 @@
-type FunctionType = (...args: any) => any
+type Fnc = (...args: any) => any
 
 type PromiseFnc = (...args: any) => Promise<any>
 

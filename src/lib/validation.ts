@@ -222,7 +222,8 @@ export function assertValid(
 		isOneOf?: any[],
 		isOneOfSet?: Set<any>,
 		arrayValuesAreOneOfSet?: Set<any>,
-	}
+	},
+	customs: (ValueError | false)[] = [],
 ): ValidationError | false {
 	const assertValid = new AssertValidClass(attrName, attrValue)
 	for (const a of basics) {
@@ -234,6 +235,11 @@ export function assertValid(
 			// @ts-ignore: ts doesnt know this is safe
 			const res = assertValid[key](arg)
 			if (res) return res
+		}
+	}
+	if (customs) {
+		for (const custom of customs) {
+			if (custom) return custom
 		}
 	}
 	return false

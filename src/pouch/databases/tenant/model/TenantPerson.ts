@@ -1,14 +1,17 @@
+import { assertValid, assertValidSet } from '#src/lib/validation'
+import type { IStandardFields } from '#src/pouch/lib/Database'
+
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
 import db from '../db'
 
 interface ITenantPersonExtra {
-	name: string
+	surname: string
+	givenName: string
 	email: string
-	age: number
-	roles: TenantUserRoleEnum[]
-	otherInfo: Record<string, any>
+	roles: TenantPersonRoleEnum[]
+	status: TenantPersonStatusEnum
 }
 
 export class TenantPerson extends PouchModel<ITenantPersonExtra> {
@@ -18,11 +21,25 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	type = TenantPerson.type
 	static indexes = ['email']
 
-	name: ITenantPersonExtra['name']
+	surname: ITenantPersonExtra['surname']
+	givenName: ITenantPersonExtra['givenName']
 	email: ITenantPersonExtra['email']
-	age: ITenantPersonExtra['age']
 	roles: ITenantPersonExtra['roles']
-	otherInfo: ITenantPersonExtra['otherInfo']
+	status: ITenantPersonExtra['status']
+
+	async validate() { 
+		return assertValidSet<IStandardFields & ITenantPersonExtra>(this, {
+			...this.baseValidations(),
+			type: assertValid('type', this.type, [], {isEqual: {expected: TenantPerson.type, message: `type must be ${TenantPerson.type}`}}),
+			email: assertValid('email', this.email, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
+				await this.validateFieldIsUnique('email', 'email is not available')
+			]),
+			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: TenantPersonStatusSet }),
+			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: TenantPersonRoleSet }),
+			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
+			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
+		})
+	}
 }
 
 class TenantPersonCollection extends PouchCollection<TenantPerson> {
@@ -41,30 +58,15 @@ export const [useTenantPerson, useTenantPersons, useTenantPersonS, useTenantPers
 // export type UserCreate = UserCreateRequired & Partial<UserCreateOptional>
 // export type UserUpdate = Partial<UserCreate>
 
-export enum TenantUserRoleEnum {
+export enum TenantPersonRoleEnum {
   ADMIN = 'admin',
   // STAFF = 'staff',
 }
-export const TenantUserRoleSet = new Set(Enum.getEnumValues(TenantUserRoleEnum))
+export const TenantPersonRoleSet = new Set(Enum.getEnumValues(TenantPersonRoleEnum))
 
-export enum UserStatusEnum {
+export enum TenantPersonStatusEnum {
   PENDING = 'pending',
   ACTIVE = 'active',
   BANNED = 'banned',
 }
-export const UserStatusSet = new Set(Enum.getEnumValues(UserStatusEnum))
-
-// export function UserValidate(record: any) {
-// 	assertValidSet<UserType>(record, {
-// 		...BaseEntityValidations(record),
-// 		email: assertValid('email', record.email, ['isRequired', 'isString', 'isTruthy', 'isEmail']),
-// 		password: isDefinedAndNotNull(record.password) && assertValid('password', record.password, ['isString', 'isNoneEmpty', 'isPassword']),
-// 		passwordHash: isDefinedAndNotNull(record.passwordHash) && assertValid('passwordHash', record.passwordHash, ['isString', 'isHash']),
-// 		passwordUpdatedAt: isDefined(record.passwordUpdatedAt) && assertValid('passwordUpdatedAt', record.passwordUpdatedAt, ['isDate']),
-// 		status: assertValid('status', record.status, ['isRequired', 'isNumber'], { isOneOfSet: UserStatusSet }),
-// 		roles: assertValid('roles', record.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: DbUserRoleSet }),
-// 		surname: assertValid('surname', record.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
-// 		givenName: assertValid('givenName', record.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
-// 		files: false,
-// 	})
-// }
+export const TenantPersonStatusSet = new Set(Enum.getEnumValues(TenantPersonStatusEnum))
