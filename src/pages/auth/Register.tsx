@@ -83,7 +83,7 @@ export default function Register() {
 	async function _onSubmit(formValues: FormJson) {
 		const values = new RegisterProps(formValues)
 		await AuthStore.register(values)
-		ToastStore.value = { message: 'Welcome to Stacks!', location: 'right' }
+		ToastStore.setValue({ message: 'Welcome to Stacks!', location: 'right' })
 	}
 }
 const RegisterDiv = styled.div`

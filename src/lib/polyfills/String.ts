@@ -13,6 +13,10 @@ declare global {
 		 * Src: https://stackoverflow.com/a/8831937/1202757
 		 */
 		toHash(): number
+		/**
+		 * Converts a string into title-case: "hello world" -> "Hello World"
+		 */
+		toTitleCase(): string
 	}
 }
  
@@ -21,4 +25,8 @@ String.prototype.toHash = function() {
 		(hash, char) => 0 | (31 * hash + char.charCodeAt(0)),
 		0,
 	)
+}
+
+String.prototype.toTitleCase = function () {
+	return this.toLocaleLowerCase().replace(/(^|\s)(\w)/g, x => x.toLocaleUpperCase())
 }

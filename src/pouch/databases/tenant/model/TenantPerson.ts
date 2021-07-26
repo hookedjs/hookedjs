@@ -27,6 +27,8 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	roles: ITenantPersonExtra['roles']
 	status: ITenantPersonExtra['status']
 
+	get fullName() {return `${this.givenName} ${this.surname}`}
+
 	async validate() { 
 		return assertValidSet<IStandardFields & ITenantPersonExtra>(this, {
 			...this.baseValidations(),
@@ -47,7 +49,7 @@ class TenantPersonCollection extends PouchCollection<TenantPerson> {
 }
 export const TenantPersons = new TenantPersonCollection()
 
-export const [useTenantPerson, useTenantPersons, useTenantPersonS, useTenantPersonsS] = createModelHooks<TenantPerson>(TenantPersons)
+export const [useTenantPerson, useTenantPersons, useTenantPersonCount, useTenantPersonS, useTenantPersonsS, useTenantPersonCountS] = createModelHooks<TenantPerson>(TenantPersons)
 
 export enum TenantPersonRoleEnum {
   ADMIN = 'admin',

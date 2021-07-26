@@ -54,6 +54,12 @@ styled.div = function div(strings: TemplateStringsArray, ...placeHolders: string
 		return <div {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
+styled.pre = function pre(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+	return function C(p: Props<HTMLPreElement>) {
+		return <pre {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+	}
+}
 styled.img = function img(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = styled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLImageElement>) {

@@ -264,17 +264,6 @@ export interface IStandardFields {
 	version: number
 }
 
-
-interface IdAndRev {
-	ok?: boolean
-	id?: string
-	rev?: string
-	error?: boolean
-	status?: number
-	name?: string
-	message?: string
-}
-
 /**
  * Stub attachments are returned by PouchDB by default (attachments option set to false)
  */
@@ -325,7 +314,7 @@ export type IAttachment = IStubAttachment | IFullAttachment;
 export interface IFindProps<P extends Record<string, any>> {
 	selector?: Partial<P> | Partial<Record<keyof P, Partial<Record<ISelectorFilter, any>>>>
 	fields?: (keyof P)[]
-	sort?: (keyof P)[]
+	sort?: [Partial<Record<keyof P, 'asc' | 'desc'>>]
 	limit?: number
 	skip?: number
 	useIndex?: string

@@ -1,5 +1,4 @@
 import { Fragment, h } from 'preact'
-import { Suspense } from 'preact/compat'
 
 import {ErrorBoundary, UnhandledErrorNotification} from './layout/components/ErrorBoundaries'
 import Toast, { ToastFromContext } from './layout/components/Toast'
@@ -13,9 +12,7 @@ export default function App() {
 			<DbProvider>
 				<StaleBrowserWarning />
 				<UnhandledErrorNotification />
-				<Suspense fallback={<div/>}>
-					<Router routesByPath={routesByPath} />
-				</Suspense>
+				<Router routesByPath={routesByPath} />
 				<ToastFromContext />
 			</DbProvider>
 		</ErrorBoundary>

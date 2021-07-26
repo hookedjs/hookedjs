@@ -28,7 +28,8 @@ export class UserProfile extends PouchModel<IUserProfileExtra> {
 	status: IUserProfileExtra['status']
 	tenants: IUserProfileExtra['tenants']
 	defaultTenant: IUserProfileExtra['defaultTenant']
-
+	
+	get fullName() {return `${this.givenName} ${this.surname}`}
 
 	async validate() { 
 		return assertValidSet<IStandardFields & IUserProfileExtra>(this, {
@@ -51,7 +52,7 @@ class UserProfileCollection extends PouchCollection<UserProfile> {
 }
 export const UserProfiles = new UserProfileCollection()
 
-export const [useUserProfile, useUserProfiles, useUserProfileS, useUserProfilesS] = createModelHooks<UserProfile>(UserProfiles)
+export const [useUserProfile, useUserProfiles, useUserProfileCount, useUserProfileS, useUserProfilesS, useUserProfileCountS] = createModelHooks<UserProfile>(UserProfiles)
 
 export enum UserProfileStatusEnum {
   PENDING = 'pending',

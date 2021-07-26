@@ -21,7 +21,7 @@ declare global {
 	interface Array<T> {
 		duplicateCheck(): boolean
 		deDuplicate(): T[]
-		keyBy(key: string): Record<string, T>
+		keyBy(key: string): Record<string, T[]>
 		subtract(otherArr: T[]): T[]
 	}
 }
@@ -45,7 +45,13 @@ Array.prototype.deDuplicate = function() {
 }
 
 Array.prototype.keyBy = function(key) {
-	return Object.fromEntries(this.map(r => [r[key], r]))
+	// Manually reduce insted of using Array.reduce for performance
+	const reduced: Record<string, any[]> = {}
+	for (const entry of this) {
+		if (!reduced[entry[key]]) reduced[entry[key]] = [entry]
+		else reduced[entry[key]].push(entry)
+	}
+	return reduced
 }
 
 Array.prototype.subtract = function(arr) {

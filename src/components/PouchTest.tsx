@@ -1,7 +1,6 @@
 import {h} from 'preact'
 
 import { useRef } from '#src/lib/hooks'
-import { NotFoundErrorBoundary } from '#src/lib/router'
 import { useTenantPerson, useTenantPersonS } from '#src/pouch'
 import { useAuthStore } from '#src/stores'
 
@@ -12,9 +11,7 @@ export default function PouchTest() {
 	return auth.username ? (
 		<div>
 			<PouchTestStateful />
-			<NotFoundErrorBoundary>
-				<PouchTestSuspense />
-			</NotFoundErrorBoundary>
+			<PouchTestSuspense />
 		</div>
 	) : null
 }

@@ -98,7 +98,9 @@ function RouterSwitch({ routesByPath }: RouterProps) {
 	}
 	if (!r.hasAccess()) throw new ForbiddenError()
 	return <Stack>
-		<r.Component route={r} />
+		<Suspense fallback={<div/>}>
+			<r.Component route={r} />
+		</Suspense>
 	</Stack>
 }
 
@@ -306,17 +308,6 @@ function BlankLayout({ children }: { children: any }) {
 	</div>
 }
 
-function NotFoundErrorBoundary({children}: {children: ComponentChildren}) {
-	const [runtimeError, resetError] = useErrorBoundary()
-	const [_location] = useLocationStore()
-	useLayoutEffect(() => {resetError()}, [_location])
-	if (runtimeError instanceof NotFoundError)
-		return <div>Sorry, we can't find the record you seek.</div>
-	if (runtimeError)
-		throw runtimeError
-	return <Suspense fallback={<div>Suspense...</div>}>{children as any}</Suspense>
-}
-
 /**
  * Call a function on scroll event
  * 
@@ -339,6 +330,14 @@ function scrollListener(el: HTMLElement, callback: any) {
 			ticking = true
 		}
 	}
+}
+
+/**
+ * Helper to get parent url of current url
+ */
+function getParentPath(o?: {pathname?: string, levels?: number}) {
+	const {pathname = location.pathname, levels = 1} = o || {}
+	return pathname.split('/').slice(0, -(levels)).join('/')
 }
 
 
@@ -506,10 +505,10 @@ PageMetaStore.subscribe(setPageMeta)
 export {
 	BlankLayout,
 	Content,
+	getParentPath,
 	LocationStore,
 	nav,
 	navListener,
-	NotFoundErrorBoundary,
 	PageMetaStore,
 	PassThrough,
 	Redirect,

@@ -16,7 +16,7 @@ export const AuthStore = Object.assign(
 			StackHistoriesReset()
 			RouteHistoryReset()
 			await logout()
-			ToastStore.value = { message: 'You\'ve been logged out.', location: 'right' }
+			ToastStore.setValue({ message: 'You\'ve been logged out.', location: 'right' })
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)

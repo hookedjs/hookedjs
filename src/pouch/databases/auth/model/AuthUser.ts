@@ -17,6 +17,7 @@ interface IAuthUserExtra {
 	givenName: string
 	roles: AuthUserRoleEnum[]
 	status: AuthUserStatusEnum
+	tenants: string[]
 }
 
 export class AuthUser extends PouchModel<IAuthUserExtra> {
@@ -36,6 +37,9 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	givenName: IAuthUserExtra['givenName']
 	roles: IAuthUserExtra['roles']
 	status: IAuthUserExtra['status']
+	tenants: IAuthUserExtra['tenants']
+
+	get fullName() {return `${this.givenName} ${this.surname}`}
 
 	async validate() { 
 		return assertValidSet<IStandardFields & IAuthUserExtra>(this, {
@@ -54,6 +58,7 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			status: assertValid('status', this.status, ['isRequired', 'isNumber'], { isOneOfSet: AuthUserStatusSet }),
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray', 'isNoneEmpty'], { arrayValuesAreOneOfSet: AuthUserRoleSet }),
+			tenants: assertValid('tenants', this.tenants, ['isRequired', 'isArray']),
 		})
 	}
 }
@@ -63,7 +68,7 @@ class AuthUserCollection extends PouchCollection<AuthUser> {
 }
 export const AuthUsers = new AuthUserCollection()
 
-export const [useAuthUser, useAuthUsers, useAuthUserS, useAuthUsersS] = createModelHooks<AuthUser>(AuthUsers)
+export const [useAuthUser, useAuthUsers, useAuthUserCount, useAuthUserS, useAuthUsersS, useAuthUserCountS] = createModelHooks<AuthUser>(AuthUsers)
 
 export enum AuthUserRoleEnum {
   ADMIN = '_admin',

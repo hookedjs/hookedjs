@@ -12,9 +12,9 @@ import { routesByPath } from '#src/routes'
 import { ToastStore } from '#src/stores'
 
 interface CmsTableProps {
-	cols: { title: string, sortable?: boolean, sortDefault?: 'asc' | 'desc' }[]
-	categories?: { title: string, count: number }[]
-	bulkOptions?: { title: string, cb: (selection: any[]) => any }[]
+	cols: { label: string, sortValue?: string, sortDefault?: 'asc' | 'desc' }[]
+	categories?: { label: string, value: string, count: number }[]
+	bulkOptions?: { label: string, cb: (selection: any[]) => any }[]
 	pages: number
 	total: number
 	rows: CmsRow[]
@@ -62,6 +62,8 @@ export default function CmsTable(p: CmsTableProps) {
 		<HeaderFooter total={p.total} pages={p.pages} bulkOptions={p.bulkOptions} checked={checked} mapMarkers={p.mapMarkers} isFooter />
 	</CmsTableDiv>
 }
+
+
 const CmsTableDiv = styled.div`
 	:root
 		display: block
@@ -100,9 +102,10 @@ function SearchForm() {
 	</SearchFormForm>
 
 	function _onSubmit(e: any) {
+		const q = qs.parse()
 		const next = new FormData(e.target).get('search')
 		if (next === (q.search || ''))
-			ToastStore.value = { message: 'Search query hasn\'t changed', icon: 'error', location: 'bottom' }
+			ToastStore.setValue({ message: 'Search query hasn\'t changed', icon: 'error', location: 'bottom' })
 		else
 			nav(qs.create({ search: next ? next : undefined, page: undefined }, { upsert: true }), {replace: true})
 	}
@@ -116,15 +119,15 @@ const SearchFormForm = styled.form`
 
 function CategoryFilters({categories}: {categories: CmsTableProps['categories']}) {
 	if (!categories || !categories?.length) return <CategoryFilterDiv>&nbsp;</CategoryFilterDiv>
-	const { category = categories[0].title } = qs.parse()
+	const { category = categories[0].value } = qs.parse()
 	return <CategoryFilterDiv>
-		{categories.map((c, i) => c.title === category
-			? <span><b>{c.title}</b> ({c.count}){i < categories.length - 1 && ' | '}</span>
-			: <span><a href={createUri(c.title)}>{c.title}</a> ({c.count}){i < categories.length - 1 && ' | '}</span>
+		{categories.map((c, i) => c.value === category
+			? <span><b>{c.label}</b> ({c.count}){i < categories.length - 1 && ' | '}</span>
+			: <span><a href={createUri(c.value)}>{c.label}</a> ({c.count}){i < categories.length - 1 && ' | '}</span>
 		)}
 	</CategoryFilterDiv>
 	function createUri(next: string) {
-		return (qs.create({ category: next !== categories![0].title ? next : undefined }, { upsert: true }) || location.pathname) + '#replace'
+		return (qs.create({ category: next !== categories![0].value ? next : undefined }, { upsert: true }) || location.pathname) + '#replace'
 	}
 }
 const CategoryFilterDiv = styled.div`
@@ -201,7 +204,7 @@ function PageButton(p: Pick<CmsTableProps, 'pages'> & { title: string, page: num
 	function _onClick(e: any) {
 		if (p.pageTo === p.page) {
 			e.preventDefault()
-			ToastStore.value = { message: `You're already on the ${p.pageTo === 1 ? 'first' : 'last'} page`, icon: 'error', location: 'bottom' }
+			ToastStore.setValue({ message: `You're already on the ${p.pageTo === 1 ? 'first' : 'last'} page`, icon: 'error', location: 'bottom' })
 		}
 	}
 }
@@ -213,7 +216,7 @@ function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseS
 	return <BulkActionsFormDiv>
 		<select aria-label="Bulk Actions" name="action" value={action} onChange={onChange}>
 			<option value="-1">Bulk Actions</option>
-			{p.bulkOptions?.map(o => <option value={o.title}>{o.title}</option>)}
+			{p.bulkOptions?.map(o => <option value={o.label}>{o.label}</option>)}
 		</select>
 		<button onClick={onClick}>Apply</button>
 	</BulkActionsFormDiv>
@@ -221,7 +224,7 @@ function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseS
 	function _onClick() {
 		if (action === '-1') return ToastStore.setValue({ message: 'No action selected', icon: 'error', location: 'bottom' })
 		if (!p.checked.size) return ToastStore.setValue({ message: 'No rows selected', icon: 'error', location: 'bottom' })
-		p.bulkOptions?.find(o => o.title === action)!.cb([...p.checked.current])
+		p.bulkOptions?.find(o => o.label === action)!.cb([...p.checked.current])
 		p.checked.reset()
 	}
 }
@@ -251,11 +254,11 @@ const carrotProps = { size: 20, style: { marginBottom: -4, marginTop: -4, color:
 function HeadCol({ colData: c }: { colData: CmsTableProps['cols'][0] }) {
 	const q = qs.parse()
 	const sortCurrent = (
-		q.sortBy === c.title && q.sortDirection
+		q.sortBy === c.sortValue && q.sortDirection
 		|| !q.sortBy && c.sortDefault
 	)
 
-	const carrot = c.sortable && (
+	const carrot = c.sortValue && (
 		sortCurrent === 'asc' && <i.CarrotDown {...carrotProps} />
 		|| sortCurrent === 'desc' && <i.CarrotUp {...carrotProps} />
 		|| c.sortDefault === 'asc' && <i.CarrotDown {...carrotProps} />
@@ -269,13 +272,13 @@ function HeadCol({ colData: c }: { colData: CmsTableProps['cols'][0] }) {
 			|| c.sortDefault
 			|| 'asc'
 		)
-		nav(qs.create({ sortBy: c.title, sortDirection }, { upsert: true }), {replace: true})
+		nav(qs.create({ sortBy: c.sortValue, sortDirection }, { upsert: true }), {replace: true})
 	}, [sortCurrent])
 
-	return <HeadColTd onClick={sort} data-clickable={c.sortable} data-sort-active={sortCurrent}>
-		{c.sortable
-			? <a href="#table-sort">{c.title} {carrot}</a>
-			: <span>{c.title} {carrot}</span>
+	return <HeadColTd onClick={sort} data-clickable={c.sortValue} data-sort-active={!!sortCurrent}>
+		{c.sortValue
+			? <a href="#table-sort">{c.label} {carrot}</a>
+			: <span>{c.label} {carrot}</span>
 		}
 	</HeadColTd>
 }
@@ -287,7 +290,8 @@ const HeadColTd = styled.td`
 	:root:not(:first-of-type) svg
 		visibility: hidden
 	:root:not(:first-of-type):hover svg,
-	:root:not(:first-of-type).active svg
+	:root:not(:first-of-type).active svg,
+	:root:not(:first-of-type)[data-sort-active="true"] svg
 		visibility: visible
 	:root[data-clickable="true"]:active svg
 		transform: translateY(2px)
@@ -298,14 +302,14 @@ function BodyRow(p: Pick<CmsTableProps, 'cols'> & { row: CmsRow, rowNumber: numb
 	return <tr>
 		<td><RowCheckbox {...p} /></td>
 		{isWide
-			? p.row.map((col, i) => <td class={i === 0 ? 'bold' : ''}>{col}</td>)
+			? p.row.map((col, i) => <td class={i === 0 ? 'bold' : ''}>{col || '--'}</td>)
 			: <td>
 				{p.cols.map((col, i) => i === 0
 					? <div>
 						<div><b>{p.row[i]}</b></div>
 						<div style={{ margin: '-.4rem 0 .4rem' }}>_ _ _</div>
 					</div>
-					: <div>{col.title}: {p.row[i]}</div>
+					: <div>{col.label}: {p.row[i] || '--'}</div>
 				)}
 			</td>
 		}

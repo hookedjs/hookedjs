@@ -1,5 +1,7 @@
 import './Array'
 import './Enum'
 import './Function'
+import './Math'
 import './Object'
 import './Promise'
+import './String'

@@ -28,7 +28,7 @@ function useDocs<PM extends PouchModel<any>>(
 
 	const mapped = Object.clone({
 		selector: {},
-		...(typeof findProps === 'string' ? {selector: {_id: {$in: findProps}}} as any: findProps),
+		...(typeof findProps === 'string' ? {selector: {_id: {$in: [findProps]}}} as any : findProps),
 		...limit && {limit}
 	})
 	mapped.selector.type = collection.model.type
@@ -112,6 +112,18 @@ function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindPr
 }
 
 /**
+ * A Stateful db query hook to get a count of docs that match a query
+ */
+function useCount<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): State<number> {
+	const _findProps = {...Object.clone(findProps), fields: []}
+	const docs = useDocs<PM>(collection, _findProps)
+	return {
+		...docs,
+		data: docs.data?.length,
+	}
+}
+
+/**
  * A Suspenseful db query hook to get many docs
  */
 function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string, limit?: number): PM[] {
@@ -129,6 +141,15 @@ function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindP
 	return docs?.[0] ?? throwNotFoundError()
 }
 
+/**
+ * A Stateful db query hook to get a count of docs that match a query
+ */
+function useCountS<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): number {
+	const _findProps = {...Object.clone(findProps), fields: []}
+	const docs = useDocsS<PM>(collection, _findProps)
+	return docs.length
+}
+
 
 function createModelUseManyHook<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDocs(findProps?: IFindProps<PM> | string): State<PM[]> {
@@ -138,6 +159,11 @@ function createModelUseManyHook<PM extends PouchModel<any>>(collection: any) {
 function createModelUseHook<PM extends PouchModel<any>>(collection: any) {
 	return function useModelDoc(findProps?: IFindProps<PM> | string): State<PM> {
 		return useDoc<PM>(collection, findProps)
+	}
+}
+function createModelUseCountHook<PM extends PouchModel<any>>(collection: any) {
+	return function useModelCount(findProps?: IFindProps<PM> | string): State<number> {
+		return useCount<PM>(collection, findProps as any)
 	}
 }
 function createModelUseManyHookS<PM extends PouchModel<any>>(collection: any) {
@@ -150,12 +176,19 @@ function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
 		return useDocS<PM>(collection, findProps)
 	}
 }
+function createModelUseCountHookS<PM extends PouchModel<any>>(collection: any) {
+	return function useModelCountS(findProps?: IFindProps<PM> | string): number {
+		return useCountS<PM>(collection, findProps as any)
+	}
+}
 
 export function createModelHooks<PM extends PouchModel<any>>(collection: any) {
 	return [
 		createModelUseHook<PM>(collection),
 		createModelUseManyHook<PM>(collection),
+		createModelUseCountHook<PM>(collection),
 		createModelUseHookS<PM>(collection),
 		createModelUseManyHookS<PM>(collection),
+		createModelUseCountHookS<PM>(collection),
 	] as const
 }
