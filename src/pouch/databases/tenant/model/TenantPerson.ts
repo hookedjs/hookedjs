@@ -49,15 +49,6 @@ export const TenantPersons = new TenantPersonCollection()
 
 export const [useTenantPerson, useTenantPersons, useTenantPersonS, useTenantPersonsS] = createModelHooks<TenantPerson>(TenantPersons)
 
-
-// import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull } from '#lib/validation'
-
-
-// export type UserCreateOptional = Pick<UserType, 'id' | 'roles' | 'status' | 'password'>
-// export type UserCreateRequired = Pick<UserType, 'email' | 'givenName' | 'surname'>
-// export type UserCreate = UserCreateRequired & Partial<UserCreateOptional>
-// export type UserUpdate = Partial<UserCreate>
-
 export enum TenantPersonRoleEnum {
   ADMIN = 'admin',
   // STAFF = 'staff',

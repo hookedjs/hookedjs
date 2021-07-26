@@ -19,13 +19,13 @@ export function DbProvider({children}: {children: ComponentChildren}) {
 }
 
 export async function initDatabases() {
-	// TODO: Handle if auth.roles.includes('_admin')
+	await dbs.initAuthDb()
 	await dbs.initUserDb()
 	await dbs.initTenantDb()
 }
 
 export async function destroyDatabases() {
-	// TODO: Handle if auth.roles.includes('_admin')
+	await dbs.destroyAuthDb()
 	await dbs.destroyUserDb()
 	await dbs.destroyTenantDb()
 }

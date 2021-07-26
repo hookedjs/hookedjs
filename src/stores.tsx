@@ -1,12 +1,12 @@
 import type { ToastProps } from './layout/components/Toast'
 import { navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
-import { CouchUserRoleEnum, login, LoginProps, logout, RegisterProps, TenantPersonRoleEnum, TenantPersons, UserProfiles } from './pouch'
+import { AuthUserRoleEnum, login, LoginProps, logout, RegisterProps, TenantPersonRoleEnum, TenantPersons, UserProfiles } from './pouch'
 
 
 
 // AuthStore: user id and roles
-export interface AuthStoreType { username: string, dbRoles: CouchUserRoleEnum[], tRoles: TenantPersonRoleEnum[], currentTenant: string }
+export interface AuthStoreType { username: string, dbRoles: AuthUserRoleEnum[], tRoles: TenantPersonRoleEnum[], currentTenant: string }
 const AuthStoreLoggedOut: AuthStoreType = { username: '', dbRoles: [], tRoles: [], currentTenant: '' }
 export const AuthStore = Object.assign(
 	new StateStore<typeof AuthStoreLoggedOut>(AuthStoreLoggedOut, 'AuthStore'),
@@ -21,13 +21,17 @@ export const AuthStore = Object.assign(
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
 			const res = await login(loginProps.email, loginProps.password)
-			const profile = await UserProfiles.findOne()
-			let tRoles: TenantPersonRoleEnum[] = []
-			if (profile.defaultTenant) {
-				const tenantProfile = await TenantPersons.findOne({ selector: { email: loginProps.email } }).catch(e => undefined)
-				tRoles = tenantProfile?.roles ?? []
+			if (res.roles.includes(AuthUserRoleEnum.ADMIN)) {
+				AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles: [], currentTenant: '' }
+			} else {
+				const profile = await UserProfiles.findOne()
+				let tRoles: TenantPersonRoleEnum[] = []
+				if (profile.defaultTenant) {
+					const tenantProfile = await TenantPersons.findOne({ selector: { email: loginProps.email } }).catch(e => undefined)
+					tRoles = tenantProfile?.roles ?? []
+				}
+				AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles, currentTenant: profile.defaultTenant ?? '' }
 			}
-			AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles, currentTenant: profile.defaultTenant ?? '' }
 		},
 		async register(props: RegisterProps) {
 			const registerProps = new RegisterProps(props)
@@ -38,9 +42,9 @@ export const AuthStore = Object.assign(
 			// 	throw new ValidationErrorSet(`${config.apiPrefix}/auth/register`, res.error?.context.errorSet)
 			// AuthStore.value = res
 		},
-		loginAsAdmin() { AuthStore.value = { username: '1', dbRoles: [CouchUserRoleEnum.ADMIN], tRoles: [], currentTenant: '' } },
+		loginAsAdmin() { AuthStore.value = { username: '1', dbRoles: [AuthUserRoleEnum.ADMIN], tRoles: [], currentTenant: '' } },
 		loginAsTenant() { AuthStore.value = { username: '1234', dbRoles: [], tRoles: [TenantPersonRoleEnum.ADMIN], currentTenant: '123' } },
-		dbRoles: CouchUserRoleEnum, // for convenience
+		dbRoles: AuthUserRoleEnum, // for convenience
 		tRoles: TenantPersonRoleEnum, // for convenience
 	},
 )

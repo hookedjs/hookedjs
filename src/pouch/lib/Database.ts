@@ -13,6 +13,7 @@ interface IDb {
 
 class Database {
 	_db = new PouchDB('loading')
+	_remote = new PouchDB('loading')
 	name: IDb['name']
 	host: IDb['host']
 	connected = false
@@ -28,25 +29,30 @@ class Database {
 	>()
 	findCacheGarbageCollectInterval: NodeJS.Timeout // an interval
 	
-	constructor(name: Database['name'], host?: Database['host']) {
+	constructor(name: Database['name'], host?: Database['host'], remoteOnly = false) {
 		this.name = name
 		this.host = host
-		this._db = new PouchDB(name)
+		this._remote = new PouchDB(`${this.host}/${this.name}`)
+		if (remoteOnly)
+			this._db = this._remote
 		this.findCacheGarbageCollect()
 	}
-	async connect() {
-		const remote = new PouchDB(`${this.host}/${this.name}`)
+	async sync() {
 		await this._db
-			.sync(remote, {retry: true})
+			.sync(this._remote, {retry: true})
 			.catch(err => {console.log('Sync failed', err); throw err})
-		this._db.sync(remote, {retry: true, live: true})
+		this._db.sync(this._remote, {retry: true, live: true})
 		this.connected = true
 	}
+	// Closes connections and deletes local database. Doesn't delete replicated databases.
 	destroy() {
 		clearInterval(this.findCacheGarbageCollectInterval)
 		this.connected = false
+		this.findCache.clear()
 		return this._db.destroy()
 	}
+	// Closes connections and frees memory. Doesn't delete local IndexedDB if exists.
+	close() {return this._db.close()}
 	get<T extends IStandardFields>(id: string): Promise<T>
 	get<T extends IStandardFields>(ids: string[]): Promise<T[]>
 	get<T extends IStandardFields>(idOrIds: string | string[]): Promise<any> {

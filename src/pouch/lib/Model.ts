@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 
-import { assertValid, isDefined, ValueError } from '#src/lib/validation'
+import { assertValid, isDefined, isDefinedAndNotNull, ValueError } from '#src/lib/validation'
 
 import { IStandardFields, loadingDb } from './Database'
 
@@ -62,7 +62,7 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 	async validate() {}
 	baseValidations() {
 		return {
-			_rev: false,
+			_rev: isDefinedAndNotNull(this._rev) && assertValid('_rev', this._rev, ['isRequired', 'isString'], { isLongerThan: 25, isShorterThan: 60 }),
 			_revs_info: false,
 			_revisions: false,
 			_attachments: false,

@@ -1,17 +1,17 @@
 import Database, { loadingDb } from '../../lib/Database'
-import { UserProfiles } from '../user/state'
+import { AuthUserRoleEnum, readAuth } from '../auth'
+import { UserProfiles } from '../user'
 import db from './db'
 import { TenantPerson } from './model/TenantPerson'
 
-export * from './model/TenantPerson'
-
 export async function initTenantDb() {
 	destroyTenantDb()
-	if (UserProfiles.isReady) {
+	const auth = readAuth()
+	if (auth && !auth.roles.includes(AuthUserRoleEnum.ADMIN) && UserProfiles.isReady) {
 		const profile = await UserProfiles.findOne()
 		if (profile.defaultTenant) {
 			db.handle = new Database(`tenantdb-${profile.defaultTenant}`, db.host)
-			await db.handle.connect()
+			await db.handle.sync()
 			await db.handle.indexModels([TenantPerson])
 		}
 	}

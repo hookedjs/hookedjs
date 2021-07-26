@@ -1,9 +1,28 @@
-import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
-import { throwValidationErrorSet } from '#src/lib/validation'
+import { assertAttrsWithin, assertValid, assertValidSet, throwValidationErrorSet } from '#lib/validation'
 
-import { destroyDatabases, initDatabases } from './state'
+import Database, { loadingDb } from '../../lib/Database'
+import { destroyDatabases, initDatabases } from '../../lib/state'
+import db from './db'
+import { AuthUser, AuthUserRoleEnum } from './model/AuthUser'
+
+export async function initAuthDb() {
+	destroyAuthDb()
+	const auth = readAuth()
+	if (auth && auth.roles.includes(AuthUserRoleEnum.ADMIN)) {
+		db.handle = new Database('_users', db.host)
+		await db.handle.sync()
+		await db.handle.indexModels([AuthUser])
+	}
+}
+
+export function destroyAuthDb() {
+	db.handle.destroy()
+	db.handle = loadingDb
+}
 
 const host = 'https://localhost:3000/db'
+
+export interface Auth {ok: boolean, name: string, roles: AuthUserRoleEnum[]}
 
 export async function login(username: string, password: string) {
 	const auth = await cookieAuth(username, password)
@@ -19,7 +38,7 @@ export async function logout() {
 	localStorage.removeItem('auth')
 }
 
-export function readAuth() {
+export function readAuth(): Auth {
 	const auth = localStorage.getItem('auth')
 	return auth ? JSON.parse(auth) : null
 }
@@ -33,19 +52,13 @@ export async function cookieAuth(username: string, password: string) {
 	})
 	if (!res.ok) throw new Error(`Could not login: ${res.status}`)
 	const json = await res.json()
-	return json as unknown as {ok: boolean, name: string, roles: CouchUserRoleEnum[]}
+	return json as unknown as Auth
 }
 
 export async function cookieClear() {
 	const res = await fetch(`${host}/_session`, {method: 'DELETE'})
 	if (!res.ok) throw new Error(`Could not clear cookie: ${res.status}`)
 }
-
-
-export enum CouchUserRoleEnum {
-  ADMIN = '_admin',
-}
-export const CouchUserRoleSet = new Set(Enum.getEnumValues(CouchUserRoleEnum))
 
 export class LoginProps {
 		email = ''
