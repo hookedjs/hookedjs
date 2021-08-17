@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from '#lib/hooks'
 import {useMedia} from '#lib/hooks'
 import * as i from '#lib/icons'
 import {nav, useLocationStore} from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 // import { Paths } from '#src/routes'
 import { useSidebarRightStore } from '#src/stores'
 
@@ -32,7 +32,7 @@ export default function Navbar(p: { sidebarLeft?: boolean, navLinks: NavLinks, s
 
 	</NavbarDiv>
 }
-const NavbarDiv = styled.div`
+const NavbarDiv = pstyled.div`
 	:root
 		position: fixed
 		top: 0
@@ -51,7 +51,7 @@ const NavbarDiv = styled.div`
 	:root :hover
 		text-decoration: none;
 `
-const LogoA = styled.a`
+const LogoA = pstyled.a`
 	:root
 		transform: rotate(20deg)
 		margin-top: -86px
@@ -154,7 +154,7 @@ function SearchBar(p: {options: SearchOption[]}) {
 		nav(option + '?search=' + value)
 	}
 }
-const SearchBarDiv = styled.div`
+const SearchBarDiv = pstyled.div`
 	:root
 		--searchbar-width: 270px
 		position: absolute
@@ -222,7 +222,7 @@ function NavButton({ path, title }: { path: string, title: string }) {
 		</NavButtonA>
 	)
 }
-const NavButtonA = styled.a`
+const NavButtonA = pstyled.a`
 	:root
 		z-index: 2
 		height: calc( var(--header-height) - 14px )
@@ -257,7 +257,7 @@ function NavLink(p: NavLinkProps) {
 		</NavLinkA>
 	)
 }
-const NavLinkA = styled.a`
+const NavLinkA = pstyled.a`
 	:root
 		display: flex
 		flex-direction: row
@@ -307,7 +307,7 @@ function RightBurger() {
 		})
 	}
 }
-const NavBurgerA = styled.a`
+const NavBurgerA = pstyled.a`
 	:root
 		z-index: 2
 		height: var(--header-height)

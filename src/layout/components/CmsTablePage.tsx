@@ -1,7 +1,7 @@
 import { Fragment as F, h } from 'preact'
 
 import { getParentPath } from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 import CmsTable from './CmsTable'
 import PaddedPage from './PaddedPage'
@@ -25,7 +25,7 @@ export default function CmsTablePage({ pageTitle, ...cmsTableProps }: { pageTitl
 		</Section>
 	</PaddedPage>
 }
-const AddNewButton = styled.a`
+const AddNewButton = pstyled.a`
 	:root
 		position: relative
 		top: -5px

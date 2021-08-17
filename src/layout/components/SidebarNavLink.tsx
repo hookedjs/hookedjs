@@ -2,7 +2,7 @@ import { FunctionalComponent, h } from 'preact'
 
 import * as i from '#lib/icons'
 import {useLocationStore} from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 interface NavLinkProps { path: string, title: string, Icon?: FunctionalComponent }
 
@@ -21,7 +21,7 @@ export default function NavLink(p: NavLinkProps) {
 		</NavLinkA>
 	)
 }
-const NavLinkA = styled.a`
+const NavLinkA = pstyled.a`
 	:root
 		padding: 14px 0 10px 24px
 		background: var(--sidebar-background)
@@ -53,7 +53,7 @@ const NavLinkA = styled.a`
 		:root
 			background: var(--gray2)
 `
-const NavLinkText = styled.div`
+const NavLinkText = pstyled.div`
 	:root
 		padding: 3px 14px 3px 20px
 `

@@ -6,7 +6,7 @@ import {ComponentChildren, Fragment as F, FunctionalComponent, h} from 'preact'
 
 import { useCallback, useEffect, useInterval, useRef, useState, useUpdateEffect } from '#lib/hooks'
 import { IconSvg } from '#lib/icons'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { ValidationErrorSet } from '#src/lib/validation'
 
 import { useMountedState } from './hooks'
@@ -121,32 +121,38 @@ export function Form({ onSubmit, onSubmitJson, reset, children, class: className
 		onSubmitJson?.(formToJson(formEvent.target))
 	}
 }
-const FormForm = styled.form`
+const FormForm = pstyled.form`
   :root .form-error
     color: var(--danger)
 `
 
 /**
- * A text input with label and error handling
+ * An input with label and error handling
  */
-interface TextProps {
+interface InputFieldProps {
   name: string
   labelText: string
   error?: string
 	disabled?: boolean
+	hidden?: boolean
 	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}
-	inputProps: h.JSX.HTMLAttributes<HTMLInputElement> & {forwardRef?: Ref<any>}
+	inputProps: h.JSX.IntrinsicElements['input'] & {
+		forwardRef?: Ref<any>,
+		defaultValue?: string | number,
+		// If isarray, the form handler will interpret the value as being comma delimitted
+		isarray?: boolean
+	}
 }
-export function TextField({ name, labelText, error, disabled, inputProps, divProps }: TextProps) {
+export function InputField({ labelText, error, disabled, hidden, inputProps, divProps, ...rest }: InputFieldProps) {
 	return (
-		<TextFieldDiv data-error={!!error} {...divProps}>
+		<InputFieldDiv data-error={!!error} data-disabled={disabled} data-hidden={hidden} {...divProps}>
 			<label>{labelText}</label>
-			<input aria-label={labelText} name={name} {...inputProps} disabled={disabled}/>
+			<input type="text" {...inputProps} aria-label={labelText} disabled={disabled} {...rest}/>
 			<div class="error">{error}</div>
-		</TextFieldDiv>
+		</InputFieldDiv>
 	)
 }
-const TextFieldDiv = styled.div`
+const InputFieldDiv = pstyled.div`
 	:root
 		--error-color: var(--danger)
 		position: relative
@@ -169,8 +175,6 @@ const TextFieldDiv = styled.div`
 		margin-top: 1px
 		width: 200px
 		max-width: 100%
-  :root.hasError input
-    border: 1px solid var(--error-color)
   :root>.error
     display: none
 		padding: .2rem 0 0 2px
@@ -182,6 +186,12 @@ const TextFieldDiv = styled.div`
 		border: 1px solid var(--error-color)
   :root[data-error="true"]>.error
     display: block
+	:root[data-disabled="true"]>label
+		color: var(--gray5)
+	:root[data-disabled="true"]>input
+		border: 1px solid var(--gray2)
+	:root[data-hidden="true"]
+		display: none
 `
 
 /**
@@ -191,6 +201,7 @@ interface BooleanFieldProps {
   labelText: ComponentChildren
 	checkedLabelText?: ComponentChildren
   error?: string
+	hidden?: boolean
 	divProps?: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}
 	inputProps: CheckboxProps['inputProps']
 	type?: 'checkbox' | 'switch'
@@ -208,7 +219,7 @@ export function BooleanField(p: BooleanFieldProps) {
 
 	const Input = p.type === 'switch' ? Switch : Checkbox
 	return (
-		<BooleanFieldDiv data-error={!!p.error} class={p.type} {...p.divProps}>
+		<BooleanFieldDiv data-error={!!p.error} data-hidden={p.hidden} class={p.type} {...p.divProps}>
 			<div>
 				<Input 
 					inputProps={{
@@ -228,7 +239,7 @@ export function BooleanField(p: BooleanFieldProps) {
 		</BooleanFieldDiv>
 	)
 }
-const BooleanFieldDiv = styled.div`
+const BooleanFieldDiv = pstyled.div`
 	:root
 		margin-top: 1rem
 		margin-bottom: 1rem
@@ -244,6 +255,8 @@ const BooleanFieldDiv = styled.div`
     color: var(--danger)
   :root[data-error="true"] .error
     display: block
+	:root[data-hidden="true"]
+		display: none
 `
 
 /**
@@ -257,13 +270,14 @@ interface CheckboxProps {
 		forwardRef?: Ref<any>
 	}
 	hasError?: boolean
+	hidden?: boolean
 }
-export function Checkbox({ divProps = {}, inputProps, hasError }: CheckboxProps) {
+export function Checkbox({ divProps = {}, inputProps, hasError, hidden }: CheckboxProps) {
 	const [checked, setChecked] = useState(inputProps.checked || inputProps.default || false)
 	useUpdateEffect(function _pullDown() { setChecked(inputProps.checked || false) }, [inputProps.checked])
 	const onClick = useCallback(_onClick, [])
 	return (
-		<CheckboxDiv {...divProps} class={divProps.class + ' checkbox'} ref={divProps.forwardRef} data-checked={checked} data-error={hasError}>
+		<CheckboxDiv {...divProps} class={divProps.class + ' checkbox'} ref={divProps.forwardRef} data-checked={checked} data-hidden={hidden} data-error={hasError}>
 			<IconSvg fill="var(--gray6)" class="marked" path={MarkedPath} />
 			<IconSvg fill="var(--gray4)" class="empty" path={EmptyPath} />
 			<input type="checkbox" {...inputProps} ref={inputProps.forwardRef!} checked={checked} onClick={onClick} />
@@ -274,7 +288,7 @@ export function Checkbox({ divProps = {}, inputProps, hasError }: CheckboxProps)
 		if (inputProps.onClick) (inputProps as any).onClick(e)
 	}
 }
-const CheckboxDiv = styled.div`
+const CheckboxDiv = pstyled.div`
 	:root
 		position: relative
 		margin-top: -2px
@@ -300,6 +314,8 @@ const CheckboxDiv = styled.div`
 	:root[data-error="true"] svg
 		border-radius: 3px
     border: 1px solid var(--danger)
+	:root[data-hidden="true"]
+		display: none
 `
 
 export function Switch({ divProps = {}, inputProps, hasError }: CheckboxProps) {
@@ -320,7 +336,7 @@ export function Switch({ divProps = {}, inputProps, hasError }: CheckboxProps) {
 		if (inputProps.onClick) (inputProps as any).onClick(e)
 	}
 }
-const SwitchDiv = styled.div`
+const SwitchDiv = pstyled.div`
 	:root
 		position: relative
 		cursor: pointer
@@ -379,8 +395,19 @@ export function SubmitButton({ children, class: className = '', forwardRef, ...b
 export function formToJson(formElement: HTMLFormElement): FormJson {
 	const reqBody: FormJson = {}
 	for (const e of formElement.elements as unknown as HTMLInputElement[]) {
-		if (e.type !== 'submit')
-			reqBody[e.name] = e.type === 'checkbox' ? e.checked : e.value
+		const isArray = e.getAttribute('isarray')
+		switch(e.type) {
+		case 'submit':
+			break
+		case 'checkbox':
+			reqBody[e.name] = e.checked
+			break
+		case 'number':
+			reqBody[e.name] = isArray ? e.value.split(',').map(Number) : Number(e.value)
+			break
+		default:
+			reqBody[e.name] = isArray ? e.value.split(',') : e.value
+		}
 	}
 	return reqBody
 }

@@ -19,9 +19,9 @@ export class UserProfile extends PouchModel<IUserProfileExtra> {
 	static get db() {return db.handle}
 	get db() {return db.handle}
 	static type = 'profile'
+	type = UserProfile.type
 	static indexes = []
 	
-	type = UserProfile.type
 	surname: IUserProfileExtra['surname']
 	givenName: IUserProfileExtra['givenName']
 	email: IUserProfileExtra['email']

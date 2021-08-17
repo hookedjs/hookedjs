@@ -20,7 +20,7 @@ import { applyTheme, defaultTheme } from '#layout/theme'
 import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from '#lib/hooks'
 
 import StateStore from './StateStore'
-import styled from './styled'
+import pstyled from './pstyled'
 import { ForbiddenError, NotFoundError } from './validation'
 
 
@@ -272,7 +272,7 @@ function Redirect(to: string) {
 function Content(p: { children: ComponentChildren }) {
 	return <ContentDiv id="content" {...p} />
 }
-const ContentDiv = styled.div`
+const ContentDiv = pstyled.div`
 	:root
 		--content-height: 100vh
 		--content-height: var(--body-height)

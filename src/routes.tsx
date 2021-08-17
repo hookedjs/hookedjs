@@ -204,7 +204,7 @@ export const routes = Object.freeze({
 		title: 'Create User',
 		Icon: i.Auth,
 		path: '/admin/users/create',
-		Component: FillerCreateRoute,
+		Component: lazy(() => import('./pages/admin/model/users/UserEntry')),
 		Layout: AdminLayout,
 		stack: '/admin/users',
 		hasAccess: isAdmin,

@@ -3,7 +3,7 @@ import { h } from 'preact'
 import { useCallback, useEffect, useState } from '#lib/hooks'
 import * as i from '#lib/icons'
 import {useLocationStore} from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { useSidebarRightStore } from '#src/stores'
 
 import type { NavLinkProps, NavLinks } from '../types'
@@ -17,7 +17,7 @@ export default function BottomNav({ navLinks }: { navLinks: NavLinks }) {
 		<NavBurger />
 	</Nav>
 }
-const Nav = styled.div`
+const Nav = pstyled.div`
 	:root
 		z-index: 1
 		will-change: scroll-position
@@ -48,7 +48,7 @@ function NavLink(p: NavLinkProps) {
 		</NavLinkA>
 	)
 }
-const NavLinkA = styled.a`
+const NavLinkA = pstyled.a`
 	:root
 		--color: var(--gray6)
 		--border-top-color: var(--gray2)

@@ -1,7 +1,7 @@
 import {h} from 'preact'
 
 import { ArrowL } from '#lib/icons'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 export default function BackButton() {
 	return <BackButtonDiv>
@@ -10,7 +10,7 @@ export default function BackButton() {
 		</BackButtonA>
 	</BackButtonDiv>
 }
-const BackButtonDiv = styled.div`
+const BackButtonDiv = pstyled.div`
 	:root
 		position: relative
 		display: inline-block
@@ -21,8 +21,9 @@ const BackButtonDiv = styled.div`
 		left: -10px
 		background: var(--gray2)
 		border-radius: 30px
+		z-index: 1
 `
-const BackButtonA = styled.a`
+const BackButtonA = pstyled.a`
 	:root
 		position: fixed
 		display: block

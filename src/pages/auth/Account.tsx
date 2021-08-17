@@ -2,7 +2,7 @@ import {h} from 'preact'
 
 import PaddedPage from '#layout/components/PaddedPage'
 import Section from '#layout/components/Section'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { Paths } from '#src/routes'
 import { AuthStore, useAuthStore } from '#src/stores'
 
@@ -22,7 +22,7 @@ export default function Account() {
 	</PaddedPage>
 }
 
-const DeleteAccountA = styled.a`
+const DeleteAccountA = pstyled.a`
 	:root
 		display: block
 		text-align: right

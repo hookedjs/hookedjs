@@ -1,6 +1,6 @@
 import {ComponentChildren, h} from 'preact'
 
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 import BackButton from './BackButton'
 
@@ -23,7 +23,7 @@ export default function Section(p: {
 	</SectionDiv>
 }
 
-const SectionDiv = styled.div`
+const SectionDiv = pstyled.div`
 	:root
 		background: var(--white)
 		margin-bottom: 10px

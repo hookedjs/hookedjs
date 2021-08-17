@@ -1,6 +1,6 @@
 import {h} from 'preact'
 
-import styled from '#src/lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 export default function CodeSnippet({snippet}: {snippet: any}) {
 	const str = typeof snippet === 'string' ? snippet : JSON.stringify(snippet, null, 2)
@@ -13,11 +13,10 @@ export default function CodeSnippet({snippet}: {snippet: any}) {
 	)
 }
 
-const CodeSnippetPre = styled.pre`
+const CodeSnippetPre = pstyled.pre`
 	:root
 		background: var(--gray3)
 		border: 4px solid var(--gray2)
 		overflow-x: scroll
 		padding: 1.2em .5em
-		
 `

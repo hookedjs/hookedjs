@@ -3,7 +3,7 @@ import {h} from 'preact'
 import CmsTablePage from '#layout/components/CmsTablePage'
 import queryStrings from '#lib/queryStrings'
 import { getParentPath, RouteType } from '#lib/router'
-import { useAuthUsersS } from '#src/pouch'
+import { AuthUser, AuthUsers, AuthUserStatusEnum, useAuthUsersS } from '#src/pouch'
 import { ToastStore } from '#src/stores'
 
 export default function UserList({ route }: { route: RouteType }) {
@@ -20,7 +20,7 @@ export default function UserList({ route }: { route: RouteType }) {
 		// PouchDB doth not allow search across multiple fields, so do it manually
 		// totalCount = useAuthUserCountS({selector: _selector}),
 		// results = useAuthUsersS({selector: _selector, limit: pageSize, skip: (page - 1) * pageSize})
-		_entriesRaw = useAuthUsersS({
+		[_entriesRaw, refetch] = useAuthUsersS({
 			..._sortBy ? {sort: [{[_sortBy]: _sortDirection}]} : {},
 		}),
 		matchingSearch = _search ? _entriesRaw.filter(u => false
@@ -47,18 +47,32 @@ export default function UserList({ route }: { route: RouteType }) {
 			...Object.entries(byCategory).map(([k,v]) => ({ label: k.toTitleCase(), value: k, count: v.length })),
 		]}
 		bulkOptions={[
-			{ label: 'Delete', cb(selection) { ToastStore.setValue({ message: `Deleted ${selection.length} items`, icon: 'success', location: 'right' }) } }
+			{ label: 'Delete', cb: deleteCb },
+			{ label: 'Ban', cb: banCb }
 		]}
 		pages={Math.ceil(entriesFiltered.length / pageSize)}
 		total={entriesFiltered.length}
-		rows={entriesPaged.map(entry => 
-			[
-				<a href={`${parentPath}/entry?id=${entry.name}`}>{entry.fullName}</a>,
-				<a href={`mailto:${entry.name}`}>{entry.name}</a>,
-				entry.status,
-				entry.roles.join(),
-				entry.tenants.join(),
-			],
-		)}
+		rows={entriesPaged.map(obj => ({
+			obj,
+			cols: [
+				<a href={`${parentPath}/entry?id=${obj.name}`}>{obj.fullName}</a>,
+				<a href={`mailto:${obj.name}`}>{obj.name}</a>,
+				obj.status,
+				obj.roles.join(),
+				obj.tenants.join(),
+			]
+		}))}
 	/>
+
+	async function deleteCb(selection: any[]) {
+		await Promise.all(selection.map((entry: AuthUser) => entry.delete()))
+		ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', location: 'right' })
+		await refetch()
+	}
+
+	async function banCb(selection: any[]) {
+		await Promise.all(selection.map((entry: AuthUser) => entry.ban('Banned by bulk action')))
+		ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', location: 'right' })
+		await refetch()
+	}
 }

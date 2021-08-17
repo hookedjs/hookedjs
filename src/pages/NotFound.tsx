@@ -1,7 +1,7 @@
 import {h} from 'preact'
 
 import {MapPin} from '#lib/icons'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 export default function NotFound() {
 	return <NotFoundDiv>
@@ -15,7 +15,7 @@ export default function NotFound() {
 	</NotFoundDiv>
 }
 // Background thanks to transparenttextures.com
-const NotFoundDiv = styled.div`
+const NotFoundDiv = pstyled.div`
 	:root 
 		position: absolute
 		top:0
@@ -41,7 +41,7 @@ const NotFoundDiv = styled.div`
 			width: 200px
 			height: 200px
 `
-const MapPinDiv = styled.div`
+const MapPinDiv = pstyled.div`
 	:root
 		margin-top: -190px
 		margin-bottom: 180px

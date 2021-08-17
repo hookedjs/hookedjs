@@ -127,10 +127,12 @@ Object.equals = function (foo, bar) {
 	}
 }
 
-// Ref: https://stackoverflow.com/a/46692810/1202757
+// Adapted from https://stackoverflow.com/a/46692810/1202757
 Object.clone = (obj: any) => {
 	if (obj === null || typeof(obj) !== 'object' || 'isActiveClone' in obj)
 		return obj
+	if (obj.constructor.name === 'Date')
+		return new Date(obj)
 	const temp = obj.constructor() // changed
 	for (const key in obj) {
 		if (Object.prototype.hasOwnProperty.call(obj, key)) {

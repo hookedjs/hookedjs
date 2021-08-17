@@ -1,5 +1,5 @@
-import { useEffect, useEffectDeep, useLayoutEffect, useLayoutEffectDeep, useMemo, useMemoDeep, useRef, useState, useUpdate } from '#lib/hooks'
-import { NotFoundError, throwError, throwNotFoundError } from '#src/lib/validation'
+import { useEffect, useRef, useUpdate } from '#lib/hooks'
+import { NotFoundError, throwNotFoundError } from '#src/lib/validation'
 
 import type { IFindProps } from './Database'
 import type PouchModel from './Model'
@@ -9,6 +9,7 @@ interface State<T> {
 	error?: Error
 	isLoading: boolean
 	fetchP?: PromiseFnc
+	refetch: () => void
 }
 
 /**
@@ -38,19 +39,24 @@ function useDocs<PM extends PouchModel<any>>(
 		cached = collection.db.findCache.get(cacheKey)
 	
 	if (!cached)
-		return {isLoading: true, fetchP: collection.db.find(mapped)}
+		return {refetch, isLoading: true, fetchP: collection.db.find(mapped)}
 	if (cached?.error)
-		return {isLoading: false, error: cached.error}
+		return {refetch, isLoading: false, error: cached.error}
 	if (cached?.value)
-		return {isLoading: false, data: cached.value.map((doc: any) => new collection.model(doc))}
+		return {refetch, isLoading: false, data: cached.value.map((doc: any) => new collection.model(doc))}
 	if (cached?.fetching)	
-		return {isLoading: true, fetchP: cached.fetchP}
+		return {refetch, isLoading: true, fetchP: cached.fetchP}
 	
 	throw new Error('Unhandled cache error')
 
 	function watch() {
 		refetchIfStale().then(listenForChanges)
 		return () => listener.current.cancel()
+	}
+
+	async function refetch() {
+		await collection.db.find(mapped)
+		rerender()
 	}
 
 	async function refetchIfStale() {
@@ -63,10 +69,8 @@ function useDocs<PM extends PouchModel<any>>(
 			// At this point, cached should always be truthy, but just in case...
 			!cached 
 			|| ((Date.now() - cached.time > 3000)) && !cached.fetching
-		) {
-			await collection.db.find(mapped)
-			rerender()
-		}
+		)
+			await refetch()
 	}
 
 	async function listenForChanges() {
@@ -105,6 +109,7 @@ function useDocs<PM extends PouchModel<any>>(
 function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM> {
 	const docs = useDocs<PM>(collection, findProps, 1)
 	return {
+		refetch: docs.refetch,
 		isLoading: docs.isLoading,
 		error: docs.error || (docs.data?.length ? undefined : new NotFoundError()),
 		data: docs.data?.length ? docs.data[0]: undefined,
@@ -126,11 +131,11 @@ function useCount<PM extends PouchModel<any>>(collection: any, findProps: IFindP
 /**
  * A Suspenseful db query hook to get many docs
  */
-function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string, limit?: number): PM[] {
+function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string, limit?: number): [PM[], State<any>['refetch']] {
 	const state = useDocs(collection, findProps, limit)
 	if (state.isLoading) throw state.fetchP
 	if (state.error) throw state.error
-	return state.data!
+	return [state.data!, state.refetch]
 }
 
 /**
@@ -138,16 +143,16 @@ function useDocsS<PM extends PouchModel<any>>(collection: any, findProps?: IFind
  */
 function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM {
 	const docs = useDocsS<PM>(collection, findProps, 1)
-	return docs?.[0] ?? throwNotFoundError()
+	return docs[0]?.[0] ?? throwNotFoundError()
 }
 
 /**
  * A Stateful db query hook to get a count of docs that match a query
  */
-function useCountS<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): number {
+function useCountS<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): [number, State<any>['refetch']] {
 	const _findProps = {...Object.clone(findProps), fields: []}
 	const docs = useDocsS<PM>(collection, _findProps)
-	return docs.length
+	return [docs[0].length, docs[1]]
 }
 
 
@@ -167,7 +172,7 @@ function createModelUseCountHook<PM extends PouchModel<any>>(collection: any) {
 	}
 }
 function createModelUseManyHookS<PM extends PouchModel<any>>(collection: any) {
-	return function useModelDocsS(findProps?: IFindProps<PM> | string): PM[] {
+	return function useModelDocsS(findProps?: IFindProps<PM> | string): [PM[], State<any>['refetch']] {
 		return useDocsS<PM>(collection, findProps)
 	}
 }
@@ -177,7 +182,7 @@ function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
 	}
 }
 function createModelUseCountHookS<PM extends PouchModel<any>>(collection: any) {
-	return function useModelCountS(findProps?: IFindProps<PM> | string): number {
+	return function useModelCountS(findProps?: IFindProps<PM> | string): [number, State<any>['refetch']] {
 		return useCountS<PM>(collection, findProps as any)
 	}
 }

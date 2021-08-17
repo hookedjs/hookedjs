@@ -1,6 +1,6 @@
 import { ComponentChildren, h } from 'preact'
 
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 import Navbar from '../components/Navbar'
 import RoundedContent from '../components/RoundedContent'
@@ -24,7 +24,7 @@ export default function HeaderLayout(p: {
 		</HeaderLayoutDiv>
 	)
 }
-const HeaderLayoutDiv = styled.div`
+const HeaderLayoutDiv = pstyled.div`
 	:root
 		--content-background: var(--sidebar-background)
 		--sidebarRight-width: 260px

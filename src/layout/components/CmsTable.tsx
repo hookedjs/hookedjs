@@ -7,7 +7,7 @@ import { useMedia, UseSet, useSet } from '#lib/hooks'
 import * as i from '#lib/icons'
 import qs from '#lib/queryStrings'
 import { nav, useLocationStore } from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { routesByPath } from '#src/routes'
 import { ToastStore } from '#src/stores'
 
@@ -20,55 +20,60 @@ interface CmsTableProps {
 	rows: CmsRow[]
 	mapMarkers?: MapMarker[],
 }
-type CmsRow = ComponentChildren[]
+type CmsRow = {
+	obj: any // the obj that will be passed to bulk actions
+	cols: ComponentChildren[] // the cols that will be displayed
+}
 export default function CmsTable(p: CmsTableProps) {
 	const [_location] = useLocationStore()
 	const checked = useSet<CmsRow>()
 	useLayoutEffect(() => checked.reset(), [_location])
 	const q = qs.parse()
 
-	return <CmsTableDiv>
-		<TableFilterDiv>
-			<CategoryFilters categories={p.categories} />
-			<SearchForm />
-		</TableFilterDiv>
-		<HeaderFooter total={p.total} pages={p.pages} bulkOptions={p.bulkOptions} checked={checked} mapMarkers={p.mapMarkers} />
+	return (
+		<CmsTableDiv>
+			<TableFilterDiv>
+				<CategoryFilters categories={p.categories} />
+				<SearchForm />
+			</TableFilterDiv>
+			<HeaderFooter total={p.total} pages={p.pages} bulkOptions={p.bulkOptions} checked={checked} mapMarkers={p.mapMarkers} />
 		
-		{p.total 
-			? (
-				q.viewMode === 'map'
-					? <div style={{ marginBottom: '.3rem' }}>
-						<OpenMap height={400} markers={p.mapMarkers!} />
-					</div>
-					: <table>
-						<thead>
-							<HeadRow cols={p.cols} rows={p.rows} checked={checked} />
-						</thead>
-						<tbody>
-							{p.rows.map((row,i) => <BodyRow cols={p.cols} row={row} rowNumber={i} checked={checked} />)}
-						</tbody>
-						<tfoot>
-							<HeadRow cols={p.cols} rows={p.rows} checked={checked} />
-						</tfoot>
-					</table>
-			)
-			: <NoResultDiv>
-				{q.page || q.search || q.category
-					? <div>No records match your filters. <a href={qs.create({ page: undefined, search: undefined, category: undefined }, {upsert: true}) || location.pathname}>Reset filters?</a></div>
-					: <div>No records found of this type.</div>
-				}
-			</NoResultDiv>
-		}
-		<HeaderFooter total={p.total} pages={p.pages} bulkOptions={p.bulkOptions} checked={checked} mapMarkers={p.mapMarkers} isFooter />
-	</CmsTableDiv>
+			{p.total 
+				? (
+					q.viewMode === 'map'
+						? <div style={{ marginBottom: '.3rem' }}>
+							<OpenMap height={400} markers={p.mapMarkers!} />
+						</div>
+						: <table>
+							<thead>
+								<HeadRow cols={p.cols} rows={p.rows} checked={checked} />
+							</thead>
+							<tbody>
+								{p.rows.map((row,i) => <BodyRow cols={p.cols} row={row} rowNumber={i} checked={checked} />)}
+							</tbody>
+							<tfoot>
+								<HeadRow cols={p.cols} rows={p.rows} checked={checked} />
+							</tfoot>
+						</table>
+				)
+				: <NoResultDiv>
+					{q.page || q.search || q.category
+						? <div>No records match your filters. <a href={qs.create({ page: undefined, search: undefined, category: undefined }, {upsert: true}) || location.pathname}>Reset filters?</a></div>
+						: <div>No records found of this type.</div>
+					}
+				</NoResultDiv>
+			}
+			<HeaderFooter total={p.total} pages={p.pages} bulkOptions={p.bulkOptions} checked={checked} mapMarkers={p.mapMarkers} isFooter />
+		</CmsTableDiv>
+	)
 }
 
 
-const CmsTableDiv = styled.div`
+const CmsTableDiv = pstyled.div`
 	:root
 		display: block
 `
-const TableFilterDiv = styled.div`
+const TableFilterDiv = pstyled.div`
 	:root
 		position: relative
 		margin-bottom: .3rem
@@ -80,7 +85,7 @@ const TableFilterDiv = styled.div`
 		:root
 			display: block
 `
-const NoResultDiv = styled.div`
+const NoResultDiv = pstyled.div`
 	:root
 		background: var(--gray3) 
 		border-radius: 3px
@@ -110,7 +115,7 @@ function SearchForm() {
 			nav(qs.create({ search: next ? next : undefined, page: undefined }, { upsert: true }), {replace: true})
 	}
 }
-const SearchFormForm = styled.form`
+const SearchFormForm = pstyled.form`
 	:root
 		display: flex
 		flex-direction: row
@@ -130,7 +135,7 @@ function CategoryFilters({categories}: {categories: CmsTableProps['categories']}
 		return (qs.create({ category: next !== categories![0].value ? next : undefined }, { upsert: true }) || location.pathname) + '#replace'
 	}
 }
-const CategoryFilterDiv = styled.div`
+const CategoryFilterDiv = pstyled.div`
 	:root
 		font-size: .9rem
 		margin-bottom: .3rem
@@ -160,7 +165,7 @@ function HeaderFooter(p: Pick<CmsTableProps, 'total' | 'pages' | 'bulkOptions' |
 		</CountDiv>
 	</HeaderFooterDiv>
 }
-const HeaderFooterDiv = styled.div`
+const HeaderFooterDiv = pstyled.div`
 	:root
 		display: flex
 		flex-direction: row
@@ -174,7 +179,7 @@ const HeaderFooterDiv = styled.div`
 		:root[data-footer="true"]
 			flex-direction: column
 `
-const CountDiv = styled.div`
+const CountDiv = pstyled.div`
 	:root
 		display: flex
 		flex-direction: row
@@ -211,24 +216,32 @@ function PageButton(p: Pick<CmsTableProps, 'pages'> & { title: string, page: num
 
 function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseSet<CmsRow>}) {
 	const [action, setAction] = useState('-1')
+	const [executing, setExecuting] = useState(false)
 	const onClick = useCallback(_onClick, [action])
 	const onChange = useCallback((e: any) => setAction(e.target.value), [])
-	return <BulkActionsFormDiv>
-		<select aria-label="Bulk Actions" name="action" value={action} onChange={onChange}>
-			<option value="-1">Bulk Actions</option>
-			{p.bulkOptions?.map(o => <option value={o.label}>{o.label}</option>)}
-		</select>
-		<button onClick={onClick}>Apply</button>
-	</BulkActionsFormDiv>
+	return (
+		<BulkActionsFormDiv>
+			<select aria-label="Bulk Actions" name="action" value={action} onChange={onChange} disabled={executing}>
+				<option value="-1">Bulk Actions</option>
+				{p.bulkOptions?.map(o => <option value={o.label}>{o.label}</option>)}
+			</select>
+			<button onClick={onClick} disabled={executing}>Apply</button>
+		</BulkActionsFormDiv>
+	)
 
-	function _onClick() {
+	async function _onClick() {
 		if (action === '-1') return ToastStore.setValue({ message: 'No action selected', icon: 'error', location: 'bottom' })
 		if (!p.checked.size) return ToastStore.setValue({ message: 'No rows selected', icon: 'error', location: 'bottom' })
-		p.bulkOptions?.find(o => o.label === action)!.cb([...p.checked.current])
+		setExecuting(true)
+		const selectionObjs = Array.from(p.checked.current).map(o => o.obj)
+		const callback = p.bulkOptions!.find(o => o.label === action)!.cb
+		const callbackP = async () => callback(selectionObjs)
+		await callbackP()
 		p.checked.reset()
+		setExecuting(false)
 	}
 }
-const BulkActionsFormDiv = styled.div`
+const BulkActionsFormDiv = pstyled.div`
 	:root
 		display: flex
 		flex-direction: row
@@ -282,7 +295,7 @@ function HeadCol({ colData: c }: { colData: CmsTableProps['cols'][0] }) {
 		}
 	</HeadColTd>
 }
-const HeadColTd = styled.td`
+const HeadColTd = pstyled.td`
 	:root[data-clickable="true"]:hover a
 		text-decoration: underline
 	:root:first-of-type svg.empty
@@ -302,16 +315,20 @@ function BodyRow(p: Pick<CmsTableProps, 'cols'> & { row: CmsRow, rowNumber: numb
 	return <tr>
 		<td><RowCheckbox {...p} /></td>
 		{isWide
-			? p.row.map((col, i) => <td class={i === 0 ? 'bold' : ''}>{col || '--'}</td>)
-			: <td>
-				{p.cols.map((col, i) => i === 0
-					? <div>
-						<div><b>{p.row[i]}</b></div>
-						<div style={{ margin: '-.4rem 0 .4rem' }}>_ _ _</div>
-					</div>
-					: <div>{col.label}: {p.row[i] || '--'}</div>
-				)}
-			</td>
+			? p.row.cols.map((col, i) => <td class={i === 0 ? 'bold' : ''}>{col || '--'}</td>)
+			: (
+				<td>
+					{p.cols.map((col, i) => (false
+						|| i === 0 && (
+							<div>
+								<div><b>{p.row.cols[i]}</b></div>
+								<div style={{ margin: '-.4rem 0 .4rem' }}>_ _ _</div>
+							</div>
+						)
+						|| <div>{col.label}: {p.row.cols[i] || '--'}</div>
+					))}
+				</td>
+			)
 		}
 	</tr>
 }

@@ -1,7 +1,7 @@
 import { Fragment as F, FunctionalComponent, h } from 'preact'
 
 import NavLink from '#layout/components/SidebarNavLink'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { useSidebarRightStore } from '#src/stores'
 
 import type { NavLinks } from '../types'
@@ -20,7 +20,7 @@ export default function SidebarRight({ navLinks }: { navLinks: NavLinks }) {
 		</SidebarDiv>
 	) : <F />
 }
-const SidebarDiv = styled.div`
+const SidebarDiv = pstyled.div`
 	:root
 		position: absolute
 		top: var(--content-top)
@@ -44,7 +44,7 @@ const SidebarDiv = styled.div`
 		:root>.logo
 			display: initial
 `
-const SidebarNav = styled.nav`
+const SidebarNav = pstyled.nav`
 	:root
 		width: var(--sidebarRight-width)
 `

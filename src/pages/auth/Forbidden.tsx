@@ -1,7 +1,7 @@
 import {h} from 'preact'
 
 import {Auth} from '#lib/icons'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { nav } from '#src/lib/router'
 import { Paths } from '#src/routes'
 import { AuthStore, useAuthStore } from '#src/stores'
@@ -28,7 +28,7 @@ export default function Forbidden() {
 	}
 }
 // Background thanks to transparenttextures.com
-const ForbiddenDiv = styled.div`
+const ForbiddenDiv = pstyled.div`
 	:root
 		position: absolute
 		top:0

@@ -1,6 +1,6 @@
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
-export default styled.div`
+export default pstyled.div`
 	:root
 		visibility: 1
 `

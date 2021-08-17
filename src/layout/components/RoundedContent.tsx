@@ -2,7 +2,7 @@ import { ComponentChildren, h } from 'preact'
 
 import { useMedia } from '#lib/hooks'
 import { Content } from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 import * as i from '../../lib/icons'
 
@@ -22,7 +22,7 @@ export default function RoundedContent(p: { children: ComponentChildren, withSid
 		</div>
 	</ContentDiv>
 }
-const ContentDiv = styled.div`
+const ContentDiv = pstyled.div`
 	:root
 		position: absolute
 		top: var(--content-top)

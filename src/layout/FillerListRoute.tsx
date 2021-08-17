@@ -27,10 +27,10 @@ export default function FillerListFactory({ route }: { route: RouteType }) {
 		pages={4}
 		total={16}
 		rows={[
-			[<a href={`${entryPath}?id=Nancy Smith1`}>Nancy Smith1</a>, <a href="mailto:nancy@smith1.com">nancy@smith1.com</a>, 'Administrator', ''],
-			[<a href={`${entryPath}?id=Nancy Smith2`}>Nancy Smith2</a>, <a href="mailto:nancy@smith2.com">nancy@smith2.com</a>, 'Administrator', ''],
-			[<a href={`${entryPath}?id=Nancy Smith3`}>Nancy Smith3</a>, <a href="mailto:nancy@smith3.com">nancy@smith3.com</a>, 'Administrator', ''],
-			[<a href={`${entryPath}?id=Nancy Smith4`}>Nancy Smith4</a>, <a href="mailto:nancy@smith4.com">nancy@smith4.com</a>, 'Administrator', ''],
+			{obj: {}, cols: [<a href={`${entryPath}?id=Nancy Smith1`}>Nancy Smith1</a>, <a href="mailto:nancy@smith1.com">nancy@smith1.com</a>, 'Administrator', '']},
+			{obj: {}, cols: [<a href={`${entryPath}?id=Nancy Smith2`}>Nancy Smith2</a>, <a href="mailto:nancy@smith2.com">nancy@smith2.com</a>, 'Administrator', '']},
+			{obj: {}, cols: [<a href={`${entryPath}?id=Nancy Smith3`}>Nancy Smith3</a>, <a href="mailto:nancy@smith3.com">nancy@smith3.com</a>, 'Administrator', '']},
+			{obj: {}, cols: [<a href={`${entryPath}?id=Nancy Smith4`}>Nancy Smith4</a>, <a href="mailto:nancy@smith4.com">nancy@smith4.com</a>, 'Administrator', '']},
 		]}
 		mapMarkers={[
 			{ title: 'Nancy Smith1', lat: 30.24, long: -97.76, popupWidth: '10rem',

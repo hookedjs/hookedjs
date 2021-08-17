@@ -1,11 +1,11 @@
 import { h } from 'preact'
 
 import { Logo } from '#layout/components/Logo'
-import { ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
+import { ErrorMessage, FormJson, InputField, SubmitButton, useForm } from '#lib/forms'
 import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { LoginProps, LoginPropsEnum, LoginPropsExample } from '#src/pouch'
 import { Paths } from '#src/routes'
 import { AuthStore, ToastStore, useAuthStore } from '#src/stores'
@@ -23,19 +23,18 @@ export default function Login() {
 	return <LoginDiv>
 		<Logo size={4} style={{margin: '0 -10px 10px', textAlign: 'center', display: 'block'}} />
 		<Form.Component onSubmitJson={onSubmit}>
-			<TextField
+			<InputField
 				name={LoginPropsEnum.email}
 				labelText="Email"
 				inputProps={{
-					type: 'text',
 					placeholder: LoginPropsExample.email,
-					value: LoginPropsExample.email,
+					defaultValue: LoginPropsExample.email,
 					autoFocus: true,
 				}}
 				disabled={submitting}
 				error={errors[LoginPropsEnum.email]?.note}
 			/>
-			<TextField
+			<InputField
 				name={LoginPropsEnum.password}
 				labelText="Password"
 				inputProps={{
@@ -61,7 +60,7 @@ export default function Login() {
 		ToastStore.setValue({ message: 'Welcome to Stacks!', location: 'right' })
 	}
 }
-const LoginDiv = styled.div`
+const LoginDiv = pstyled.div`
 	:root input:not([type="checkbox"])
 		width: 100%
 	:root form svg.empty

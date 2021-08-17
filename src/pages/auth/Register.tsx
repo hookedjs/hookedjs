@@ -1,11 +1,11 @@
 import { h } from 'preact'
 
 import { Logo } from '#layout/components/Logo'
-import { BooleanField, ErrorMessage, FormJson, SubmitButton, TextField, useForm } from '#lib/forms'
+import { BooleanField, ErrorMessage, FormJson, SubmitButton, InputField, useForm } from '#lib/forms'
 import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { RegisterProps, RegisterPropsEnum, RegisterPropsExample } from '#src/pouch'
 import { Paths } from '#src/routes'
 import { AuthStore, ToastStore, useAuthStore } from '#src/stores'
@@ -23,7 +23,7 @@ export default function Register() {
 	return <RegisterDiv>
 		<Logo size={4} style={{ margin: '0 -10px 10px', textAlign: 'center', display: 'block' }} />
 		<Form.Component onSubmitJson={onSubmit}>
-			<TextField
+			<InputField
 				name={RegisterPropsEnum.givenName}
 				labelText="First Name"
 				inputProps={{
@@ -35,7 +35,7 @@ export default function Register() {
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.givenName]?.note}
 			/>
-			<TextField
+			<InputField
 				name={RegisterPropsEnum.surname}
 				labelText="Last Name"
 				inputProps={{
@@ -46,7 +46,7 @@ export default function Register() {
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.surname]?.note}
 			/>
-			<TextField
+			<InputField
 				name={RegisterPropsEnum.email}
 				labelText="Email"
 				inputProps={{
@@ -57,7 +57,7 @@ export default function Register() {
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.email]?.note}
 			/>
-			<TextField
+			<InputField
 				name={RegisterPropsEnum.password}
 				labelText="Password"
 				inputProps={{
@@ -86,7 +86,7 @@ export default function Register() {
 		ToastStore.setValue({ message: 'Welcome to Stacks!', location: 'right' })
 	}
 }
-const RegisterDiv = styled.div`
+const RegisterDiv = pstyled.div`
 	:root input:not([type="checkbox"])
 		width: 100%
 	:root form svg.empty

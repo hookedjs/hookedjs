@@ -10,11 +10,11 @@ declare global {
 		 * 
 		 * @param enum0 Incoming enum
 		 */
-		getEnumValues: any
+		getEnumValues: (enumFrom: Record<string, any>) => any[];
 		/**
 		 * Creates an enum-like object from a class instance
 		 */
-		getEnumFromClassInstance: any
+		getEnumFromClassInstance: <T>(classInstance: T) => Record<keyof T, keyof T>
 	}
 }
 
@@ -24,7 +24,7 @@ globalThis.Enum = {
 	getEnumFromClassInstance,
 }
 
-function getEnumValues(enumFrom: Record<string, any>) {
+function getEnumValues(enumFrom: Record<string, any>): any[] {
 	const vals = Object.entries(enumFrom)
 		// If enum values are number type, entries() will emit it also
 		// as a key, which we don't want so filter them out.
@@ -33,6 +33,6 @@ function getEnumValues(enumFrom: Record<string, any>) {
 	return vals
 }
 
-function getEnumFromClassInstance<T>(classInstance: T) {
+function getEnumFromClassInstance<T>(classInstance: T): Record<keyof T, keyof T> {
 	return Object.fromEntries(Object.keys(classInstance).map(k => [k,k])) as Record<keyof T, keyof T>
 }

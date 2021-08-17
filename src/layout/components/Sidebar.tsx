@@ -2,7 +2,7 @@ import { h } from 'preact'
 
 import NavLink from '#layout/components/SidebarNavLink'
 import * as i from '#lib/icons'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { AuthStore, SidebarLeftStore } from '#src/stores'
 
 import type { NavLinks } from '../types'
@@ -20,7 +20,7 @@ export default function Sidebar({ navLinks }: { navLinks: NavLinks }) {
 		</SidebarDiv>
 	)
 }
-const SidebarDiv = styled.div`
+const SidebarDiv = pstyled.div`
 	:root
 		position: fixed
 		top: var(--header-height)
@@ -48,7 +48,7 @@ export function SidebarHeader() {
 		</SidebarHeaderDiv>
 	)
 }
-const SidebarHeaderDiv = styled.div`
+const SidebarHeaderDiv = pstyled.div`
 	:root
 		width: var(--sidebar-width)
 		position: relative
@@ -117,7 +117,7 @@ export function SidebarToggler() {
 		</SidebarTogglerDiv>
 	)
 }
-const SidebarTogglerDiv = styled.div`
+const SidebarTogglerDiv = pstyled.div`
 	:root
 		margin-right: 10px
 		margin-left: 10px
@@ -143,7 +143,7 @@ const SidebarTogglerDiv = styled.div`
 		display: block
 `
 
-const Nav = styled.nav`
+const Nav = pstyled.nav`
 	:root
 		visibility: visible
 	.miniSidebar :root

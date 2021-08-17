@@ -37,6 +37,7 @@ class Database {
 			this._db = this._remote
 		this.findCacheGarbageCollect()
 	}
+	static createId() {return nanoid()}
 	async sync() {
 		await this._db
 			.sync(this._remote, {retry: true})
@@ -53,11 +54,13 @@ class Database {
 	}
 	// Closes connections and frees memory. Doesn't delete local IndexedDB if exists.
 	close() {return this._db.close()}
+	// Gets record(s) from the database and converts date strings to dates
 	get<T extends IStandardFields>(id: string): Promise<T>
 	get<T extends IStandardFields>(ids: string[]): Promise<T[]>
 	get<T extends IStandardFields>(idOrIds: string | string[]): Promise<any> {
 		const getter = (id: string) => this._db
 			.get<T>(id, {})
+			.then(mapDateFields)
 			.catch(err => {throw err.status === 404 ? new NotFoundError(id) : err})
 		if (Array.isArray(idOrIds))
 			// The format for bulkGet is really strange, so just do brute force	
@@ -71,7 +74,7 @@ class Database {
 			createdAt: now,
 			...doc,
 			version: doc.version ? doc.version+1 : 0,
-			_id: doc._id || nanoid(),
+			_id: doc._id || Database.createId(),
 			updatedAt: now
 		}
 		return this._db
@@ -81,7 +84,7 @@ class Database {
 	setMany<T extends IStandardFieldsCreate>(docs: T[]) {
 		const now = new Date()
 		const docs2 = docs.map(doc => {
-			if (!doc._id) doc._id = nanoid()
+			if (!doc._id) doc._id = Database.createId()
 			if (!doc.createdAt) doc.createdAt = now
 			doc.updatedAt = now
 		})
@@ -133,14 +136,25 @@ class Database {
 		) {
 			if (typeof props.selector?._id === 'string')
 				cached.fetchP = this.get<T>(props.selector._id)
-					.then(doc => ({docs: [doc]}))
+					.then(doc => {
+						if (doc.deletedAt) throw new NotFoundError(props.selector!._id as string)
+						return {docs: [doc]}
+					})
 			else
 				cached.fetchP = this.get<T>(props.selector._id.$in as string[])
-					.then(docs => ({docs}))
+					.then(docs => ({docs: docs.filter(d => !d.deletedAt)}))
 		}
 		// Else do full search
 		else {
-			cached.fetchP = this._db.find({selector: {}, ...props as any})
+			const propsMapped = Object.clone({selector: {}, ...props as any})
+			if (!propsMapped.selector.deletedAt)
+				propsMapped.selector.deletedAt = {$exists: false}
+			cached.fetchP = this._db
+				.find(propsMapped)
+				.then(res => {
+					res.docs = res.docs.map(mapDateFields)
+					return res
+				})
 		}
 
 		cached.fetchP
@@ -196,7 +210,7 @@ class Database {
 			include_docs: true,
 			doc_ids: ids,
 		})
-			.on('change', ({doc}) => callback(doc))
+			.on('change', ({doc}) => callback(mapDateFields(doc)))
 			.on('complete', info => {
 				console.log(`changes(${ids}) was canceled`)
 			})
@@ -240,12 +254,27 @@ class DatabaseLoadingError extends Error {
 		super('Database is loading')
 	}
 }
+
+function mapDateFields(obj: any) {
+	for (const key of Object.keys(obj))
+		if (key.endsWith('At')) {
+			try {
+				// @ts-ignore: Unsure why TS thinks this key is broken.
+				obj[key] = new Date(obj[key])
+			} catch(e) {
+				e.orig = e
+				e.message = `Value of ${obj._id}:${key} is not a date string.`
+				throw e
+			}
+		}
+	return obj
+}
 export interface IStandardFieldsCreate {
 	_id?: string
 	type: string
 	createdAt?: Date
 	updatedAt?: Date
-	deletedAt?: Date | undefined
+	deletedAt?: Date
 	version: number
 }
 
@@ -260,7 +289,7 @@ export interface IStandardFields {
 	type: string
 	createdAt: Date
 	updatedAt: Date
-	deletedAt?: Date | undefined
+	deletedAt?: Date
 	version: number
 }
 

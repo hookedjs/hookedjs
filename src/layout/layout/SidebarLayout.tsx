@@ -2,7 +2,7 @@ import { ComponentChildren, h } from 'preact'
 
 import { useEffect, useRef } from '#lib/hooks'
 import {useMedia} from '#lib/hooks'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 import { ThemeStore } from '#src/stores'
 
 import BottomNav from '../components/BottomNav'
@@ -45,7 +45,7 @@ export default function SidebarLayout(p: {
 	}
 }
 
-const SidebarLayoutDiv = styled.div`
+const SidebarLayoutDiv = pstyled.div`
 	:root
 		--content-background: var(--sidebar-background)
 		--sidebarRight-width: 260px

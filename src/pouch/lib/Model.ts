@@ -1,14 +1,13 @@
-import { nanoid } from 'nanoid'
-
 import { assertValid, isDefined, isDefinedAndNotNull, ValueError } from '#src/lib/validation'
 
-import { IStandardFields, loadingDb } from './Database'
+import Database, { IStandardFields, loadingDb } from './Database'
 
 class PouchModel<ExtraFields extends Record<string, any>> {
 	static get db() {return loadingDb}
 	get db() {return loadingDb}
 	static type: IStandardFields['type'] = 'base'
 	type = PouchModel.type
+	
 	// indexes: A comma separated list of field names to index.
 	static indexes: string[] = []
 
@@ -30,28 +29,39 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 		const now = new Date()
 		Object.assign(
 			this,
-			{_id: data._id || nanoid(), createdAt: now, updatedAt: now, version: 0},
+			{_id: data._id || PouchModel.createId(), createdAt: now, updatedAt: now, version: 0},
 			data
 		)
+		this.valuesClean = this.values
 	}
 
-	extractSaveObject() {
-		return Object.omit(this, ['db'])
+	static createId() {return Database.createId()}
+
+	get values() {
+		return Object.clone(Object.omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])) as IStandardFields & ExtraFields
+	}
+	valuesClean: IStandardFields & ExtraFields
+	get isClean() {
+		return Object.equals(this.values, this.valuesClean)
+	}
+	get isDirty() {
+		return !this.isClean
 	}
 
 	async refresh() {
 		return Object.assign(this, await this.db.get(this._id))
 	}
-	// async save(): Promise<PouchModel<any> & ExtraFields> {
 	async save() {
 		await this.validate()
-		return Object.assign(this, await this.db.set(this.extractSaveObject()))
+		Object.assign(this, await this.db.set(this.values))
+		this.valuesClean = this.values
+		return this
 	}
 	async delete() {
-		return Object.assign(this, await this.db.delete(this.extractSaveObject()))
+		return Object.assign(this, await this.db.delete(this.values))
 	}
 	async deletePermanent() {
-		await this.db.deletePermanent(this.extractSaveObject())
+		await this.db.deletePermanent(this.values)
 	}
 	subscribe(callback: (doc: PouchModel<any> & ExtraFields) => any) {
 		return this.db.subscribe([this._id], doc => {
@@ -76,10 +86,26 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 	}
 
 	async isFieldUnique(fieldName: keyof this) {
-		return (await this.db.findOne<any>({selector: {[fieldName]: this[fieldName]}, limit: 1})).length ? false : true
+		const existing = await this.db.findOne<any>({selector: {[fieldName]: this[fieldName]}}).catch(() => null)
+		const isUnique =  !existing || existing._id === this._id
+		return isUnique
 	}
 	async validateFieldIsUnique(fieldName: keyof this, errorMessage?: string) {
 		return (await this.isFieldUnique(fieldName)) ? false : new ValueError(fieldName as string, errorMessage || `${fieldName} is invalid`)
+	}
+
+	static mockStandardFields: IStandardFields = {
+		_id: '72ff88753a64d9bb2cd014d7f803573b',
+		_rev: '72ff88753a64d9bb2cd014d7f803573b',
+		_revs_info: undefined,
+		_revisions: undefined,
+		_attachments: undefined,
+		_conflicts: undefined,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		deletedAt: undefined,
+		version: 0,
+		type: 'base',
 	}
 }
 export default PouchModel

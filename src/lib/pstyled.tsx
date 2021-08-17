@@ -18,7 +18,7 @@ const pcssFlag = true
  *
  * Returns the unique class name
  */
-export default function styled(strings: TemplateStringsArray, ...placeHolders: string[]) {
+export default function pstyled(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	let css = strings.map((s, i) => s + (placeHolders?.[i] ?? '')).join('')
 	const root = 's' + count++
 	css = css.replace(/:root/g, '.' + root)
@@ -36,86 +36,86 @@ export default function styled(strings: TemplateStringsArray, ...placeHolders: s
  */
 type Ref<T> = { current: T }
 type Props<T extends HTMLElement> = h.JSX.HTMLAttributes<T> & {forwardRef?: Ref<T>}
-styled.a = function a(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.a = function a(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLAnchorElement>) {
 		return <a {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.button = function button(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.button = function button(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLButtonElement>) {
 		return <button {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.div = function div(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.div = function div(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLDivElement>) {
 		return <div {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.pre = function pre(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.pre = function pre(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLPreElement>) {
 		return <pre {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.img = function img(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.img = function img(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLImageElement>) {
 		return <img {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.form = function div(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.form = function div(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLFormElement>) {
 		return <form {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.input = function input(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.input = function input(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLInputElement>) {
 		return <input {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.label = function label(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.label = function label(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLLabelElement>) {
 		return <label {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.nav = function nav(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.nav = function nav(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLElement>) {
 		return <nav {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}
 }
-styled.span = function span(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.span = function span(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLSpanElement>) {
 		return <span {...p} ref={p.forwardRef} class={combineClasses(root, p.class, p.className)} />
 	}
 }
-styled.table = function table(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.table = function table(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLTableElement>) {
 		return <table {...p} ref={p.forwardRef} class={combineClasses(root, p.class, p.className)} />
 	}
 }
-styled.td = function td(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.td = function td(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLTableDataCellElement>) {
 		return <td {...p} ref={p.forwardRef} class={combineClasses(root, p.class, p.className)} />
 	}
 }
-styled.tr = function tr(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.tr = function tr(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLTableRowElement>) {
 		return <tr {...p} ref={p.forwardRef} class={combineClasses(root, p.class, p.className)} />
 	}
 }
-styled.textarea = function textarea(strings: TemplateStringsArray, ...placeHolders: string[]) {
-	const root = styled`${assembleTemplateString(strings, placeHolders)}`
+pstyled.textarea = function textarea(strings: TemplateStringsArray, ...placeHolders: string[]) {
+	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLTextAreaElement>) {
 		return <textarea {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
 	}

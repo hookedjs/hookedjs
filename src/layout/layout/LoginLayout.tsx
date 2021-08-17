@@ -1,7 +1,7 @@
 import { h } from 'preact'
 
 import { useLayoutEffect } from '#lib/hooks'
-import styled from '#lib/styled'
+import pstyled from '#src/lib/pstyled'
 
 import { applyTheme, defaultTheme } from '../theme'
 
@@ -13,7 +13,7 @@ export default function LoginLayout({children}: any) {
 		</LoginLayoutInner>
 	</LoginLayoutOuter>
 }
-const LoginLayoutOuter = styled.div`
+const LoginLayoutOuter = pstyled.div`
 	:root
 		--background-color-light: hsl(var(--primary-h),var(--primary-s),70%)
 		--background-color-dark: hsl(var(--primary-h),var(--primary-s),30%)
@@ -32,7 +32,7 @@ const LoginLayoutOuter = styled.div`
 			--background-color: var(--background-color-dark)
 `
 
-const LoginLayoutInner = styled.div`
+const LoginLayoutInner = pstyled.div`
 	:root
 		z-index: 1
 		position: relative
@@ -53,6 +53,10 @@ const LoginLayoutInner = styled.div`
 		background-color: rgba(0,0,0,0%)
 		border: 2px solid var(--secondary)
 		color: white
+	:root [data-disabled="true"]>label
+		color: white
+	:root [data-disabled="true"]>input
+		border: 2px solid hsl(var(--secondary-h),var(--secondary-s),calc( var(--secondary-l) - 12% ))
 	:root label
 		background-color: var(--primary)
 		border: 1px solid var(--secondary)

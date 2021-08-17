@@ -192,13 +192,13 @@ export class AssertValidClass {
 	// Sets
 	isOneOf = (values: any[]) => 
 		!values.includes(this.attrValue) 
-		&& new ValueError(this.attrName, `${this.attrName} is not one of ${JSON.stringify(values)}`)
+		&& new ValueError(this.attrName, `${this.attrName} is invalid`)
 	isOneOfSet = (valueSet: Set<any>) => 
 		!valueSet.has(this.attrValue) 
-		&& new ValueError(this.attrName, `${this.attrName} is not one of ${JSON.stringify(Array.from(valueSet))}`)
+		&& new ValueError(this.attrName, `${this.attrName} is invalid`)
 	arrayValuesAreOneOfSet = (valueSet: Set<any>) => 
-		this.attrValue.some((e: any) => !valueSet.has(e)) 
-		&& new ValueError(this.attrName, `${this.attrName} selections must be one of ${JSON.stringify(Array.from(valueSet))}`)
+		this.attrValue.some((e: any) => !(e.length === 0 || valueSet.has(e)))
+		&& new ValueError(this.attrName, `${this.attrName} is invalid`)
 }
 
 export function assertValid(
