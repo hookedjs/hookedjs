@@ -382,7 +382,7 @@ export function ErrorMessage({ children, class: className = '', forwardRef, ...b
 
 export function SubmitButton({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLButtonElement> & {forwardRef?: Ref<any>}) {
 	return (
-		<button style={{marginBottom:'.3rem'}} class={`form-submit-button ${className}`} {...buttonProps} ref={forwardRef} type="submit">{children}</button>
+		<button style={{marginBottom:'.3rem'}} class={`primary large ${className}`} {...buttonProps} ref={forwardRef} type="submit">{children}</button>
 	)
 }
 

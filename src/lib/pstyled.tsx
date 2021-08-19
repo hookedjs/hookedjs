@@ -39,55 +39,55 @@ type Props<T extends HTMLElement> = h.JSX.HTMLAttributes<T> & {forwardRef?: Ref<
 pstyled.a = function a(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLAnchorElement>) {
-		return <a {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <a {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.button = function button(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLButtonElement>) {
-		return <button {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <button {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.div = function div(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLDivElement>) {
-		return <div {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <div {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.pre = function pre(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLPreElement>) {
-		return <pre {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <pre {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.img = function img(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLImageElement>) {
-		return <img {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <img {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.form = function div(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLFormElement>) {
-		return <form {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <form {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.input = function input(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLInputElement>) {
-		return <input {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <input {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.label = function label(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLLabelElement>) {
-		return <label {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <label {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.nav = function nav(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLElement>) {
-		return <nav {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <nav {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 pstyled.span = function span(strings: TemplateStringsArray, ...placeHolders: string[]) {
@@ -117,7 +117,7 @@ pstyled.tr = function tr(strings: TemplateStringsArray, ...placeHolders: string[
 pstyled.textarea = function textarea(strings: TemplateStringsArray, ...placeHolders: string[]) {
 	const root = pstyled`${assembleTemplateString(strings, placeHolders)}`
 	return function C(p: Props<HTMLTextAreaElement>) {
-		return <textarea {...p} ref={p.forwardRef} class={combineClasses(root,p.class,p.className)} />
+		return <textarea {...p} ref={p.forwardRef} class={combineClasses(root,p.class || p.className)} />
 	}
 }
 

@@ -1,9 +1,11 @@
-import {h} from 'preact'
+import {ComponentChildren, Fragment as F, h} from 'preact'
 
 import CmsTablePage from '#layout/components/CmsTablePage'
 import queryStrings from '#lib/queryStrings'
 import { getParentPath, RouteType } from '#lib/router'
-import { AuthUser, AuthUsers, AuthUserStatusEnum, useAuthUsersS } from '#src/pouch'
+import { portalPrompt } from '#src/layout/components/Portal'
+import pstyled from '#src/lib/pstyled'
+import { AuthUser, useAuthUsersS } from '#src/pouch'
 import { ToastStore } from '#src/stores'
 
 export default function UserList({ route }: { route: RouteType }) {
@@ -65,14 +67,47 @@ export default function UserList({ route }: { route: RouteType }) {
 	/>
 
 	async function deleteCb(selection: any[]) {
-		await Promise.all(selection.map((entry: AuthUser) => entry.delete()))
-		ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', location: 'right' })
-		await refetch()
+		const confirmed = await portalPrompt<boolean>(({resolve}) => (
+			<ConfirmPrompt resolve={resolve}>
+				<p>Okay to delete {selection.length} user(s)?</p>
+			</ConfirmPrompt>
+		))
+		if (confirmed) {
+			await Promise.all(selection.map((entry: AuthUser) => entry.delete()))
+			ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', location: 'right' })
+			await refetch()
+		}
 	}
 
 	async function banCb(selection: any[]) {
-		await Promise.all(selection.map((entry: AuthUser) => entry.ban('Banned by bulk action')))
-		ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', location: 'right' })
-		await refetch()
+		// TODO: Ban should prompt for reason
+		const confirmed = await portalPrompt<boolean>(({resolve}) => (
+			<ConfirmPrompt resolve={resolve}>
+				<p>Okay to ban {selection.length} user(s)?</p>
+			</ConfirmPrompt>
+		))
+		if (confirmed) {
+			await Promise.all(selection.map((entry: AuthUser) => entry.ban('Banned by bulk action')))
+			ToastStore.setValue({ message: `Banned ${selection.length} entries`, icon: 'success', location: 'right' })
+			await refetch()
+		}
 	}
 }
+
+function ConfirmPrompt({resolve, children = 'Are you sure?'}: {resolve: (res: boolean) => void, children?: ComponentChildren}) {
+	return (<div>
+		<div>{children}</div>
+		<ButtonGroup>
+			<button onClick={() => resolve(true)} class="primary large">Proceed</button>
+			<button onClick={() => resolve(false)} class="link">Cancel</button>
+		</ButtonGroup>
+	</div>)
+}
+
+const ButtonGroup = pstyled.div`
+	:root
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 2px;
+`

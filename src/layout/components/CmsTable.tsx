@@ -217,7 +217,6 @@ function PageButton(p: Pick<CmsTableProps, 'pages'> & { title: string, page: num
 function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseSet<CmsRow>}) {
 	const [action, setAction] = useState('-1')
 	const [executing, setExecuting] = useState(false)
-	const onClick = useCallback(_onClick, [action])
 	const onChange = useCallback((e: any) => setAction(e.target.value), [])
 	return (
 		<BulkActionsFormDiv>
@@ -229,7 +228,7 @@ function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseS
 		</BulkActionsFormDiv>
 	)
 
-	async function _onClick() {
+	async function onClick() {
 		if (action === '-1') return ToastStore.setValue({ message: 'No action selected', icon: 'error', location: 'bottom' })
 		if (!p.checked.size) return ToastStore.setValue({ message: 'No rows selected', icon: 'error', location: 'bottom' })
 		setExecuting(true)
@@ -237,7 +236,7 @@ function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseS
 		const callback = p.bulkOptions!.find(o => o.label === action)!.cb
 		const callbackP = async () => callback(selectionObjs)
 		await callbackP()
-		p.checked.reset()
+		// p.checked.reset()
 		setExecuting(false)
 	}
 }

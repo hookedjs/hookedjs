@@ -1,8 +1,8 @@
+import type { PortalProps } from './layout/components/Portal'
 import type { ToastProps } from './layout/components/Toast'
 import { navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
 import { AuthUserRoleEnum, login, LoginProps, logout, RegisterProps, TenantPersonRoleEnum, TenantPersons, UserProfiles } from './pouch'
-
 
 
 // AuthStore: user id and roles
@@ -81,6 +81,10 @@ export const ToastStore = new StateStore<ToastProps>({ location: 'right', messag
 export const useToastStore = ToastStore.use
 
 
+// PortalStore: display a Portal overlaying the page
+export const PortalStore = new StateStore<PortalProps>({ location: 'center', message: '' })
+export const usePortalStore = PortalStore.use
+
 
 // SidebarLeftStore: can be full | mini, persists to disk, and can be toggled with #sidebar-toggle event
 const bc = document.body.classList
@@ -109,4 +113,4 @@ navListener(() => SidebarRightStore.setValue(false))
 ThemeStore.subscribe(() => SidebarRightStore.setValue(false))
 
 
-Object.assign(window, {AuthStore, ToastStore, ThemeStore, SidebarLeftStore, SidebarRightStore})
+Object.assign(window, {AuthStore, PortalStore, ToastStore, ThemeStore, SidebarLeftStore, SidebarRightStore})

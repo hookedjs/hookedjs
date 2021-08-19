@@ -341,12 +341,56 @@ export interface IFullAttachment {
 export type IAttachment = IStubAttachment | IFullAttachment;
 
 export interface IFindProps<P extends Record<string, any>> {
-	selector?: Partial<P> | Partial<Record<keyof P, Partial<Record<ISelectorFilter, any>>>>
+	// selector?: Partial<P> | Partial<Record<keyof P, Partial<Record<ISelectorFilter, any>>>>
+	selector?: ISelector<P>
 	fields?: (keyof P)[]
 	sort?: [Partial<Record<keyof P, 'asc' | 'desc'>>]
 	limit?: number
 	skip?: number
 	useIndex?: string
 }
-type ISelectorFilter = '$lt' | '$gt' | '$lte' | '$gte' | '$eq' | '$ne' | '$exists' | '$type' | '$in' | '$and' | '$nin' | '$all' | '$size' | '$or' | '$nor' | '$not' | '$mod' | '$regex' | '$elemMatch'
 
+type ISelector<P extends Record<string, any>> = 
+	Partial<P> 
+	| {
+		[KEY in keyof P]?: Partial<{
+			// $lt Match fields “less than” this one.
+			$lt?: P[KEY],
+			// $gt Match fields “greater than” this one.
+			$gt?: P[KEY],
+			// $lte Match fields “less than or equal to” this one.
+			$lte?: P[KEY],
+			// $gte Match fields “greater than or equal to” this one.
+			$gte?: P[KEY],
+			// $eq Match fields equal to this one.
+			$eq?: P[KEY],
+			// $ne Match fields not equal to this one.
+			$ne?: P[KEY],
+			// $exists True if the field should exist, false otherwise.
+			$exists?: boolean,
+			// $type One of: “null”, “boolean”, “number”, “string”, “array”, or “object”.
+			$type?: 'null' | 'boolean' | 'number' | 'string' | 'array' | 'object',
+			// $in The document field must exist in the list provided.
+			$in?: P[KEY][],
+			// $and Matches if all the selectors in the array match.
+			$and?: ISelector<P>[],
+			// $nin The document field must not exist in the list provided.
+			$nin?: P[KEY][],
+			// $all Matches an array value if it contains all the elements of the argument array.
+			$all?: any,
+			// $size Special condition to match the length of an array field in a document.
+			$size?: number,
+			// $or Matches if any of the selectors in the array match. All selectors must use the same index.
+			$or?: ISelector<P>[],
+			// $nor Matches if none of the selectors in the array match.
+			$nor?: ISelector<P>[],
+			// $not Matches if the given selector does not match.
+			$not?: ISelector<P>,
+			// $mod Matches documents where (field % Divisor == Remainder) is true, and only when the document field is an integer.
+			$mod?: number,
+			// $regex A regular expression pattern to match against the document field.
+			$regex?: string,
+			// $elemMatch Matches all documents that contain an array field with at least one element that matches all the specified query criteria.
+			$elemMatch?: any,
+		}>
+	}

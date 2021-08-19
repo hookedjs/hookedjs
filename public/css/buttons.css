@@ -40,10 +40,9 @@ a.button { /* try to match button */
 
 
 button.large, a.button.large {
-	font-size: 1.2rem;
-	padding: .7rem .8rem;
+	font-size: 1.3rem;
+	padding: .6rem .8rem;
 	height: auto;
-	border: none;
 }
 
 button:hover, a.button:hover {
@@ -67,7 +66,7 @@ button:disabled, button[data-disabled="true"], a.button[data-disabled="true"] {
 button.primary, a.button.primary {
   color: white;
   background: var(--primary);
-  border: 1px solid var(--primary);
+  border: 1px solid var(--gray6);
 }
 button.primary:hover, a.button.primary:hover {
   background: var(--primary-hover);
@@ -79,4 +78,12 @@ button.secondary, a.button.secondary {
 }
 button.secondary:hover, a.button.secondary:hover {
   background: var(--secondary-hover);
+}
+button.link, a.button.link {
+  color: var(--links);
+  background: none;
+  border: 1px solid #0000;
+}
+button.link:hover, a.button.link:hover {
+  background: var(--gray2);
 }

@@ -1,6 +1,7 @@
 import { Fragment, h } from 'preact'
 
 import {ErrorBoundary, UnhandledErrorNotification} from './layout/components/ErrorBoundaries'
+import { PortalFromContext } from './layout/components/Portal'
 import Toast, { ToastFromContext } from './layout/components/Toast'
 import { RouterComponent as Router } from './lib/router'
 import { DbProvider } from './pouch'
@@ -13,6 +14,7 @@ export default function App() {
 				<StaleBrowserWarning />
 				<UnhandledErrorNotification />
 				<Router routesByPath={routesByPath} />
+				<PortalFromContext />
 				<ToastFromContext />
 			</DbProvider>
 		</ErrorBoundary>

@@ -2,7 +2,6 @@ import {ComponentChildren, h} from 'preact'
 
 import { useEffect, useLayoutEffect, useRef } from '#lib/hooks'
 import * as i from '#lib/icons'
-import { useMedia } from '#src/lib/hooks'
 import pstyled from '#src/lib/pstyled'
 import { useToastStore } from '#src/stores'
 
@@ -22,7 +21,7 @@ export interface ToastProps {
 }
 export default function Toast(p: ToastProps) {
 	const ref = useRef<any>(null)
-	const isWide = useMedia('(min-width: 700px)')
+	// const isWide = useMedia('(min-width: 700px)')
 
 	let Icon = p.icon!
 	if (Icon === 'success') Icon = i.Success
@@ -34,7 +33,7 @@ export default function Toast(p: ToastProps) {
 
 	
 
-	return <ToastOuter class={`${p.location} _hidden ${typeof p.icon === 'string' ? p.icon : ''}`} ref={ref}>
+	return <ToastOuter data-location={p.location} class={`_hidden ${typeof p.icon === 'string' ? p.icon : ''}`} ref={ref}>
 		<div>
 			<div data-icon={!!p.icon}>
 				{!!p.icon && <div><Icon size={p.iconSize ?? 40} /></div>}
@@ -83,28 +82,28 @@ const ToastOuter = pstyled.div`
 		transition: right.06s linear
 	:root.animatedOut
 		transition: bottom .3s linear, right .2s linear, opacity .4s linear
-	:root.bottom
+	:root[data-location="bottom"]
 		bottom:10px
 		left:0
 		width:100%
 		text-align:center
-	:root.bottom._hidden
+	:root[data-location="bottom"]._hidden
 		bottom: -100px
-	:root.right
+	:root[data-location="right"]
 		top:60px
 		right:10px
 		border-radius: 6px
 	@media (max-width: 700px)
-		:root.right
+		:root[data-location="right"]
 			top:10px
-	:root.right._hidden
+	:root[data-location="right"]._hidden
 		right:-330px
-	:root.center
+	:root[data-location="center"]
 		top:150px
 		left:0
 		width:100%
 		text-align:center
-	:root.center._hidden
+	:root[data-location="center"]._hidden
 		opacity:0
 	:root>div
 		max-width:330px
@@ -113,8 +112,8 @@ const ToastOuter = pstyled.div`
 		display:inline-block
 		color:#fff
 		border-radius: 6px
-	:root.center>div,
-	:root.bottom>div
+	:root[data-location="center"]>div,
+	:root[data-location="bottom"]>div
 		min-width: 230px
 	:root.success>div
 		background: var(--success)
