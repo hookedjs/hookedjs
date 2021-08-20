@@ -49,7 +49,7 @@ function ErrorC() {
 	return (
 		<Toast 
 			icon="error" 
-			location="bottom" 
+			placement="bottom" 
 			duration={-1} 
 			message={<span>
 				Something went wrong on this page! Shoot. Maybe&nbsp;

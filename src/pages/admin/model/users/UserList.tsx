@@ -3,7 +3,7 @@ import {ComponentChildren, Fragment as F, h} from 'preact'
 import CmsTablePage from '#layout/components/CmsTablePage'
 import queryStrings from '#lib/queryStrings'
 import { getParentPath, RouteType } from '#lib/router'
-import { portalPrompt } from '#src/layout/components/Portal'
+import Portal from '#src/layout/components/Portal'
 import pstyled from '#src/lib/pstyled'
 import { AuthUser, useAuthUsersS } from '#src/pouch'
 import { ToastStore } from '#src/stores'
@@ -67,41 +67,43 @@ export default function UserList({ route }: { route: RouteType }) {
 	/>
 
 	async function deleteCb(selection: any[]) {
-		const confirmed = await portalPrompt<boolean>(({resolve}) => (
+		const confirmed = await Portal.prompt<boolean>(({resolve}) => (
 			<ConfirmPrompt resolve={resolve}>
 				<p>Okay to delete {selection.length} user(s)?</p>
 			</ConfirmPrompt>
 		))
 		if (confirmed) {
 			await Promise.all(selection.map((entry: AuthUser) => entry.delete()))
-			ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', location: 'right' })
+			ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', placement: 'right' })
 			await refetch()
 		}
 	}
 
 	async function banCb(selection: any[]) {
 		// TODO: Ban should prompt for reason
-		const confirmed = await portalPrompt<boolean>(({resolve}) => (
+		const confirmed = await Portal.prompt<boolean>(({resolve}) => (
 			<ConfirmPrompt resolve={resolve}>
 				<p>Okay to ban {selection.length} user(s)?</p>
 			</ConfirmPrompt>
 		))
 		if (confirmed) {
 			await Promise.all(selection.map((entry: AuthUser) => entry.ban('Banned by bulk action')))
-			ToastStore.setValue({ message: `Banned ${selection.length} entries`, icon: 'success', location: 'right' })
+			ToastStore.setValue({ message: `Banned ${selection.length} entries`, icon: 'success', placement: 'right' })
 			await refetch()
 		}
 	}
 }
 
 function ConfirmPrompt({resolve, children = 'Are you sure?'}: {resolve: (res: boolean) => void, children?: ComponentChildren}) {
-	return (<div>
-		<div>{children}</div>
-		<ButtonGroup>
-			<button onClick={() => resolve(true)} class="primary large">Proceed</button>
-			<button onClick={() => resolve(false)} class="link">Cancel</button>
-		</ButtonGroup>
-	</div>)
+	return (
+		<div>
+			<div>{children}</div>
+			<ButtonGroup>
+				<button onClick={() => resolve(true)} class="primary large">Proceed</button>
+				<button onClick={() => resolve(false)} class="link">Cancel</button>
+			</ButtonGroup>
+		</div>
+	)
 }
 
 const ButtonGroup = pstyled.div`

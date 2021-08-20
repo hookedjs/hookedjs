@@ -37,7 +37,7 @@ export default function FillerCreateFactory({ route }: { route: RouteType }) {
 
 	async function _onSubmit(formValues: FormJson) {
 		const values = new CreateProps(formValues)
-		ToastStore.setValue({message: 'Record created!', icon: 'success', duration: 3e3, location: 'right'})
+		ToastStore.setValue({message: 'Record created!', icon: 'success', duration: 3e3, placement: 'right'})
 		window.dispatchEvent(new Event('#stack-pop'))
 		nav(parent + '/home', { replace: true }) 
 	}

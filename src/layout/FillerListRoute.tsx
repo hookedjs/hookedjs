@@ -22,7 +22,7 @@ export default function FillerListFactory({ route }: { route: RouteType }) {
 			{ label: 'Administrator', value: 'admin', count: 16 },
 		]}
 		bulkOptions={[
-			{ label: 'Delete', cb(selection) { ToastStore.setValue({ message: `Deleted ${selection.length} items`, icon: 'success', location: 'right' }) } }
+			{ label: 'Delete', cb(selection) { ToastStore.setValue({ message: `Deleted ${selection.length} items`, icon: 'success', placement: 'right' }) } }
 		]}
 		pages={4}
 		total={16}

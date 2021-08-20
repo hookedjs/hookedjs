@@ -110,7 +110,7 @@ function SearchForm() {
 		const q = qs.parse()
 		const next = new FormData(e.target).get('search')
 		if (next === (q.search || ''))
-			ToastStore.setValue({ message: 'Search query hasn\'t changed', icon: 'error', location: 'bottom' })
+			ToastStore.setValue({ message: 'Search query hasn\'t changed', icon: 'error', placement: 'bottom' })
 		else
 			nav(qs.create({ search: next ? next : undefined, page: undefined }, { upsert: true }), {replace: true})
 	}
@@ -209,7 +209,7 @@ function PageButton(p: Pick<CmsTableProps, 'pages'> & { title: string, page: num
 	function _onClick(e: any) {
 		if (p.pageTo === p.page) {
 			e.preventDefault()
-			ToastStore.setValue({ message: `You're already on the ${p.pageTo === 1 ? 'first' : 'last'} page`, icon: 'error', location: 'bottom' })
+			ToastStore.setValue({ message: `You're already on the ${p.pageTo === 1 ? 'first' : 'last'} page`, icon: 'error', placement: 'bottom' })
 		}
 	}
 }
@@ -229,8 +229,8 @@ function BulkActionsForm(p: Pick<CmsTableProps, 'bulkOptions'> & { checked: UseS
 	)
 
 	async function onClick() {
-		if (action === '-1') return ToastStore.setValue({ message: 'No action selected', icon: 'error', location: 'bottom' })
-		if (!p.checked.size) return ToastStore.setValue({ message: 'No rows selected', icon: 'error', location: 'bottom' })
+		if (action === '-1') return ToastStore.setValue({ message: 'No action selected', icon: 'error', placement: 'bottom' })
+		if (!p.checked.size) return ToastStore.setValue({ message: 'No rows selected', icon: 'error', placement: 'bottom' })
 		setExecuting(true)
 		const selectionObjs = Array.from(p.checked.current).map(o => o.obj)
 		const callback = p.bulkOptions!.find(o => o.label === action)!.cb

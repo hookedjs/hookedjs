@@ -57,7 +57,7 @@ export default function Login() {
 	async function _onSubmit(formValues: FormJson) {
 		const values = new LoginProps(formValues)
 		await AuthStore.login(values)
-		ToastStore.setValue({ message: 'Welcome to Stacks!', location: 'right' })
+		ToastStore.setValue({ message: 'Welcome to Stacks!', placement: 'right' })
 	}
 }
 const LoginDiv = pstyled.div`

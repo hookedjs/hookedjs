@@ -13,7 +13,7 @@ export function ToastFromContext() {
 }
 
 export interface ToastProps {
-	location: 'right' | 'bottom' | 'center',
+	placement: 'right' | 'bottom' | 'center',
 	message: ComponentChildren,
 	duration?: number,
 	icon?: 'success' | 'warning' | 'error' | i.IconComponentType,
@@ -33,7 +33,7 @@ export default function Toast(p: ToastProps) {
 
 	
 
-	return <ToastOuter data-location={p.location} class={`_hidden ${typeof p.icon === 'string' ? p.icon : ''}`} ref={ref}>
+	return <ToastOuter data-placement={p.placement} class={`_hidden ${typeof p.icon === 'string' ? p.icon : ''}`} ref={ref}>
 		<div>
 			<div data-icon={!!p.icon}>
 				{!!p.icon && <div><Icon size={p.iconSize ?? 40} /></div>}
@@ -46,7 +46,7 @@ export default function Toast(p: ToastProps) {
 		ref.current.base.classList.remove('animatedIn')
 		ref.current.base.classList.remove('animatedOut')
 		ref.current.base.style.display = 'none'
-		if (p.location === 'right')
+		if (p.placement === 'right')
 			ref.current.base.classList.add('_hidden')
 		if (timeouts.size) {
 			timeouts.forEach(t => clearTimeout(t))
@@ -82,28 +82,28 @@ const ToastOuter = pstyled.div`
 		transition: right.06s linear
 	:root.animatedOut
 		transition: bottom .3s linear, right .2s linear, opacity .4s linear
-	:root[data-location="bottom"]
+	:root[data-placement="bottom"]
 		bottom:10px
 		left:0
 		width:100%
 		text-align:center
-	:root[data-location="bottom"]._hidden
+	:root[data-placement="bottom"]._hidden
 		bottom: -100px
-	:root[data-location="right"]
+	:root[data-placement="right"]
 		top:60px
 		right:10px
 		border-radius: 6px
 	@media (max-width: 700px)
-		:root[data-location="right"]
+		:root[data-placement="right"]
 			top:10px
-	:root[data-location="right"]._hidden
+	:root[data-placement="right"]._hidden
 		right:-330px
-	:root[data-location="center"]
+	:root[data-placement="center"]
 		top:150px
 		left:0
 		width:100%
 		text-align:center
-	:root[data-location="center"]._hidden
+	:root[data-placement="center"]._hidden
 		opacity:0
 	:root>div
 		max-width:330px
@@ -112,8 +112,8 @@ const ToastOuter = pstyled.div`
 		display:inline-block
 		color:#fff
 		border-radius: 6px
-	:root[data-location="center"]>div,
-	:root[data-location="bottom"]>div
+	:root[data-placement="center"]>div,
+	:root[data-placement="bottom"]>div
 		min-width: 230px
 	:root.success>div
 		background: var(--success)

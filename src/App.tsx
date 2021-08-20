@@ -31,7 +31,7 @@ export default function App() {
 			? <Fragment />
 			: <Toast
 				icon="error"
-				location="bottom"
+				placement="bottom"
 				duration={-1}
 				message={<span>Please use a modern browser and/or update. Internet Explorer is <i>not</i> supported.</span>}
 			/>

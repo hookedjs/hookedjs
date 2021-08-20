@@ -1,11 +1,40 @@
-import { StateUpdater, useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'preact/hooks'
+import { Inputs, StateUpdater, useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'preact/hooks'
 export * from 'preact/hooks'
+
+/**
+ * useClickAway: Triggers a callback when user clicks outside the target element.
+ * Ex. useClickAway(ref, callback);
+ */
+export function useClickAway<E extends Event = Event>(
+	ref: Ref<HTMLElement | null>,
+	onDismiss: (event: E) => void,
+	events: string[] = useClickAway.defaultEvents
+) {
+	const savedCallback = useRef(onDismiss)
+	useEffect(() => {savedCallback.current = onDismiss}, [onDismiss])
+	useEffect(() => {
+		const handler = (event: any) => {
+			const { current: el } = ref
+			el && !el.contains(event.target) && savedCallback.current(event)
+		}
+		for (const eventName of events) {
+			document.addEventListener(eventName, handler)
+		}
+		return () => {
+			for (const eventName of events) {
+				document.removeEventListener(eventName, handler)
+			}
+		}
+	}, [events, ref])
+}
+useClickAway.defaultEvents = ['mousedown', 'touchstart']
+
 
 /**
  * useEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useEffectDeep(callback: Fnc, varsToWatch: any[]) {
+export function useEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
 	const lastSeenProps = useRef('')
 	useEffect(watchProps, [varsToWatch])
 
@@ -19,10 +48,83 @@ export function useEffectDeep(callback: Fnc, varsToWatch: any[]) {
 }
 
 /**
+ * useEvent: subscribes a handler to events.
+ * Ex. useEvent('keydown', callback); (also see useKey)
+ */
+export function useEvent<T extends UseEventTarget>(
+	name: Parameters<AddEventListener<T>>[0],
+	handler?: null | undefined | Parameters<AddEventListener<T>>[1],
+	target: null | T | Window = window,
+	options?: UseEventOptions<T>
+) {
+	useEffect(() => {
+		if (!handler) return
+		if (!target) return
+		target.addEventListener(name, handler, options)
+		return () => {target.removeEventListener(name, handler, options)}
+	}, [name, handler, target, JSON.stringify(options)])
+}
+export interface ListenerType1 {
+  addEventListener(name: string, handler: (event?: any) => void, ...args: any[]): void;
+  removeEventListener(name: string, handler: (event?: any) => void, ...args: any[]): void;
+}
+export type UseEventTarget = ListenerType1
+type AddEventListener<T> = T extends ListenerType1
+  ? T['addEventListener']
+  : never;
+export type UseEventOptions<T> = Parameters<AddEventListener<T>>[2];
+
+
+
+/**
+ * executes a handler when a keyboard key is used. 
+ * Ex. useKey('ArrowUp', callback);
+ */
+export function useKey<T extends UseEventTarget>(
+	key: KeyFilter,
+	fn: Handler = () => {},
+	opts: UseKeyOptions<T> = {},
+	deps: Inputs = [key]
+) {
+	const { event = 'keydown', target, options } = opts
+	const useMemoHandler = useMemo(() => {
+		const predicate: KeyPredicate = useKey.createKeyPredicate(key)
+		const handler: Handler = (handlerEvent) => {
+			if (predicate(handlerEvent)) return fn(handlerEvent)
+		}
+		return handler
+	}, deps)
+	useEvent(event, useMemoHandler, target, options)
+}
+useKey.codes = {
+	Esc: 27,
+}
+useKey.createKeyPredicate = (keyFilter: KeyFilter): KeyPredicate =>
+	typeof keyFilter === 'function'
+		? keyFilter
+		: typeof keyFilter === 'string'
+			? (event: KeyboardEvent) => event.key === keyFilter
+			: keyFilter
+				? () => true
+				: () => false
+export type KeyPredicate = (event: KeyboardEvent) => boolean;
+export type KeyFilter = null | undefined | string | number | ((event: KeyboardEvent) => boolean);
+export type Handler = (event: KeyboardEvent) => void;
+export interface UseKeyOptions<T extends UseEventTarget> {
+	event?: 'keydown' | 'keypress' | 'keyup';
+	target?: T | null;
+	options?: UseEventOptions<T>;
+}
+
+
+
+
+
+/**
  * useLayoutEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useLayoutEffectDeep(callback: Fnc, varsToWatch: any[]) {
+export function useLayoutEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
 	const lastSeenProps = useRef('')
 	useLayoutEffect(watchProps, [varsToWatch])
 
@@ -39,7 +141,7 @@ export function useLayoutEffectDeep(callback: Fnc, varsToWatch: any[]) {
  * useEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useMemoDeep(callback: Fnc, varsToWatch: any[]) {
+export function useMemoDeep(callback: Fnc, varsToWatch: Inputs[]) {
 	const [lastSeenProps, setLastSeenProps] = useState(JSON.stringify(varsToWatch))
 	useEffect(watchProps, [varsToWatch])
 	return useMemo(callback, [lastSeenProps])

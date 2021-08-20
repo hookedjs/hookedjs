@@ -16,7 +16,7 @@ export const AuthStore = Object.assign(
 			StackHistoriesReset()
 			RouteHistoryReset()
 			await logout()
-			ToastStore.setValue({ message: 'You\'ve been logged out.', location: 'right' })
+			ToastStore.setValue({ message: 'You\'ve been logged out.', placement: 'right' })
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
@@ -77,12 +77,12 @@ window.addEventListener('#theme-toggle', ThemeStore.toggle)
 
 
 // ToastStore: display a Toast at the bottom or right of the page
-export const ToastStore = new StateStore<ToastProps>({ location: 'right', message: '', duration: 2e3 })
+export const ToastStore = new StateStore<ToastProps>({ placement: 'right', message: '', duration: 2e3 })
 export const useToastStore = ToastStore.use
 
 
 // PortalStore: display a Portal overlaying the page
-export const PortalStore = new StateStore<PortalProps>({ location: 'center', message: '' })
+export const PortalStore = new StateStore<PortalProps>({ placement: 'top', message: '' })
 export const usePortalStore = PortalStore.use
 
 
