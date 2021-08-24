@@ -93,16 +93,12 @@ export const routes = Object.freeze({
 		path: '/dashboard',
 		Component: () => {
 			const [auth] = useAuthStore()
-			if (!auth.username)
+			if (!auth.name)
 				nav(Paths.Login)
-			
-			else if (auth.dbRoles?.includes(AuthStore.dbRoles.ADMIN))
+			else if (isAdmin())
 				nav(Paths.AdminRoot, { replace: true })
-			
-			else if (auth.tRoles?.includes(AuthStore.tRoles.ADMIN))
+			else if(isTenant())
 				nav(Paths.TenantRoot, { replace: true })
-			else if(auth.tRoles?.length)
-				alert(`Unexpected Role(s): ${auth.tRoles}`)
 			else
 				nav(Paths.TenantSwitcher, { replace: true })
 			
@@ -419,6 +415,6 @@ export const routesByPath = Object.fromEntries(Object.values(routes).map(r => [r
 export const Paths: Record<keyof typeof routes, string> = Object.fromEntries(Object.entries(routes).map(([name, r]) => [name, r.path]))
 
 
-function isLoggedIn() { return !!AuthStore.value.username }
-function isAdmin() { return AuthStore.value.dbRoles.includes(AuthStore.dbRoles.ADMIN) }
+function isLoggedIn() { return !!AuthStore.value.name }
+function isAdmin() { return AuthStore.value.roles.includes(AuthStore.dbRoles.ADMIN) }
 function isTenant() { return AuthStore.value.tRoles.length > 0}

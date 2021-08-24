@@ -1,9 +1,10 @@
-import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull } from '#src/lib/validation'
+import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
 
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
+import { readAuth } from '..'
 import db from '../db'
 
 export interface IAuthUserExtra {
@@ -13,13 +14,14 @@ export interface IAuthUserExtra {
 	iterations?: number
 	derived_key?: string
 	salt?: string
+	bannedAt?: Date
+	bannedReason?: string
 	givenName: string
 	surname: string
 	roles: AuthUserRoleEnum[]
 	status: AuthUserStatusEnum
-	bannedAt?: Date
-	bannedReason?: string
-	tenants: string[]
+	tenants: {id: string, name: string}[],
+	defaultTenantId?: string
 }
 export interface IAuthUser extends IStandardFields, IAuthUserExtra {}
 
@@ -37,13 +39,14 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	iterations: IAuthUserExtra['iterations']
 	derived_key: IAuthUserExtra['derived_key']
 	salt: IAuthUserExtra['salt']
+	bannedAt: IAuthUserExtra['bannedAt']
+	bannedReason: IAuthUserExtra['bannedReason']
 	givenName: IAuthUserExtra['givenName']
 	surname: IAuthUserExtra['surname']
 	roles: IAuthUserExtra['roles']
 	status: IAuthUserExtra['status']
-	bannedAt: IAuthUserExtra['bannedAt']
-	bannedReason: IAuthUserExtra['bannedReason']
 	tenants: IAuthUserExtra['tenants']
+	defaultTenantId: IAuthUserExtra['defaultTenantId']
 
 	get fullName() {return `${this.givenName} ${this.surname}`}
 
@@ -51,12 +54,13 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 		return assertValidSet<IStandardFields & IAuthUserExtra>(this, {
 			...this.baseValidations(),
 			_id: assertValid('_id', this._id, ['isRequired', 'isString'], { isEqual: {expected: `org.couchdb.user:${this.name}`} }),
-			name: assertValid('email', this.name, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
+			name: assertValid('name', this.name, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
 				// This doesn't work for AuthUser, because _id is computered from name :-/
 				// await this.validateFieldIsUnique('name', 'email is already claimed')
+				this.name !== this.valuesClean.name && new ValueError('email cannot be changed')
 			]),
 			type: assertValid('type', this.type, [], {isEqual: {expected: AuthUser.type, message: `type must be ${AuthUser.type}`}}),
-			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isRequired', 'isString', 'isTruthy', 'isPassword']),
+			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isRequired', 'isString', 'isPassword']),
 			password_scheme: false,
 			iterations: false,
 			derived_key: false,
@@ -68,6 +72,7 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 			bannedReason: isDefined(this.bannedReason) && assertValid('bannedReason', this.bannedReason, ['isRequired', 'isString', 'isTruthy']),
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray'], { arrayValuesAreOneOfSet: AuthUserRoleSet }),
 			tenants: assertValid('tenants', this.tenants, ['isRequired', 'isArray']),
+			defaultTenantId: assertValid('defaultTenantId', this.defaultTenantId, ['isRequired', 'isString']),
 		})
 	}
 
@@ -81,6 +86,11 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 
 class AuthUserCollection extends PouchCollection<AuthUser> {
 	model = AuthUser
+
+	async getCurrent() {
+		const name = readAuth()?.name ?? throwForbiddenError()
+		return this.get(`org.couchdb.user:${name}`)
+	}
 }
 export const AuthUsers = new AuthUserCollection()
 
@@ -99,13 +109,16 @@ export enum AuthUserStatusEnum {
 export const AuthUserStatusSet = new Set(Enum.getEnumValues(AuthUserStatusEnum))
 
 export const AuthUserExampleCreateFields: IAuthUserExtra = {
-	name: 'test@hookedjs.org',
-	password: '',
-	surname: 'test',
-	givenName: 'test',
+	name: 'sallyfields@hookedjs.org',
+	password: 'Password8',
+	bannedAt: undefined,
+	bannedReason: undefined,
+	surname: 'Sally',
+	givenName: 'Fields',
 	roles: [],
 	status: AuthUserStatusEnum.ACTIVE,
 	tenants: [],
+	defaultTenantId: undefined,
 }
 
 export const AuthUserExampleFields: IAuthUser = {

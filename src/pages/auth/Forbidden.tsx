@@ -16,7 +16,7 @@ export default function Forbidden() {
 			<h1>You lack access to this record.</h1>
 			<br />
 			<a href={Paths.Home}>Home</a>&nbsp;&nbsp;&nbsp;
-			{auth.username
+			{auth.name
 				? <a href={LoginUrl} onClick={onSwitchClick}>Switch User</a>
 				: <a href={LoginUrl}>Login</a>
 			}

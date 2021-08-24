@@ -30,7 +30,7 @@ export default function FillerCreateFactory({ route }: { route: RouteType }) {
 					error={errors[CreatePropsEnum.title]?.note}
 				/>
 				<SubmitButton>Submit</SubmitButton>
-				<ErrorMessage>{errors.form?.note}</ErrorMessage>
+				<ErrorMessage errors={errors}/>
 			</Form.Component>
 		</Section>
 	</PaddedPage>

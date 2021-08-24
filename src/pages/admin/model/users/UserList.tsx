@@ -61,7 +61,7 @@ export default function UserList({ route }: { route: RouteType }) {
 				<a href={`mailto:${obj.name}`}>{obj.name}</a>,
 				obj.status,
 				obj.roles.join(),
-				obj.tenants.join(),
+				obj.tenants.map(t => t.name).join(),
 			]
 		}))}
 	/>

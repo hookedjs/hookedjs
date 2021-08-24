@@ -1,4 +1,4 @@
-import { Fragment as F, h } from 'preact'
+import { ComponentChildren, h } from 'preact'
 
 import PaddedPage from '#layout/components/PaddedPage'
 import Section from '#layout/components/Section'
@@ -7,8 +7,8 @@ import {PageMetaStore, RouteType} from '#lib/router'
 import CodeSnippet from '#src/layout/components/CodeSnippet'
 import { ErrorMessage, InputField, SubmitButton, useForm } from '#src/lib/forms'
 import { useCallback } from '#src/lib/hooks'
-import { throwValidationErrorSet, ValueError } from '#src/lib/validation'
-import { AuthUser, AuthUserFieldsEnum, AuthUsers, AuthUserStatusEnum, IAuthUserExtra, useAuthUserS } from '#src/pouch'
+import { AuthUser, AuthUserFieldsEnum, AuthUserStatusEnum, IAuthUserExtra, useAuthUserS } from '#src/pouch'
+import type { IStandardFields } from '#src/pouch/lib/Database'
 import { ToastStore } from '#src/stores'
 
 export default function UserEntry({ route }: { route: RouteType }) {
@@ -36,10 +36,10 @@ export default function UserEntry({ route }: { route: RouteType }) {
 
 	return <PaddedPage>
 		<Section header1={route.title} backButton>
-			<Form.Component onSubmitJson={onSubmit}>
+			<Form.Component onSubmitJson={onSubmit as any}>
 				{Fields()}
 				<SubmitButton>{id ? 'Save' : 'Submit'}</SubmitButton>
-				<ErrorMessage>{errors.form?.note}</ErrorMessage>
+				<ErrorMessage errors={errors}/>
 			</Form.Component>
 		</Section>
 
@@ -48,24 +48,31 @@ export default function UserEntry({ route }: { route: RouteType }) {
 		</Section>}
 	</PaddedPage>
 
-	async function onSubmitCb(formValues: any) {
-		if ('password' in formValues && !formValues.password) delete formValues.password
+	async function onSubmitCb(formValues: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & IAuthUserExtra), any>) {
+		// _id is calculated from name in _users
 		formValues._id = 'org.couchdb.user:' + formValues.name
+		
+		// Map fields
+		formValues.tenants = JSON.parse(formValues.tenants)
+
+		// Scrub optional fields that are empty
+		if (!formValues.deletedAt) delete formValues.deletedAt
+		if (!formValues.password) delete formValues.password
+		if (!formValues.password_scheme) delete formValues.password_scheme
+		if (!formValues.iterations) delete formValues.iterations
+		if (!formValues.derived_key) delete formValues.derived_key
+		if (!formValues.salt) delete formValues.salt
+		if (!formValues.bannedAt) delete formValues.bannedAt
+		if (!formValues.bannedReason) delete formValues.bannedReason
+		
 		Object.assign(entry, formValues)
-		if (entry.isDirty) {
-			// If email has changed, verify that it's not already taken
-			if (entry.name !== entry.valuesClean.name) {
-				if (await AuthUsers.get(formValues._id).catch(() => {}))
-					throwValidationErrorSet(entry, {name: new ValueError('name', 'email is already claimed')})
-			}
-			await entry.save()
-		}
+		await entry.save()
 		ToastStore.setValue({message: 'Record saved!', icon: 'success', duration: 3e3, placement: 'right'})
 		window.dispatchEvent(new Event('#stack-back'))
 	}
 
 	function Fields() {
-		const fields: Record<'_id' & keyof IAuthUserExtra, any> = {
+		const fields: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & IAuthUserExtra), ComponentChildren> = {
 			_id: <InputField
 				name={AuthUserFieldsEnum._id}
 				labelText="_id"
@@ -76,14 +83,14 @@ export default function UserEntry({ route }: { route: RouteType }) {
 			name: <InputField
 				name={AuthUserFieldsEnum.name}
 				labelText="Email"
-				inputProps={{autoFocus: !id, defaultValue: entry.name}}
+				inputProps={{autoFocus: !id, type: 'email', defaultValue: entry.name}}
 				disabled={!!id || submitting}
 				error={errors[AuthUserFieldsEnum.name]?.note}
 			/>,
 			password: <InputField
 				name={AuthUserFieldsEnum.password}
 				labelText="Password"
-				inputProps={{autoFocus: !!id, type: 'password', defaultValue: entry.password}}
+				inputProps={{autoFocus: !!id, defaultValue: entry.password}}
 				disabled={submitting}
 				error={errors[AuthUserFieldsEnum.password]?.note}
 			/>,
@@ -146,9 +153,37 @@ export default function UserEntry({ route }: { route: RouteType }) {
 			tenants: <InputField
 				name={AuthUserFieldsEnum.tenants}
 				labelText="Tenants"
-				inputProps={{defaultValue: entry.tenants.join(), isarray: true}}
+				inputProps={{defaultValue: JSON.stringify(entry.tenants), isarray: true}}
 				disabled={submitting}
 				error={errors[AuthUserFieldsEnum.tenants]?.note}
+			/>,
+			defaultTenantId: <InputField
+				name={AuthUserFieldsEnum.defaultTenantId}
+				labelText="Default Tenant ID"
+				inputProps={{defaultValue: entry.defaultTenantId}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.defaultTenantId]?.note}
+			/>,
+			deletedAt: <InputField
+				name={AuthUserFieldsEnum.deletedAt}
+				labelText="Deleted At"
+				inputProps={{type: 'date', defaultValue: entry.deletedAt?.toISOString() ?? ''}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.deletedAt]?.note}
+			/>,
+			bannedAt: <InputField
+				name={AuthUserFieldsEnum.bannedAt}
+				labelText="Banned At"
+				inputProps={{type: 'date', defaultValue: entry.bannedAt?.toISOString() ?? ''}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.bannedAt]?.note}
+			/>,
+			bannedReason: <InputField
+				name={AuthUserFieldsEnum.bannedReason}
+				labelText="Banned Reason"
+				inputProps={{defaultValue: entry.bannedReason}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.bannedReason]?.note}
 			/>,
 		}
 		return Object.values(fields)

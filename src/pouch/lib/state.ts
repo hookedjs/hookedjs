@@ -20,12 +20,10 @@ export function DbProvider({children}: {children: ComponentChildren}) {
 
 export async function initDatabases() {
 	await dbs.initAuthDb()
-	await dbs.initUserDb()
 	await dbs.initTenantDb()
 }
 
 export async function destroyDatabases() {
 	await dbs.destroyAuthDb()
-	await dbs.destroyUserDb()
 	await dbs.destroyTenantDb()
 }

@@ -7,6 +7,7 @@ import PouchModel from '../../../lib/Model'
 import db from '../db'
 
 interface ITenantPersonExtra {
+	name: string
 	surname: string
 	givenName: string
 	email: string
@@ -21,6 +22,7 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	type = TenantPerson.type
 	static indexes = ['email']
 
+	name: ITenantPersonExtra['name']
 	surname: ITenantPersonExtra['surname']
 	givenName: ITenantPersonExtra['givenName']
 	email: ITenantPersonExtra['email']
@@ -33,6 +35,7 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 		return assertValidSet<IStandardFields & ITenantPersonExtra>(this, {
 			...this.baseValidations(),
 			type: assertValid('type', this.type, [], {isEqual: {expected: TenantPerson.type, message: `type must be ${TenantPerson.type}`}}),
+			name: assertValid('name', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			email: assertValid('email', this.email, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
 				await this.validateFieldIsUnique('email', 'email is not available')
 			]),

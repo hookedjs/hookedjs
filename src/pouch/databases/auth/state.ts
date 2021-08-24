@@ -1,22 +1,25 @@
-import { assertAttrsWithin, assertValid, assertValidSet, throwValidationErrorSet } from '#lib/validation'
+import { assertAttrsWithin, assertValid, assertValidSet, throwFormValidationErrorSet } from '#lib/validation'
 
 import Database, { loadingDb } from '../../lib/Database'
 import { destroyDatabases, initDatabases } from '../../lib/state'
 import db from './db'
-import { AuthUser, AuthUserRoleEnum } from './model/AuthUser'
+import { AuthUser, AuthUserExampleCreateFields, AuthUserRoleEnum, AuthUsers } from './model/AuthUser'
 
 export async function initAuthDb() {
 	destroyAuthDb()
 	const auth = readAuth()
-	if (auth && auth.roles.includes(AuthUserRoleEnum.ADMIN)) {
+	if (auth?.roles?.includes(AuthUserRoleEnum.ADMIN)) {
 		db.handle = new Database('_users', db.host)
 		await db.handle.sync()
 		await db.handle.indexModels([AuthUser])
 	}
+	else {
+		db.handle = new Database('_users', db.host, {remoteOnly: true, skipSetup: true})
+	}
 }
 
 export function destroyAuthDb() {
-	db.handle.destroy()
+	if (db.handle._db !== db.handle._remote) db.handle.destroy()
 	db.handle = loadingDb
 }
 
@@ -26,7 +29,7 @@ export interface Auth {ok: boolean, name: string, roles: AuthUserRoleEnum[]}
 
 export async function login(username: string, password: string) {
 	const auth = await cookieAuth(username, password)
-		.catch(e => throwValidationErrorSet({}, 'email and/or password invalid'))
+		.catch(e => throwFormValidationErrorSet({username, password}, 'email and/or password invalid'))
 	localStorage.setItem('auth', JSON.stringify(auth))
 	await initDatabases()
 	return auth
@@ -40,7 +43,7 @@ export async function logout() {
 
 export function readAuth(): Auth {
 	const auth = localStorage.getItem('auth')
-	return auth ? JSON.parse(auth) : null
+	return auth ? JSON.parse(auth) : {}
 }
 
 export async function cookieAuth(username: string, password: string) {
@@ -61,26 +64,23 @@ export async function cookieClear() {
 }
 
 export class LoginProps {
-		email = ''
+		name = ''
 		password = ''
 		constructor(props: any) {
 			assertAttrsWithin(props, this)
 			assertValidSet<LoginProps>(props, {
-				email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
-				password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty']),
+				name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
+				password: assertValid('password', props.password, ['isDefined', 'isString', 'isPassword']),
 			})
 			Object.assign(this, props)
 		}
 }
-export const LoginPropsExample = new LoginProps({
-	email: 'tenant@hookedjs.org',
-	password: 'password',
-})
+export const LoginPropsExample = new LoginProps(Object.pick(AuthUserExampleCreateFields, ['name', 'password']))
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
 
 
 export class RegisterProps {
-		email = ''
+		name = ''
 		password = ''
 		givenName = ''
 		surname = ''
@@ -88,20 +88,17 @@ export class RegisterProps {
 		constructor(props: any) {
 			assertAttrsWithin(props, this)
 			assertValidSet<RegisterProps>(props, {
-				email: assertValid('email', props.email, ['isDefined', 'isString', 'isEmail']),
+				name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
 				password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty', 'isPassword']),
-				givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString', 'isNoneEmpty']),
-				surname: assertValid('surname', props.surname, ['isDefined', 'isString', 'isNoneEmpty']),
+				givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
+				surname: assertValid('surname', props.surname, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 				acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
 			})
 			Object.assign(this, props)
 		}
 }
 export const RegisterPropsExample = new RegisterProps({
-	email: 'admin@example.com',
-	password: 'Password8',
-	givenName: 'Sally',
-	surname: 'Fields',
+	...Object.pick(AuthUserExampleCreateFields, ['name', 'password', 'givenName', 'surname']),
 	acceptedTerms: true,
 })
 export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)

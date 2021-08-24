@@ -23,6 +23,8 @@ declare global {
 		deDuplicate(): T[]
 		keyBy(key: string): Record<string, T[]>
 		subtract(otherArr: T[]): T[]
+		// Aka !arr.includes(val)
+		excludes(val: any): boolean
 	}
 }
 
@@ -30,7 +32,7 @@ declare global {
 type ArrayDifferenceType = <T extends any>(...arrays: T[][]) => T[];
 
 Array.difference = function(...arrays) {
-	return arrays.reduce((a, b) => a.filter((c) => !b.includes(c)))
+	return arrays.reduce((a, b) => a.filter((c) => b.excludes(c)))
 }
 
 Array.intersection = function (...arrays) {
@@ -56,4 +58,8 @@ Array.prototype.keyBy = function(key) {
 
 Array.prototype.subtract = function(arr) {
 	return Array.difference(this, arr)
+}
+
+Array.prototype.excludes = function(val) {
+	return !this.includes(val)
 }

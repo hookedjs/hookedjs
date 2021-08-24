@@ -20,6 +20,7 @@ What makes it cool:
 
 - [Status 🚨](#status-)
 - [Setup ⚙️](#setup-️)
+	- [CouchDB](#couchdb)
 - [Running locally 🏎](#running-locally-)
 - [API ☁](#api-)
 - [DB Schema Management 🗂](#db-schema-management-)
@@ -55,6 +56,11 @@ nvm install
 nvm use
 npm i
 ```
+
+### CouchDB
+
+1. Create an admin user
+1. Allow users to access their own user record ([instructions](https://stackoverflow.com/a/62748933/1202757))
 
 ## Running locally 🏎
 

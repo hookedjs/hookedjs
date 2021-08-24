@@ -1,22 +1,19 @@
-import {Fragment as F, h} from 'preact'
+import {h} from 'preact'
 
 import { nav } from '#src/lib/router'
-import { useUserProfile } from '#src/pouch'
+import { AuthUsers } from '#src/pouch'
 import { Paths } from '#src/routes'
-import { AuthStore } from '#src/stores'
+import { AuthStore, AuthStoreType, useAuthStore } from '#src/stores'
 
 export default function TenantSwitcher() {
-	const profile = useUserProfile()
-	
-	if (profile.isLoading) return <F></F>
-	if (profile.error) throw profile.error
-	
+	const [auth] = useAuthStore()
+
 	return (
 		<div>
 			<h1>Select Account</h1>
-			{profile.data?.tenants?.map(tenant => (
+			{auth.tenants?.map(tenant => (
 				<p key={tenant.id}>
-					<a href={Paths.TenantDashboardStack} onClick={e => selectTenant(e, tenant.id)}>
+					<a href={Paths.TenantDashboardStack} onClick={e => selectTenant(e, tenant)}>
 						<button>{tenant.name}</button>
 					</a>
 				</p>
@@ -27,11 +24,16 @@ export default function TenantSwitcher() {
 		</div>
 	)
 
-	function selectTenant(e: any, tenantId: string) {
+	async function selectTenant(e: any, tenant: AuthStoreType['currentTenant']) {
 		e.preventDefault()
-		profile.data!.defaultTenant = tenantId
-		profile.data!.save()
-		AuthStore.value.currentTenant = tenantId
+		const profile = await AuthUsers.getCurrent()
+		profile.defaultTenantId = tenant!.id
+		profile.save()
+		AuthStore.value.currentTenant = tenant
 		nav(e.target.href)
 	}
+}
+
+function useAuth() {
+	throw new Error('Function not implemented.')
 }

@@ -29,12 +29,15 @@ class Database {
 	>()
 	findCacheGarbageCollectInterval: NodeJS.Timeout // an interval
 	
-	constructor(name: Database['name'], host?: Database['host'], remoteOnly = false) {
+	constructor(name: Database['name'], host?: Database['host'], options?: {remoteOnly?: boolean, skipSetup?: boolean}) {
+		const {remoteOnly, skipSetup = false} = options || {}
 		this.name = name
 		this.host = host
-		this._remote = new PouchDB(`${this.host}/${this.name}`)
-		if (remoteOnly)
+		this._remote = new PouchDB(`${this.host}/${this.name}`, {skip_setup: skipSetup})
+		if (remoteOnly) {
 			this._db = this._remote
+			this.connected = true
+		}
 		this.findCacheGarbageCollect()
 	}
 	static createId() {return nanoid()}
@@ -72,7 +75,7 @@ class Database {
 		const now = new Date()
 		const doc2 = {
 			createdAt: now,
-			...doc,
+			...Object.rmUndefAttrs(doc) as T,
 			version: doc.version ? doc.version+1 : 0,
 			_id: doc._id || Database.createId(),
 			updatedAt: now

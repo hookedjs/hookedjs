@@ -38,10 +38,14 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 	static createId() {return Database.createId()}
 
 	get values() {
-		return Object.clone(Object.omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])) as IStandardFields & ExtraFields
+		return Object.rmUndefAttrs(
+			Object.omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])
+		) as IStandardFields & ExtraFields
 	}
 	valuesClean: IStandardFields & ExtraFields
 	get isClean() {
+		console.log(JSON.stringify(this.values))
+		console.log(JSON.stringify(this.valuesClean))
 		return Object.equals(this.values, this.valuesClean)
 	}
 	get isDirty() {
@@ -52,6 +56,8 @@ class PouchModel<ExtraFields extends Record<string, any>> {
 		return Object.assign(this, await this.db.get(this._id))
 	}
 	async save() {
+		Object.rmUndefAttrs(this, true)
+		if (this.isClean) return this
 		await this.validate()
 		Object.assign(this, await this.db.set(this.values))
 		this.valuesClean = this.values

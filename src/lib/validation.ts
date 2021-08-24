@@ -64,13 +64,13 @@ export class ValueError extends ValidationError {
 
 export class ValidationErrorSet<T> extends Error {
 	type = 'ValidationErrorSet'
-	note = 'One or more arguments are invalid'
+	note = 'One or more values are invalid'
 	context: {
 		entity: any,
 		errorSet: Partial<ValidationErrorType<T>>,
 	}
 	constructor(entity: any, errorSet: Partial<ValidationErrorType<T>>) {
-		super('ValidationErrorSet: One or more arguments are invalid')
+		super('ValidationErrorSet: One or more values are invalid')
 		this.context = {
 			entity: Object.assign({}, entity),
 			errorSet: errorSet
@@ -93,6 +93,10 @@ export class FormValidationErrorSet extends ValidationErrorSet<any> {
 		super(entity, {form: new ValueError('form', message)})
 	}
 }
+export function throwFormValidationErrorSet(entity: any, message: string): never {
+	throw new FormValidationErrorSet(entity, message)
+}
+
 export class AssertValidClass {
 	attrName: string
 	attrValue: any
@@ -191,7 +195,7 @@ export class AssertValidClass {
 
 	// Sets
 	isOneOf = (values: any[]) => 
-		!values.includes(this.attrValue) 
+		values.excludes(this.attrValue) 
 		&& new ValueError(this.attrName, `${this.attrName} is invalid`)
 	isOneOfSet = (valueSet: Set<any>) => 
 		!valueSet.has(this.attrValue) 

@@ -8,7 +8,7 @@ import { useAuthStore } from '#src/stores'
 export default function PouchTest() {
 	const [auth] = useAuthStore()
 	console.log('pouchtest')
-	return auth.username ? (
+	return auth.name ? (
 		<div>
 			<PouchTestStateful />
 			<PouchTestSuspense />

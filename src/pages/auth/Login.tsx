@@ -18,21 +18,21 @@ export default function Login() {
 	
 	const { submitting, errors } = Form.state
 	
-	if (auth.username) nav(from || Paths.Dashboard, { replace: true })
+	if (auth.name) nav(from || Paths.Dashboard, { replace: true })
 
 	return <LoginDiv>
 		<Logo size={4} style={{margin: '0 -10px 10px', textAlign: 'center', display: 'block'}} />
 		<Form.Component onSubmitJson={onSubmit}>
 			<InputField
-				name={LoginPropsEnum.email}
+				name={LoginPropsEnum.name}
 				labelText="Email"
 				inputProps={{
-					placeholder: LoginPropsExample.email,
-					defaultValue: LoginPropsExample.email,
+					placeholder: LoginPropsExample.name,
+					defaultValue: LoginPropsExample.name,
 					autoFocus: true,
 				}}
 				disabled={submitting}
-				error={errors[LoginPropsEnum.email]?.note}
+				error={errors[LoginPropsEnum.name]?.note}
 			/>
 			<InputField
 				name={LoginPropsEnum.password}
@@ -40,13 +40,13 @@ export default function Login() {
 				inputProps={{
 					type: 'password',
 					placeholder: '********',
-					value: LoginPropsExample.password,
+					defaultValue: LoginPropsExample.password,
 				}}
 				disabled={submitting}
 				error={errors[LoginPropsEnum.password]?.note}
 			/>
 			<SubmitButton class="large">Login</SubmitButton>
-			<ErrorMessage>{errors.form?.note}</ErrorMessage>
+			<ErrorMessage errors={errors}/>
 		</Form.Component>
 		<div>
 			<a href={`${Paths.Register}${location.search}#replace`}>Need an account?</a><br />

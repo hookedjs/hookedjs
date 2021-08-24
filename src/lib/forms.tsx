@@ -6,6 +6,7 @@ import {ComponentChildren, Fragment as F, FunctionalComponent, h} from 'preact'
 
 import { useCallback, useEffect, useInterval, useRef, useState, useUpdateEffect } from '#lib/hooks'
 import { IconSvg } from '#lib/icons'
+import CodeSnippet from '#src/layout/components/CodeSnippet'
 import pstyled from '#src/lib/pstyled'
 import { ValidationErrorSet } from '#src/lib/validation'
 
@@ -51,12 +52,12 @@ export function useForm(): UseFormReturn {
 					setState(last => ({
 						...last, submitting: false, submitted: true,
 						errors: {
-							form: { attrName: 'form', type: 'FormError', note: 'Please check form for errors.' },
+							form: { attrName: 'form', type: 'FormError', note: error.context.note },
 							...error.context.errorSet
 						}
 					}))
 				else
-					setState(last => ({ ...last, submitting: false, submitted: true, errors: { form: error.message } }))
+					setState(last => ({ ...last, submitting: false, submitted: true, errors: {form: {attrName: 'form', type: 'FormError', note: error.message }}}))
 			}
 		}
 	}
@@ -374,10 +375,11 @@ const SwitchDiv = pstyled.div`
     border: 1px solid var(--danger)
 `
 
-export function ErrorMessage({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLDivElement> & {forwardRef?: Ref<any>}) {
-	return children ? (
-		<div class={`form-error-message ${className}`} {...buttonProps} ref={forwardRef}>{children}</div>
-	) : <F></F>
+export function ErrorMessage({ errors }: {errors: UseFormState['errors']}) {
+	return Object.keys(errors).length ? (<F>
+		<div>{errors.form?.note}</div>
+		{location.hostname === 'localhost' && <CodeSnippet snippet={errors} />}
+	</F>) : <F></F>
 }
 
 export function SubmitButton({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLButtonElement> & {forwardRef?: Ref<any>}) {

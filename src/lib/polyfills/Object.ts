@@ -9,6 +9,7 @@ declare global {
 		pick<T extends Record<string, any>, K extends (keyof T)> (obj: T, keys: readonly K[] | K[]): Pick<T, K>
 		omit<T extends Record<string, any>, K extends (keyof T)>(obj: T, keys: readonly K[] | K[]): Omit<T, K>
 		rmFalseyAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
+		rmUndefAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 		equals(foo: any, bar: any): boolean
 		clone<T extends any>(obj: T): T
 	}
@@ -31,13 +32,19 @@ Object.omit = function (obj, keys) {
 }
 
 Object.rmFalseyAttrs = function (obj, inPlace) {
-	if (inPlace) {
-		for (const key of Object.keys(obj)) {
-			if (!obj[key]) delete obj[key]
-		}
-		return obj
+	const obj2 = inPlace ? obj : Object.clone(obj)
+	for (const key of Object.keys(obj2)) {
+		if (!obj2[key]) delete obj2[key]
 	}
-	else return Object.fromEntries(Object.entries(obj).filter(([_, val]) => val)) as any
+	return obj2
+}
+
+Object.rmUndefAttrs = function (obj, inPlace) {
+	const obj2 = inPlace ? obj : Object.clone(obj)
+	for (const key of Object.keys(obj2)) {
+		if (obj2[key] === undefined) delete obj2[key]
+	}
+	return obj2
 }
 
 /**

@@ -17,6 +17,15 @@ declare global {
 		 * Converts a string into title-case: "hello world" -> "Hello World"
 		 */
 		toTitleCase(): string
+
+		/**
+		 * Checks if a string is in an array or object
+		 */
+		isIn(arrOrObj: any): boolean
+		/**
+		 * Checks if a string is not in an array or object
+		 */
+		isNotIn(arrOrObj: any): boolean
 	}
 }
  
@@ -29,4 +38,12 @@ String.prototype.toHash = function() {
 
 String.prototype.toTitleCase = function () {
 	return this.toLocaleLowerCase().replace(/(^|\s)(\w)/g, x => x.toLocaleUpperCase())
+}
+
+String.prototype.isIn = function (arrOrObj) {
+	return Array.isArray(arrOrObj) ? arrOrObj.includes(this) : (this as string) in arrOrObj
+}
+
+String.prototype.isNotIn = function (arrOrObj) {
+	return !this.isIn(arrOrObj)
 }

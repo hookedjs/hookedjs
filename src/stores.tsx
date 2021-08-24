@@ -2,12 +2,12 @@ import type { PortalProps } from './layout/components/Portal'
 import type { ToastProps } from './layout/components/Toast'
 import { navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
-import { AuthUserRoleEnum, login, LoginProps, logout, RegisterProps, TenantPersonRoleEnum, TenantPersons, UserProfiles } from './pouch'
+import { AuthUser, AuthUserRoleEnum, AuthUsers, login, LoginProps, logout, RegisterProps, TenantPersonRoleEnum, TenantPersons } from './pouch'
 
 
-// AuthStore: user id and roles
-export interface AuthStoreType { username: string, dbRoles: AuthUserRoleEnum[], tRoles: TenantPersonRoleEnum[], currentTenant: string }
-const AuthStoreLoggedOut: AuthStoreType = { username: '', dbRoles: [], tRoles: [], currentTenant: '' }
+// AuthStore: auth user meta
+export interface AuthStoreType extends Pick<AuthUser, 'name' | 'roles' | 'tenants'> { tRoles: TenantPersonRoleEnum[], currentTenant?: { id: string, name: string } }
+const AuthStoreLoggedOut: AuthStoreType = { name: '', roles: [], tenants: [], tRoles: [] }
 export const AuthStore = Object.assign(
 	new StateStore<typeof AuthStoreLoggedOut>(AuthStoreLoggedOut, 'AuthStore'),
 	{
@@ -20,17 +20,27 @@ export const AuthStore = Object.assign(
 		},
 		async login(props: LoginProps) {
 			const loginProps = new LoginProps(props)
-			const res = await login(loginProps.email, loginProps.password)
-			if (res.roles.includes(AuthUserRoleEnum.ADMIN)) {
-				AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles: [], currentTenant: '' }
-			} else {
-				const profile = await UserProfiles.findOne()
+			const auth = await login(loginProps.name, loginProps.password)
+			if (auth.roles.includes(AuthStore.dbRoles.ADMIN)) {
+				AuthStore.setValue({
+					...Object.pick(auth, ['name', 'roles']),
+					tenants: [],
+					tRoles: [],
+					currentTenant: undefined,
+				})
+			}
+			else {
+				const profile = await AuthUsers.getCurrent()
 				let tRoles: TenantPersonRoleEnum[] = []
-				if (profile.defaultTenant) {
-					const tenantProfile = await TenantPersons.findOne({ selector: { email: loginProps.email } }).catch(e => undefined)
+				if (profile.defaultTenantId) {
+					const tenantProfile = await TenantPersons.findOne({ selector: { email: loginProps.name } }).catch(e => undefined)
 					tRoles = tenantProfile?.roles ?? []
 				}
-				AuthStore.value = {username: res.name, dbRoles: res.roles, tRoles, currentTenant: profile.defaultTenant ?? '' }
+				AuthStore.setValue({
+					...Object.pick(profile, ['name', 'roles', 'tenants']),
+					tRoles,
+					currentTenant: profile.tenants.filter(t => t.id === profile.defaultTenantId)?.[0],
+				})
 			}
 		},
 		async register(props: RegisterProps) {
@@ -42,16 +52,14 @@ export const AuthStore = Object.assign(
 			// 	throw new ValidationErrorSet(`${config.apiPrefix}/auth/register`, res.error?.context.errorSet)
 			// AuthStore.value = res
 		},
-		loginAsAdmin() { AuthStore.value = { username: '1', dbRoles: [AuthUserRoleEnum.ADMIN], tRoles: [], currentTenant: '' } },
-		loginAsTenant() { AuthStore.value = { username: '1234', dbRoles: [], tRoles: [TenantPersonRoleEnum.ADMIN], currentTenant: '123' } },
 		dbRoles: AuthUserRoleEnum, // for convenience
 		tRoles: TenantPersonRoleEnum, // for convenience
 	},
 )
 export const useAuthStore = AuthStore.use
 setInterval(async function watchRoles() {
-	if (AuthStore.value.username && TenantPersons.isReady) {
-		const tenantProfile = await TenantPersons.findOne({ selector: { email: AuthStore.value.username } }).catch(e => undefined)
+	if (AuthStore.value.name && TenantPersons.isReady) {
+		const tenantProfile = await TenantPersons.findOne({ selector: { email: AuthStore.value.name } }).catch(e => undefined)
 		const tRoles = tenantProfile?.roles ?? []
 		if (`${tRoles}` !== `${AuthStore.value.tRoles}`)
 			AuthStore.value.tRoles = tRoles

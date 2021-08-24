@@ -1,7 +1,7 @@
 import { h } from 'preact'
 
 import { Logo } from '#layout/components/Logo'
-import { BooleanField, ErrorMessage, FormJson, SubmitButton, InputField, useForm } from '#lib/forms'
+import { BooleanField, ErrorMessage, FormJson, InputField, SubmitButton, useForm } from '#lib/forms'
 import { useCallback } from '#lib/hooks'
 import qs from '#lib/queryStrings'
 import { nav } from '#lib/router'
@@ -18,7 +18,7 @@ export default function Register() {
 	
 	const { submitting, errors } = Form.state
 
-	if (auth.username) nav(from || Paths.Dashboard, { replace: true })
+	if (auth.name) nav(from || Paths.Dashboard, { replace: true })
 
 	return <RegisterDiv>
 		<Logo size={4} style={{ margin: '0 -10px 10px', textAlign: 'center', display: 'block' }} />
@@ -27,9 +27,8 @@ export default function Register() {
 				name={RegisterPropsEnum.givenName}
 				labelText="First Name"
 				inputProps={{
-					type: 'text',
 					placeholder: RegisterPropsExample.givenName,
-					value: RegisterPropsExample.givenName,
+					defaultValue: RegisterPropsExample.givenName,
 					autoFocus: true,
 				}}
 				disabled={submitting}
@@ -39,23 +38,22 @@ export default function Register() {
 				name={RegisterPropsEnum.surname}
 				labelText="Last Name"
 				inputProps={{
-					type: 'text',
 					placeholder: RegisterPropsExample.surname,
-					value: RegisterPropsExample.surname,
+					defaultValue: RegisterPropsExample.surname,
 				}}
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.surname]?.note}
 			/>
 			<InputField
-				name={RegisterPropsEnum.email}
+				name={RegisterPropsEnum.name}
 				labelText="Email"
 				inputProps={{
-					type: 'text',
-					placeholder: RegisterPropsExample.email,
-					value: RegisterPropsExample.email,
+					type: 'email',
+					placeholder: RegisterPropsExample.name,
+					defaultValue: RegisterPropsExample.name,
 				}}
 				disabled={submitting}
-				error={errors[RegisterPropsEnum.email]?.note}
+				error={errors[RegisterPropsEnum.name]?.note}
 			/>
 			<InputField
 				name={RegisterPropsEnum.password}
@@ -63,7 +61,7 @@ export default function Register() {
 				inputProps={{
 					type: 'password',
 					placeholder: '********',
-					value: RegisterPropsExample.password,
+					defaultValue: RegisterPropsExample.password,
 				}}
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.password]?.note}
@@ -74,7 +72,7 @@ export default function Register() {
 				error={errors[RegisterPropsEnum.acceptedTerms]?.note}
 			/>
 			<SubmitButton class="large">Register</SubmitButton>
-			<ErrorMessage>{errors.form?.note}</ErrorMessage>
+			<ErrorMessage errors={errors}/>
 		</Form.Component>
 		<a href={`${Paths.Login}${location.search}#replace`}>Have an account?</a><br />
 		<a href={`${Paths.ForgotPassword}${location.search}#replace`}>Forgot your password?</a>
