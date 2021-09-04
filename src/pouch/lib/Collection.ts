@@ -1,8 +1,8 @@
 import { IFindProps, IStandardFields, loadingDb } from './Database'
 import type PouchModel from './Model'
 
-class PouchCollection<PM extends PouchModel<any>> {
-	model: any = {db: loadingDb}
+abstract class PouchCollection<PM extends PouchModel<any>> {
+	abstract model: any = {db: loadingDb}
 	indexes: string[] = []
 
 	get db() { return this.model.db }
