@@ -1,9 +1,10 @@
 /**
- * Extensions for Function
+ * Polyfills for Function
  */
 
 import memoize from './Function.memoize'
 
+// You must export something or TS gets confused.
 export {}
 
 declare global {

@@ -1,7 +1,16 @@
 /**
- * Extensions for Array
+ * Polyfills for Array
+ * 
+ * Note: Extending primitive's can be problematic without care. For more info, see
+ * https://stackoverflow.com/questions/8859828/javascript-what-dangers-are-in-extending-array-prototype
+ * 
+ * Tips:
+ * 1. for...in will break if you naively extend via Array.propotype.foo = ...
+ *    Instead, use Object.defineProperty({value: fnc, enumerable: false})
+ * 2. Drop support for older Internet Explorer
  */
 
+// You must export something or TS gets confused.
 export {}
 
 declare global {
@@ -19,9 +28,13 @@ declare global {
 		intersection: ArrayDifferenceType
 	}
 	interface Array<T> {
+		/**
+		 * Removes all elements matching value
+		 */
+		remove(value: T): T[]
 		duplicateCheck(): boolean
 		deDuplicate(): T[]
-		keyBy(key: string): Record<string, T[]>
+		keyBy(key: string | number | symbol): Record<string, T[]>
 		subtract(otherArr: T[]): T[]
 		// Aka !arr.includes(val)
 		excludes(val: any): boolean
@@ -39,27 +52,53 @@ Array.intersection = function (...arrays) {
 	return arrays.reduce((a, b) => b.filter(Set.prototype.has.bind(new Set(a))))
 }
 
-Array.prototype.duplicateCheck = function() {
-	return new Set(this).size !== this.length
-}
-Array.prototype.deDuplicate = function() {
-	return Array.from(new Set(this))
-}
+Object.defineProperty(Array.prototype, 'remove', {
+	value: function (el: any) {
+		let i: number
+		while((i = this.indexOf(el)) > -1) {
+			this.splice(i, 1)
+		}
+	},
+	enumerable: false
+})
 
-Array.prototype.keyBy = function(key) {
+Object.defineProperty(Array.prototype, 'duplicateCheck', {
+	value: function() {
+		return new Set(this).size !== this.length
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'deDuplicate', {
+	value: function() {
+		return Array.from(new Set(this))
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'keyBy', {
+	value: function(key: string | number | symbol) {
 	// Manually reduce insted of using Array.reduce for performance
-	const reduced: Record<string, any[]> = {}
-	for (const entry of this) {
-		if (!reduced[entry[key]]) reduced[entry[key]] = [entry]
-		else reduced[entry[key]].push(entry)
-	}
-	return reduced
-}
+		const reduced: Record<string, any[]> = {}
+		for (const entry of this) {
+			if (!reduced[entry[key]]) reduced[entry[key]] = [entry]
+			else reduced[entry[key]].push(entry)
+		}
+		return reduced
+	},
+	enumerable: false
+})
 
-Array.prototype.subtract = function(arr) {
-	return Array.difference(this, arr)
-}
+Object.defineProperty(Array.prototype, 'subtract', {
+	value: function(arr: Array<any>) {
+		return Array.difference(this, arr)
+	},
+	enumerable: false
+})
 
-Array.prototype.excludes = function(val) {
-	return !this.includes(val)
-}
+Object.defineProperty(Array.prototype, 'excludes', {
+	value: function(val: any) {
+		return !this.includes(val)
+	},
+	enumerable: false
+})

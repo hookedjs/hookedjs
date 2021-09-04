@@ -42,6 +42,7 @@ class Database {
 	}
 	static createId() {return nanoid()}
 	async sync() {
+		// TODO: Figure out how to allow offline mode
 		await this._db
 			.sync(this._remote, {retry: true})
 			.catch(err => {console.log('Sync failed', err); throw err})

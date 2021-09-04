@@ -1,3 +1,8 @@
+/**
+ * Utils for Enums attached to global namespace
+ */
+
+// You must export something or TS gets confused.
 export {}
 
 declare global {

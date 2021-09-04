@@ -1,7 +1,16 @@
 /**
  * Extensions for String
+ * 
+ * Note: Extending primitive's can be problematic without care. For more info, see
+ * https://stackoverflow.com/questions/8859828/javascript-what-dangers-are-in-extending-array-prototype
+ * 
+ * Tips:
+ * 1. for...in will break if you naively extend via String.propotype.foo = ...
+ *    Instead, use Object.defineProperty({value: fnc, enumerable: false})
+ * 2. Drop support for older Internet Explorer
  */
 
+// You must export something or TS gets confused.
 export {}
 
 declare global {
@@ -28,22 +37,34 @@ declare global {
 		isNotIn(arrOrObj: any): boolean
 	}
 }
- 
-String.prototype.toHash = function() {
-	return Array.from(this).reduce(
-		(hash, char) => 0 | (31 * hash + char.charCodeAt(0)),
-		0,
-	)
-}
 
-String.prototype.toTitleCase = function () {
-	return this.toLocaleLowerCase().replace(/(^|\s)(\w)/g, x => x.toLocaleUpperCase())
-}
+Object.defineProperty(String.prototype, 'toHash', {
+	value: function() {
+		return Array.from(this).reduce(
+			(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
+			0,
+		)
+	},
+	enumerable: false
+})
 
-String.prototype.isIn = function (arrOrObj) {
-	return Array.isArray(arrOrObj) ? arrOrObj.includes(this) : (this as string) in arrOrObj
-}
+Object.defineProperty(String.prototype, 'toTitleCase', {
+	value: function () {
+		return this.toLocaleLowerCase().replace(/(^|\s)(\w)/g, (x: string) => x.toLocaleUpperCase())
+	},
+	enumerable: false
+})
 
-String.prototype.isNotIn = function (arrOrObj) {
-	return !this.isIn(arrOrObj)
-}
+Object.defineProperty(String.prototype, 'isIn', {
+	value: function (arrOrObj: any) {
+		return Array.isArray(arrOrObj) ? arrOrObj.includes(this) : (this as string) in arrOrObj
+	},
+	enumerable: false
+})
+
+Object.defineProperty(String.prototype, 'isNotIn', {
+	value: function (arrOrObj: any) {
+		return !this.isIn(arrOrObj)
+	},
+	enumerable: false
+})

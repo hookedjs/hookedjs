@@ -2,6 +2,7 @@
  * Polyfills for object
  */
 
+// You must export something or TS gets confused.
 export {}
 
 declare global {
@@ -13,6 +14,9 @@ declare global {
 		equals(foo: any, bar: any): boolean
 		clone<T extends any>(obj: T): T
 	}
+
+	// Sadly, Object is not generic, so we cannot extend it in a typesafe way :-(.
+	// interface Object<T> {}
 }
 
 Object.pick = function (obj, keys) {
