@@ -240,7 +240,7 @@ export function useSet<T>(initial: Set<T> = new Set()) {
 	const add: UseSet<T>['add'] = useCallback(v => setSet(curr => { curr.add(v); return new Set([...curr]) }), [])
 	const del: UseSet<T>['delete'] = useCallback(v => setSet(curr => { curr.delete(v); return new Set([...curr]) }), [])
 	const toggle: UseSet<T>['toggle'] = useCallback(v => setSet(curr => { if (curr.has(v)) curr.delete(v); else curr.add(v); return new Set([...curr]) }), [])
-	const clear: UseSet<T>['clear'] = useCallback(() => setSet(new Set()), [])
+	const clear: UseSet<T>['clear'] = useCallback(() => setSet(new Set<T>()), [])
 	const reset: UseSet<T>['reset'] = useCallback(() => setSet(new Set([...initial])), [])
 	const res: UseSet<T> = { current: set, size: set.size, has, add, delete: del, toggle, clear, reset, set: setSet }
 	return res

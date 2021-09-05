@@ -6,6 +6,7 @@
 export {}
 
 declare global {
+
 	interface ObjectConstructor {
 		pick<T extends Record<string, any>, K extends (keyof T)> (obj: T, keys: readonly K[] | K[]): Pick<T, K>
 		omit<T extends Record<string, any>, K extends (keyof T)>(obj: T, keys: readonly K[] | K[]): Omit<T, K>
@@ -15,8 +16,12 @@ declare global {
 		clone<T extends any>(obj: T): T
 	}
 
-	// Sadly, Object is not generic, so we cannot extend it in a typesafe way :-(.
+	// Sadly, Object is not generic, so we cannot extend it and acces this in a typesafe way :-(.
 	// interface Object<T> {}
+	interface Object {
+		has(prop: string): boolean
+		hasNot(prop: string): boolean
+	}
 }
 
 Object.pick = function (obj, keys) {
@@ -154,3 +159,17 @@ Object.clone = (obj: any) => {
 	}
 	return temp
 }
+
+Object.defineProperty(Object.prototype, 'has', {
+	value: function(prop: string) {
+		return this.hasOwnProperty(prop)
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Object.prototype, 'hasNot', {
+	value: function(prop: string) {
+		return !this.hasOwnProperty(prop)
+	},
+	enumerable: false
+})

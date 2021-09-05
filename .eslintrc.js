@@ -20,6 +20,7 @@ module.exports = {
 		'max-len': ['warn',{'code': 200}],
 		'no-empty': 0,
 		'no-unreachable': 0,
+		'no-prototype-builtins': 0,
 		'@typescript-eslint/ban-ts-comment': 0,
 		'@typescript-eslint/ban-ts-ignore': 0,
 		'@typescript-eslint/explicit-module-boundary-types': 0,

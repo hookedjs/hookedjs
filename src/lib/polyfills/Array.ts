@@ -29,15 +29,75 @@ declare global {
 	}
 	interface Array<T> {
 		/**
+		 * Returns a copy of the array
+		 */
+		copy(): T[]
+		/**
 		 * Removes all elements matching value
 		 */
 		remove(value: T): T[]
+		/**
+		 * Checks if the array contains the any value multiple times
+		 */
 		duplicateCheck(): boolean
+		/**
+		 * Remove values that are repeated
+		 */
 		deDuplicate(): T[]
+		/**
+		 * Returns a Record keyed by a property of the elements in the array
+		 */
 		keyBy(key: string | number | symbol): Record<string, T[]>
-		subtract(otherArr: T[]): T[]
-		// Aka !arr.includes(val)
+		/**
+		 * Aka !arr.includes(val)
+		 */
 		excludes(val: any): boolean
+
+		/**
+		 * Functional version of pop
+		 */
+		popF(): T
+		/**
+		 * Pop the last N elements from the array
+		 */
+		popN(n: number): T[]
+		/**
+		 * Functional version of popN
+		 */
+		popNF(n: number): T[]
+		/**
+		 * Functional version of push
+		 */
+		pushF(...values: T[]): number
+		/**
+		 * Functional version of shift
+		 */
+		shiftF(): T
+		/**
+		 * Shift the first N elements from the array
+		 */
+		shiftN(n: number): T[]
+		/**
+		 * Functional version of shiftN
+		 */
+		shiftNF(n: number): T[]
+
+		/**
+		 * Subtracts the values of an array(s) from the current array
+		 */
+		subtract(...otherArrs: T[][]): T[]
+		/**
+		* Alias of subtract
+		*/
+		minus(...otherArrs: T[][]): T[]
+		/**
+		* Functional version of subtract that returns a new array
+		*/
+		subtractF(...otherArrs: T[][]): T[]
+		/**
+		* Alias of subtractF
+		*/
+		minusF(...otherArrs: T[][]): T[]
 	}
 }
 
@@ -51,6 +111,13 @@ Array.difference = function(...arrays) {
 Array.intersection = function (...arrays) {
 	return arrays.reduce((a, b) => b.filter(Set.prototype.has.bind(new Set(a))))
 }
+
+Object.defineProperty(Array.prototype, 'copy', {
+	value: function() {
+		return [...this]
+	},
+	enumerable: false
+})
 
 Object.defineProperty(Array.prototype, 'remove', {
 	value: function (el: any) {
@@ -89,16 +156,97 @@ Object.defineProperty(Array.prototype, 'keyBy', {
 	enumerable: false
 })
 
-Object.defineProperty(Array.prototype, 'subtract', {
-	value: function(arr: Array<any>) {
-		return Array.difference(this, arr)
-	},
-	enumerable: false
-})
-
 Object.defineProperty(Array.prototype, 'excludes', {
 	value: function(val: any) {
 		return !this.includes(val)
 	},
+	enumerable: false
+})
+
+
+// popF(): T
+Object.defineProperty(Array.prototype, 'popF', {
+	value: function() {
+		return this.slice(0, -1)
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'popN', {
+	value: function(n: number) {
+		const poped = []
+		let i  = n
+		while (i-- && this.length) poped.push(this.pop())
+		return poped
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'popNF', {
+	value: function(n: number) {
+		return this.slice(0, -n)
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'pushF', {
+	value: function(...vals: any[]) {
+		return this.concat(vals)
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'shiftF', {
+	value: function() {
+		return this.slice(1)
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'shiftN', {
+	value: function(n: number) {
+		return this.splice(n)
+	},
+	enumerable: false
+})
+
+// shiftNF(n: number): T[]
+Object.defineProperty(Array.prototype, 'shiftNF', {
+	value: function(n: number) {
+		return this.slice(n)
+	},
+	enumerable: false
+})
+
+
+
+Object.defineProperty(Array.prototype, 'subtract', {
+	value: function(...arrs: any[][]) {
+		let i
+		for (const arr of arrs) {
+			for (const el of arr) {
+				while ((i = this.indexOf(el)) > -1) {
+					this.splice(i, 1)
+				}
+			}
+		}
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'minus', {
+	value: Array.prototype.subtract,
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'subtractF', {
+	value: function(...arrs: any[][]) {
+		return Array.difference(this, ...arrs)
+	},
+	enumerable: false
+})
+
+Object.defineProperty(Array.prototype, 'minusF', {
+	value: Array.prototype.subtractF,
 	enumerable: false
 })
