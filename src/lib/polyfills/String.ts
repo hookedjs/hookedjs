@@ -15,6 +15,7 @@ export {}
 
 declare global {
 	interface String {
+		copy(): string;
 		/**
 		 * Converts a string into a semi-unique, numeric hash
 		 *
@@ -39,6 +40,13 @@ declare global {
 }
 
 Object.defineProperties(String.prototype, {
+	copy: {
+		value: function() {
+			return new String(this)
+		},
+		enumerable: false
+	},
+
 	toHash: {
 		value: function() {
 			return Array.from(this).reduce(

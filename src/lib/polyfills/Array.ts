@@ -89,19 +89,19 @@ declare global {
 		/**
 		 * Subtracts the values of an array(s) from the current array
 		 */
-		subtract(...otherArrs: T[][]): T[]
+		subtract(...otherArrs: string[][]): undefined
 		/**
 		* Alias of subtract
 		*/
-		minus(...otherArrs: T[][]): T[]
+		minus(...otherArrs: string[][]): undefined
 		/**
 		* Functional version of subtract that returns a new array
 		*/
-		subtractF(...otherArrs: T[][]): T[]
+		subtractF(...otherArrs: string[][]): T[]
 		/**
 		* Alias of subtractF
 		*/
-		minusF(...otherArrs: T[][]): T[]
+		minusF(...otherArrs: string[][]): T[]
 	}
 }
 
@@ -119,7 +119,7 @@ Array.intersection = function (...arrays) {
 defineProperties(Array.prototype, {
 	copy: {
 		value: function() {
-			return [...this]
+			return copy(this)
 		},
 		enumerable: false
 	},

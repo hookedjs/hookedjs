@@ -47,7 +47,7 @@ export function useForm(): UseFormReturn {
 				if (onSubmitP) await onSubmitP(formEvent)
 				if (onSubmitJsonP) await onSubmitJsonP(formToJson(formEvent.target))
 				if (isMounted()) setState(last => ({ ...last, submitting: false, submitted: true, accepted: true, errors: {} }))
-			} catch (error) {
+			} catch (error: any) { // cast as any bc ts isn't smart enough to pass instanceof check down to setState
 				if (error instanceof ValidationErrorSet)
 					setState(last => ({
 						...last, submitting: false, submitted: true,
@@ -56,7 +56,7 @@ export function useForm(): UseFormReturn {
 							...error.context.errorSet
 						}
 					}))
-				else
+				else if (error instanceof Error)
 					setState(last => ({ ...last, submitting: false, submitted: true, errors: {form: {attrName: 'form', type: 'FormError', note: error.message }}}))
 			}
 		}
@@ -376,7 +376,7 @@ const SwitchDiv = pstyled.div`
 `
 
 export function ErrorMessage({ errors }: {errors: UseFormState['errors']}) {
-	return errors.oKeys().length ? (<F>
+	return errors._keys().length ? (<F>
 		<div>{errors.form?.note}</div>
 		{location.hostname === 'localhost' && <CodeSnippet snippet={errors} />}
 	</F>) : <F></F>

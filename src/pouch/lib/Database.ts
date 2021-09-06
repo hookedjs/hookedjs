@@ -135,7 +135,7 @@ class Database {
 				|| props.selector?._id?.$in
 			)
 			// ...and there aren't other modifiers
-			&& props.selector.oKeys().subtract(['_id', 'type']).length === 0
+			&& props.selector._keys().minusF(['_id', 'type']).length === 0
 			&& !props.sort && !props.fields && !props.skip
 		) {
 			if (typeof props.selector?._id === 'string')
@@ -150,7 +150,7 @@ class Database {
 		}
 		// Else do full search
 		else {
-			const propsMapped = clone({selector: {}, ...props as any})
+			const propsMapped = copy({selector: {}, ...props as any})
 			if (!propsMapped.selector.deletedAt)
 				propsMapped.selector.deletedAt = {$exists: false}
 			cached.fetchP = this._db
@@ -263,11 +263,12 @@ function mapDateFields(obj: any) {
 	for (const key in obj)
 		if (key.endsWith('At')) {
 			try {
-				// @ts-ignore: Unsure why TS thinks this key is broken.
 				obj[key] = new Date(obj[key])
 			} catch(e) {
-				e.orig = e
-				e.message = `Value of ${obj._id}:${key} is not a date string.`
+				if (e instanceof Error) {
+					(e as any).orig = e
+					e.message = `Value of ${obj._id}:${key} is not a date string.`
+				}
 				throw e
 			}
 		}

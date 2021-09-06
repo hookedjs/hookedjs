@@ -2,7 +2,7 @@ import { IFindProps, IStandardFields, loadingDb } from './Database'
 import type PouchModel from './Model'
 
 abstract class PouchCollection<PM extends PouchModel<any>> {
-	abstract model: any = {db: loadingDb}
+	abstract model: any
 	indexes: string[] = []
 
 	get db() { return this.model.db }
@@ -13,11 +13,11 @@ abstract class PouchCollection<PM extends PouchModel<any>> {
 		return new this.model(await this.db.get(id))
 	}
 	find(props: IFindProps<IStandardFields & PM> = {}): Promise<PM[]> {
-		const propsMapped = clone(props)
+		const propsMapped = copy(props)
 		if (!propsMapped.selector) propsMapped.selector = {}
 		propsMapped.selector.type = this.model.type
 		
-		const nonIndexedFields = propsMapped.selector.oKeys().subtract(this.model.indexes.concat(['_id', 'type']))
+		const nonIndexedFields = propsMapped.selector._keys().minusF(this.model.indexes.concat(['_id', 'type']))
 		if (nonIndexedFields.length)
 			throw new Error(`Cannot use non-indexed fields: ${nonIndexedFields.join(', ')}`)
 
@@ -26,7 +26,7 @@ abstract class PouchCollection<PM extends PouchModel<any>> {
 			.then((res: any[]) => res.map((d: any) => new this.model(d)))
 	}
 	async findOne(props: Parameters<PouchCollection<PM>['find']>[0] = {}): Promise<PM> {
-		const propsMapped = clone(props)
+		const propsMapped = copy(props)
 		if (!propsMapped.selector) propsMapped.selector = {}
 		propsMapped.selector.type = this.model.type
 		return new this.model(await this.db.findOne(propsMapped) as any)

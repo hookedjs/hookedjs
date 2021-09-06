@@ -26,7 +26,7 @@ declare global {
 	function rmUndefAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 	function equals(foo: any, bar: any): boolean
 	// Note: Clone is imperfect!
-	function clone<T extends any>(obj: T): T
+	function copy<T extends any>(obj: T): T
 
 	interface ObjectConstructor {
 		pick: typeof pick
@@ -36,36 +36,44 @@ declare global {
 		rmUndefAttrs: typeof rmUndefAttrs
 		equals: typeof equals
 		// Note: Clone is imperfect!
-		clone: typeof clone
+		copy: typeof copy
 	}
 
 	// Sadly, Object is not generic, so we cannot extend it and acces this in a typesafe way :-(.
 	// interface Object<T> {}
 	interface Object {
 		/**
-		 * Alias for keys(obj)
+		 * Alias for keys(obj) but MORE TYPESAFE!
 		 */
-		oKeys(): string[]
+		_keys<T extends any>(): (keyof T)[]
 		/**
 		 * Alias for, but not typesafe values(obj)
 		 */
-		oValues(): any[]
+		_values(): any[]
 		/**
 		 * Alias for, but not typesafe entries(obj)
 		 */
-		oEntries(): [string, any][]
+		_entries<T extends any>(): [keyof T, any][]
 		/**
 		 * Alias for Object.hasOwnProperty(prop)
 		 */
-		oIncludes(prop: string): boolean
+		_includes(prop: string): boolean
 		/**
 		 * Alias for !Object.hasOwnProperty(prop)
 		 */
-		oExcludes(prop: string): boolean
+		_excludes(prop: string): boolean
 		/**
 		 * Alias for, but not typesafe `new Map(entries(obj))`
 		 */
-		toMap(): Map<string, any>
+		_toMap(): Map<string, any>
+		/**
+		 * Alias for obj._keys().map(key => ...)
+		 */
+		_keyMap<T extends any>(fn: (key: keyof T) => T): T[]
+		/**
+		 * Alias for obj._keys().reduce((acc, key) => ..., init)
+		 */
+		_keyReduce<T extends any, A extends any>(fn: (acc: A, key: keyof T) => A, init: A): A
 	}
 }
 
@@ -96,7 +104,7 @@ globalThis.omit = Object.omit = function (obj, keys) {
 }
 
 globalThis.rmFalseyAttrs = Object.rmFalseyAttrs = function (obj, inPlace) {
-	const obj2 = inPlace ? obj : clone(obj)
+	const obj2 = inPlace ? obj : copy(obj)
 	for (const key in obj2) {
 		if (!obj2[key]) delete obj2[key]
 	}
@@ -104,7 +112,7 @@ globalThis.rmFalseyAttrs = Object.rmFalseyAttrs = function (obj, inPlace) {
 }
 
 globalThis.rmNullAttrs = Object.rmNullAttrs = function (obj, inPlace) {
-	const obj2 = inPlace ? obj : clone(obj)
+	const obj2 = inPlace ? obj : copy(obj)
 	for (const key in obj2) {
 		if (obj2[key] === null) delete obj2[key]
 	}
@@ -112,7 +120,7 @@ globalThis.rmNullAttrs = Object.rmNullAttrs = function (obj, inPlace) {
 }
 
 globalThis.rmUndefAttrs = Object.rmUndefAttrs = function (obj, inPlace) {
-	const obj2 = inPlace ? obj : clone(obj)
+	const obj2 = inPlace ? obj : copy(obj)
 	for (const key in obj2) {
 		if (obj2[key] === undefined) delete obj2[key]
 	}
@@ -207,49 +215,84 @@ globalThis.equals = Object.equals = function (foo, bar) {
 }
 
 // Is imperfect on Classes or objects containing classes
-// Adapted from https://stackoverflow.com/a/46692810/1202757
-globalThis.clone = Object.clone = (obj: any) => {
+// Inspired by https://stackoverflow.com/a/46692810/1202757
+globalThis.copy = Object.copy = (obj: any) => {
 	if (obj === null || typeof(obj) !== 'object' || 'isActiveClone' in obj)
 		return obj
-	if (obj.constructor.name === 'Date')
-		return new Date(obj)
-	// This is the imperfect part: we can't perfectly clone classes with constructors that have arguments,
-	// because we can't access the arguments object in use strict mode.
-	let temp: any = {}
-	try { temp = obj.constructor() } catch (e) {}
-	for (const key in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, key)) {
-			obj['isActiveClone'] = null
-			temp[key] = clone(obj[key])
-			delete obj['isActiveClone']
+
+	switch (obj.constructor) {
+	case Array:
+		return obj.map(copy)
+	case Number:
+		return new Number(obj.toString())
+	case Set:
+		return new Set([...obj].map(copy))
+	case Map:
+		return new Map([...obj.entries()].map(copy))
+	case Object: // means we have no idea what it is :-/
+		// This is the imperfect part: we can't perfectly copy classes, but we can come close
+		const temp = Object.assign({}, obj)
+		for (const key in obj) {
+			if (Object.prototype.hasOwnProperty.call(obj, key)) {
+				obj['isActiveClone'] = null // prevent cyclical reference
+				temp[key] = copy(obj[key])
+				delete obj['isActiveClone']
+			}
 		}
+		return temp
+	default: // means some primitive that's okay to just pass the val into constructor
+		return new obj.constructor(obj)
 	}
-	return temp
 }
 
+
 Object.defineProperties(Object.prototype, {
-	oKeys: {
+	_keys: {
 		value: function() {
 			return Object.keys(this)
 		},
 		enumerable: false
 	},
-	oIncludes: {
+	_values: {
+		value: function() {
+			return Object.values(this)
+		},
+		enumerable: false
+	},
+	_entries: {
+		value: function() {
+			return Object.entries(this)
+		},
+		enumerable: false
+	},
+	_includes: {
 		value: function(prop: string) {
 			return this.hasOwnProperty(prop)
 		},
 		enumerable: false
 	},
-	oExcludes: {
+	_excludes: {
 		value: function(prop: string) {
 			return !this.hasOwnProperty(prop)
 		},
 		enumerable: false
 	},
-	toMap: {
+	__toMap: {
 		value: function() {
 			return new Map(entries(this))
 		},
 		enumerable: false
-	}
+	},
+	_keyMap: {
+		value: function(fn: (...props: any) => any) {
+			return this._keys().map(fn)
+		},
+		enumerable: false
+	},
+	_keyReduce: {
+		value: function(fn: (...props: any) => any, init: any) {
+			return this._keys().reduce(fn, init)
+		},
+		enumerable: false
+	},
 })

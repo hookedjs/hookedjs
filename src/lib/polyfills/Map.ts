@@ -15,11 +15,18 @@ export {}
 
 declare global {
 	interface Map<K, V> {
+		copy(): Map<K, V>;
 		toObj(): Record<string, V>;
 	}
 }
 
 Object.defineProperties(Map.prototype, {
+	copy: {
+		value: function() {
+			return copy(this)
+		},
+		enumerable: false
+	},
 	toObj: {
 		value: function () {
 			return Object.fromEntries(this)

@@ -6,8 +6,8 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 	// TS doesn't support abstract static props yet: https://github.com/microsoft/TypeScript/issues/34516
 	static get db() {return loadingDb}
 	abstract get db(): typeof loadingDb
-	static type: IStandardFields['type'] = 'base'
-	abstract type = PouchModel.type
+	static type: IStandardFields['type']
+	abstract type: string
 	
 	// indexes: A comma separated list of field names to index.
 	static indexes: string[] = []

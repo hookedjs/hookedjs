@@ -39,7 +39,7 @@ Promise.sleep = async ms =>
 
 Promise.callWithRetry = async function callWithRetry(callback, maxTries = 4) {
 	const callbackPromise = async () => callback() // promisify callback
-	let lastError = new Error()
+	let lastError: any = new Error()
 	for (let tryCount = 0; tryCount < maxTries; tryCount++) {
 		try { return await callbackPromise()} 
 		catch(err) { lastError = err }

@@ -251,7 +251,7 @@ export function assertValid(
 
 export function validateSet<T>(obj: T, attrAssertions: ValidationErrorType<T>) {
 	const attrAssertionsClean = rmFalseyAttrs(attrAssertions)
-	if (attrAssertionsClean.oKeys().length) return new ValidationErrorSet(obj, attrAssertionsClean)
+	if (attrAssertionsClean._keys().length) return new ValidationErrorSet(obj, attrAssertionsClean)
 }
 
 export function assertValidSet<T>(obj: T, attrAssertions: ValidationErrorType<T>) {
@@ -260,7 +260,7 @@ export function assertValidSet<T>(obj: T, attrAssertions: ValidationErrorType<T>
 }
 
 export function assertAttrsWithin(given: Record<string, any>, expected: Record<string, any>,) {
-	const randos = Array.difference(given.oKeys(), expected.oKeys())
+	const randos = Array.difference(given._keys(), expected._keys())
 
 	if (randos.length) throw new ValidationErrorSet(
 		given,
