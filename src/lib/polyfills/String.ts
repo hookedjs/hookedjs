@@ -38,33 +38,35 @@ declare global {
 	}
 }
 
-Object.defineProperty(String.prototype, 'toHash', {
-	value: function() {
-		return Array.from(this).reduce(
-			(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
-			0,
-		)
+Object.defineProperties(String.prototype, {
+	toHash: {
+		value: function() {
+			return Array.from(this).reduce(
+				(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
+				0,
+			)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(String.prototype, 'toTitleCase', {
-	value: function () {
-		return this.toLocaleLowerCase().replace(/(^|\s)(\w)/g, (x: string) => x.toLocaleUpperCase())
+	toTitleCase: {
+		value: function () {
+			return this.toLocaleLowerCase().replace(/(^|\s)(\w)/g, (x: string) => x.toLocaleUpperCase())
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(String.prototype, 'isIn', {
-	value: function (arrOrObj: any) {
-		return Array.isArray(arrOrObj) ? arrOrObj.includes(this) : (this as string) in arrOrObj
+	isIn: {
+		value: function (arrOrObj: any) {
+			return Array.isArray(arrOrObj) ? arrOrObj.includes(this) : (this as string) in arrOrObj
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(String.prototype, 'isNotIn', {
-	value: function (arrOrObj: any) {
-		return !this.isIn(arrOrObj)
+	isNotIn: {
+		value: function (arrOrObj: any) {
+			return !this.isIn(arrOrObj)
+		},
+		enumerable: false
 	},
-	enumerable: false
 })

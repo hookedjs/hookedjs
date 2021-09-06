@@ -72,7 +72,7 @@ export class ValidationErrorSet<T> extends Error {
 	constructor(entity: any, errorSet: Partial<ValidationErrorType<T>>) {
 		super('ValidationErrorSet: One or more values are invalid')
 		this.context = {
-			entity: Object.assign({}, entity),
+			entity: assign({}, entity),
 			errorSet: errorSet
 		}
 		if (this.context.entity.password) this.context.entity.password = '********'
@@ -100,7 +100,7 @@ export function throwFormValidationErrorSet(entity: any, message: string): never
 export class AssertValidClass {
 	attrName: string
 	attrValue: any
-	constructor(attrName: string, attrValue: any) { Object.assign(this, { attrName, attrValue }) }
+	constructor(attrName: string, attrValue: any) { assign(this, { attrName, attrValue }) }
 	isDefined = () => 
 		this.attrValue === undefined 
 		&& new ValueError(this.attrName, `${this.attrName} is missing`)
@@ -235,7 +235,7 @@ export function assertValid(
 		if (assertion) return assertion
 	}
 	if (complex) {
-		for (const [key,arg] of Object.entries(complex)) {
+		for (const [key,arg] of entries(complex)) {
 			// @ts-ignore: ts doesnt know this is safe
 			const res = assertValid[key](arg)
 			if (res) return res
@@ -250,21 +250,24 @@ export function assertValid(
 }
 
 export function validateSet<T>(obj: T, attrAssertions: ValidationErrorType<T>) {
-	const attrAssertionsClean = Object.rmFalseyAttrs(attrAssertions)
-	if (Object.keys(attrAssertionsClean).length) return new ValidationErrorSet(obj, attrAssertionsClean)
+	const attrAssertionsClean = rmFalseyAttrs(attrAssertions)
+	if (attrAssertionsClean.oKeys().length) return new ValidationErrorSet(obj, attrAssertionsClean)
 }
 
 export function assertValidSet<T>(obj: T, attrAssertions: ValidationErrorType<T>) {
-	const validationErrorSetOrNull = validateSet<T>(obj, attrAssertions)
-	if(validationErrorSetOrNull) throw validationErrorSetOrNull
+	const maybeValidationError = validateSet<T>(obj, attrAssertions)
+	if(maybeValidationError) throw maybeValidationError
 }
 
 export function assertAttrsWithin(given: Record<string, any>, expected: Record<string, any>,) {
-	const randos = Array.difference(Object.keys(given), Object.keys(expected))
+	const randos = Array.difference(given.oKeys(), expected.oKeys())
 
 	if (randos.length) throw new ValidationErrorSet(
 		given,
-		Object.fromEntries(randos.map(k => [k, new ValueError(k, `${k} field is unexpected`)]))
+		randos.reduce<Record<string, ValueError>>((acc, k) => {
+			acc[k] = new ValueError(k, `${k} field is unexpected`)
+			return acc
+		}, {}),
 	)
 }
 

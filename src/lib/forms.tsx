@@ -376,7 +376,7 @@ const SwitchDiv = pstyled.div`
 `
 
 export function ErrorMessage({ errors }: {errors: UseFormState['errors']}) {
-	return Object.keys(errors).length ? (<F>
+	return errors.oKeys().length ? (<F>
 		<div>{errors.form?.note}</div>
 		{location.hostname === 'localhost' && <CodeSnippet snippet={errors} />}
 	</F>) : <F></F>

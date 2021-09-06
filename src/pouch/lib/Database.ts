@@ -76,7 +76,7 @@ class Database {
 		const now = new Date()
 		const doc2 = {
 			createdAt: now,
-			...Object.rmUndefAttrs(doc) as T,
+			...rmUndefAttrs(doc) as T,
 			version: doc.version ? doc.version+1 : 0,
 			_id: doc._id || Database.createId(),
 			updatedAt: now
@@ -135,7 +135,7 @@ class Database {
 				|| props.selector?._id?.$in
 			)
 			// ...and there aren't other modifiers
-			&& Object.keys(props.selector).subtract(['_id', 'type']).length === 0
+			&& props.selector.oKeys().subtract(['_id', 'type']).length === 0
 			&& !props.sort && !props.fields && !props.skip
 		) {
 			if (typeof props.selector?._id === 'string')
@@ -150,7 +150,7 @@ class Database {
 		}
 		// Else do full search
 		else {
-			const propsMapped = Object.clone({selector: {}, ...props as any})
+			const propsMapped = clone({selector: {}, ...props as any})
 			if (!propsMapped.selector.deletedAt)
 				propsMapped.selector.deletedAt = {$exists: false}
 			cached.fetchP = this._db
@@ -260,7 +260,7 @@ class DatabaseLoadingError extends Error {
 }
 
 function mapDateFields(obj: any) {
-	for (const key of Object.keys(obj))
+	for (const key in obj)
 		if (key.endsWith('At')) {
 			try {
 				// @ts-ignore: Unsure why TS thinks this key is broken.

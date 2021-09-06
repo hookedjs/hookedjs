@@ -12,7 +12,7 @@ export default {
 	 * @param options - upsert: update an existing search string; includeQuestionMark: if truthy prepend with '?'
 	 */
 	create(obj: any, { upsert = false, upsertFrom = location.search, includeQuestionMark = true}) {
-		if (upsert) obj = Object.assign(this.parse(upsertFrom), obj)
+		if (upsert) obj = assign(this.parse(upsertFrom), obj)
 		Object.entries(obj).forEach(([k,v]) => { if(v === undefined) delete obj[k] })
 		const sp = new URLSearchParams()
 		Object.entries(obj).forEach(function setUrlSearchParams([k,v]) {

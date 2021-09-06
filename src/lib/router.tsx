@@ -19,8 +19,8 @@ import {Suspense} from 'preact/compat'
 import { applyTheme, defaultTheme } from '#layout/theme'
 import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from '#lib/hooks'
 
-import StateStore from './StateStore'
 import pstyled from './pstyled'
+import StateStore from './StateStore'
 import { ForbiddenError, NotFoundError } from './validation'
 
 
@@ -109,7 +109,7 @@ function RouterSwitch({ routesByPath }: RouterProps) {
  * Enhances a route object and adds typesafety
  */
 function RouteFactory(props: Omit<RouteType, 'hasBack' | 'hasAccess'> & {hasAccess?: RouteType['hasAccess']}) {
-	const r: RouteType = Object.freeze({
+	const r: RouteType = freeze({
 		hasAccess: (): boolean => true,
 		...props,
 		hasBack: !!props.stack && props.path !== props.stack + '/home',

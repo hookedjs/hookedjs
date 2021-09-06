@@ -43,7 +43,7 @@ declare global {
 		/**
 		 * Remove values that are repeated
 		 */
-		deDuplicate(): T[]
+		deDup(): T[]
 		/**
 		 * Returns a Record keyed by a property of the elements in the array
 		 */
@@ -52,6 +52,10 @@ declare global {
 		 * Aka !arr.includes(val)
 		 */
 		excludes(val: any): boolean
+		/**
+		 * 
+		 */
+		toSet(): Set<T[]>
 
 		/**
 		 * Functional version of pop
@@ -112,141 +116,150 @@ Array.intersection = function (...arrays) {
 	return arrays.reduce((a, b) => b.filter(Set.prototype.has.bind(new Set(a))))
 }
 
-Object.defineProperty(Array.prototype, 'copy', {
-	value: function() {
-		return [...this]
+defineProperties(Array.prototype, {
+	copy: {
+		value: function() {
+			return [...this]
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'remove', {
-	value: function (el: any) {
-		let i: number
-		while((i = this.indexOf(el)) > -1) {
-			this.splice(i, 1)
-		}
+	remove: {
+		value: function (el: any) {
+			let i: number
+			while((i = this.indexOf(el)) > -1) {
+				this.splice(i, 1)
+			}
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'duplicateCheck', {
-	value: function() {
-		return new Set(this).size !== this.length
+	duplicateCheck: {
+		value: function() {
+			return new Set(this).size !== this.length
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'deDuplicate', {
-	value: function() {
-		return Array.from(new Set(this))
+	deDup: {
+		value: function() {
+			return Array.from(new Set(this))
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'keyBy', {
-	value: function(key: string | number | symbol) {
-	// Manually reduce insted of using Array.reduce for performance
-		const reduced: Record<string, any[]> = {}
-		for (const entry of this) {
-			if (!reduced[entry[key]]) reduced[entry[key]] = [entry]
-			else reduced[entry[key]].push(entry)
-		}
-		return reduced
+	keyBy: {
+		value: function(key: string | number | symbol) {
+		// Manually reduce insted of using Array.reduce for performance
+			const reduced: Record<string, any[]> = {}
+			for (const entry of this) {
+				if (!reduced[entry[key]]) reduced[entry[key]] = [entry]
+				else reduced[entry[key]].push(entry)
+			}
+			return reduced
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'excludes', {
-	value: function(val: any) {
-		return !this.includes(val)
+	excludes: {
+		value: function(val: any) {
+			return !this.includes(val)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-
-// popF(): T
-Object.defineProperty(Array.prototype, 'popF', {
-	value: function() {
-		return this.slice(0, -1)
+	toSet: {
+		value: function() {
+			return new Set(this)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'popN', {
-	value: function(n: number) {
-		const poped = []
-		let i  = n
-		while (i-- && this.length) poped.push(this.pop())
-		return poped
+	// popF(): T
+	popF: {
+		value: function() {
+			return this.slice(0, -1)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'popNF', {
-	value: function(n: number) {
-		return this.slice(0, -n)
+	popN: {
+		value: function(n: number) {
+			const poped = []
+			let i  = n
+			while (i-- && this.length) poped.push(this.pop())
+			return poped
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'pushF', {
-	value: function(...vals: any[]) {
-		return this.concat(vals)
+	popNF: {
+		value: function(n: number) {
+			return this.slice(0, -n)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'shiftF', {
-	value: function() {
-		return this.slice(1)
+	pushF: {
+		value: function(...vals: any[]) {
+			return this.concat(vals)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'shiftN', {
-	value: function(n: number) {
-		return this.splice(n)
+	shiftF: {
+		value: function() {
+			return this.slice(1)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-// shiftNF(n: number): T[]
-Object.defineProperty(Array.prototype, 'shiftNF', {
-	value: function(n: number) {
-		return this.slice(n)
+	shiftN: {
+		value: function(n: number) {
+			return this.splice(n)
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
+
+	// shiftNF(n: number): T[]
+	shiftNF: {
+		value: function(n: number) {
+			return this.slice(n)
+		},
+		enumerable: false
+	},
 
 
 
-Object.defineProperty(Array.prototype, 'subtract', {
-	value: function(...arrs: any[][]) {
-		let i
-		for (const arr of arrs) {
-			for (const el of arr) {
-				while ((i = this.indexOf(el)) > -1) {
-					this.splice(i, 1)
+	subtract: {
+		value: function(...arrs: any[][]) {
+			let i
+			for (const arr of arrs) {
+				for (const el of arr) {
+					while ((i = this.indexOf(el)) > -1) {
+						this.splice(i, 1)
+					}
 				}
 			}
-		}
+		},
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'minus', {
-	value: Array.prototype.subtract,
-	enumerable: false
-})
-
-Object.defineProperty(Array.prototype, 'subtractF', {
-	value: function(...arrs: any[][]) {
-		return Array.difference(this, ...arrs)
+	minus: {
+		value: Array.prototype.subtract,
+		enumerable: false
 	},
-	enumerable: false
-})
 
-Object.defineProperty(Array.prototype, 'minusF', {
-	value: Array.prototype.subtractF,
-	enumerable: false
+	subtractF: {
+		value: function(...arrs: any[][]) {
+			return Array.difference(this, ...arrs)
+		},
+		enumerable: false
+	},
+
+	minusF: {
+		value: Array.prototype.subtractF,
+		enumerable: false
+	},
+
 })

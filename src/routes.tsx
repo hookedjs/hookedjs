@@ -6,7 +6,7 @@ import FillerListRoute from '#layout/FillerListRoute'
 import FillerPageRoute from '#layout/FillerPageRoute'
 import * as i from '#lib/icons'
 import lazy from '#lib/lazy'
-import { nav, PassThrough, Redirect, RouteFactory } from '#lib/router'
+import { nav, PassThrough, Redirect, RouteFactory, RouteType } from '#lib/router'
 
 import { AuthStore, useAuthStore } from './stores'
 
@@ -15,7 +15,7 @@ const AdminLayout = lazy(() => import('#layout/layout/AdminLayout'))
 const TenantLayout = lazy(() => import('#layout/layout/TenantLayout'))
 const MarketingLayout = lazy(() => import('#layout/layout/MarketingLayout'))
 
-export const routes = Object.freeze({
+export const routes = freeze({
 
 
 	// Access Control Routes
@@ -410,9 +410,15 @@ export const routes = Object.freeze({
 } as const)
 
 
-export const routesByPath = Object.fromEntries(Object.values(routes).map(r => [r.path, r]))
-// @ts-ignore: Maybe fix later
-export const Paths: Record<keyof typeof routes, string> = Object.fromEntries(Object.entries(routes).map(([name, r]) => [name, r.path]))
+export const routesByPath = values(routes).reduce<Record<string, any>>((acc, r) => {
+	acc[r.path] = r
+	return acc
+}, {})
+
+export const Paths = entries(routes).reduce<Record<string, string>>((acc, [name, r]) => {
+	acc[name] = r.path
+	return acc
+}, {}) as Record<keyof typeof routes, string>
 
 
 function isLoggedIn() { return !!AuthStore.value.name }

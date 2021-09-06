@@ -30,7 +30,7 @@ globalThis.Enum = {
 }
 
 function getEnumValues(enumFrom: Record<string, any>): any[] {
-	const vals = Object.entries(enumFrom)
+	const vals = entries(enumFrom)
 		// If enum values are number type, entries() will emit it also
 		// as a key, which we don't want so filter them out.
 		.filter(([key]) => isNaN(Number(key)))
@@ -39,5 +39,5 @@ function getEnumValues(enumFrom: Record<string, any>): any[] {
 }
 
 function getEnumFromClassInstance<T>(classInstance: T): Record<keyof T, keyof T> {
-	return Object.fromEntries(Object.keys(classInstance).map(k => [k,k])) as Record<keyof T, keyof T>
+	return keys(classInstance).reduce<any>((acc, k) => {acc[k]=k; return acc}, {}) as Record<keyof T, keyof T>
 }

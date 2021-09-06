@@ -6,8 +6,6 @@
 export {}
 
 declare global {
-	// eslint-disable-next-line no-var
-	var P: PromiseConstructor
 	interface PromiseConstructor {
 		/**
 		 * Return a promise that resolves after ms milliseconds
@@ -35,8 +33,6 @@ declare global {
 	// 	foo: 'bar'
 	// }
 }
-
-globalThis.P = Promise
 
 Promise.sleep = async ms => 
 	new Promise(resolve => setTimeout(resolve, ms))
