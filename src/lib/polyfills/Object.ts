@@ -223,13 +223,11 @@ globalThis.copy = Object.copy = (obj: any) => {
 	switch (obj.constructor) {
 	case Array:
 		return obj.map(copy)
-	case Number:
-		return new Number(obj.toString())
 	case Set:
 		return new Set([...obj].map(copy))
 	case Map:
 		return new Map([...obj.entries()].map(copy))
-	case Object: // means we have no idea what it is :-/
+	default: // means we have no idea what it is :-/
 		// This is the imperfect part: we can't perfectly copy classes, but we can come close
 		const temp = Object.assign({}, obj)
 		for (const key in obj) {
@@ -240,8 +238,6 @@ globalThis.copy = Object.copy = (obj: any) => {
 			}
 		}
 		return temp
-	default: // means some primitive that's okay to just pass the val into constructor
-		return new obj.constructor(obj)
 	}
 }
 
