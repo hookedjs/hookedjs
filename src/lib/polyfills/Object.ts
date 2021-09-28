@@ -21,6 +21,7 @@ declare global {
 	
 	function pick<T extends Record<string, any>, K extends (keyof T)> (obj: T, keys: readonly K[] | K[]): Pick<T, K>
 	function omit<T extends Record<string, any>, K extends (keyof T)>(obj: T, keys: readonly K[] | K[]): Omit<T, K>
+	function filterAttrs<T extends Record<string, any>>(obj: T, filter: (attrName: string, attrVal: any) => any, inPlace?: boolean): T
 	function rmFalseyAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 	function rmNullAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 	function rmUndefAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
@@ -31,6 +32,7 @@ declare global {
 	interface ObjectConstructor {
 		pick: typeof pick
 		omit: typeof omit
+		filterAttrs: typeof filterAttrs
 		rmFalseyAttrs: typeof rmFalseyAttrs
 		rmNullAttrs: typeof rmNullAttrs
 		rmUndefAttrs: typeof rmUndefAttrs
@@ -54,6 +56,10 @@ declare global {
 		 * Alias for, but not typesafe entries(obj)
 		 */
 		_entries<T extends any>(): [keyof T, any][]
+		/**
+		 * Alias for Object.equals
+		 */
+		_equals(otherObj: any): boolean
 		/**
 		 * Alias for Object.hasOwnProperty(prop)
 		 */
@@ -103,32 +109,28 @@ globalThis.omit = Object.omit = function (obj, keys) {
 	return res
 }
 
-globalThis.rmFalseyAttrs = Object.rmFalseyAttrs = function (obj, inPlace) {
+globalThis.filterAttrs = Object.filterAttrs = function (obj, filter, inPlace) {
 	const obj2 = inPlace ? obj : copy(obj)
 	for (const key in obj2) {
-		if (!obj2[key]) delete obj2[key]
+		if (!filter(key, obj2[key])) delete obj2[key]
 	}
 	return obj2
+}
+
+globalThis.rmFalseyAttrs = Object.rmFalseyAttrs = function (obj, inPlace) {
+	return filterAttrs(obj, (_, val) => val, inPlace)
 }
 
 globalThis.rmNullAttrs = Object.rmNullAttrs = function (obj, inPlace) {
-	const obj2 = inPlace ? obj : copy(obj)
-	for (const key in obj2) {
-		if (obj2[key] === null) delete obj2[key]
-	}
-	return obj2
+	return filterAttrs(obj, (_, val) => val !== null, inPlace)
 }
 
 globalThis.rmUndefAttrs = Object.rmUndefAttrs = function (obj, inPlace) {
-	const obj2 = inPlace ? obj : copy(obj)
-	for (const key in obj2) {
-		if (obj2[key] === undefined) delete obj2[key]
-	}
-	return obj2
+	return filterAttrs(obj, (_, val) => val !== undefined, inPlace)
 }
 
 /**
- * Copied from npm/depqual
+ * Adapted from npm/fast-deep-equal
  */
 const has = Object.prototype.hasOwnProperty
 globalThis.equals = Object.equals = function (foo, bar) {
@@ -205,6 +207,7 @@ globalThis.equals = Object.equals = function (foo, bar) {
 		}
 	}
 
+	// true if both NaN, false otherwise
 	return foo !== foo && bar !== bar
 
 	function find(iter: any, tar: any, key?: any) {
@@ -258,6 +261,12 @@ Object.defineProperties(Object.prototype, {
 	_entries: {
 		value: function() {
 			return Object.entries(this)
+		},
+		enumerable: false
+	},
+	_equals: {
+		value: function(that: any) {
+			return Object.equals(this, that)
 		},
 		enumerable: false
 	},

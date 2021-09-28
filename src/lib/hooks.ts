@@ -31,23 +31,6 @@ useClickAway.defaultEvents = ['mousedown', 'touchstart']
 
 
 /**
- * useEffectDeep: Like useEffect, but does a deep compare instead default compare
- * to avoid misfires
- */
-export function useEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
-	const lastSeenProps = useRef('')
-	useEffect(watchProps, [varsToWatch])
-
-	function watchProps() {
-		const next = JSON.stringify(varsToWatch)
-		if (lastSeenProps.current !== next) {
-			lastSeenProps.current = next
-			return callback()
-		}
-	}
-}
-
-/**
  * useEvent: subscribes a handler to events.
  * Ex. useEvent('keydown', callback); (also see useKey)
  */
@@ -117,21 +100,33 @@ export interface UseKeyOptions<T extends UseEventTarget> {
 }
 
 
+/**
+ * useEffectDeep: Like useEffect, but does a deep compare instead default compare
+ * to avoid misfires
+ */
+export function useEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
+	const lastSeenProps = useRef<Inputs[]>([])
+	useEffect(watchProps, [varsToWatch])
 
-
+	function watchProps() {
+		if (!equals(varsToWatch, lastSeenProps.current)) {
+			lastSeenProps.current = varsToWatch
+			return callback()
+		}
+	}
+}
 
 /**
- * useLayoutEffectDeep: Like useEffect, but does a deep compare instead default compare
+ * useLayoutEffectDeep: Like useLayoutEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
 export function useLayoutEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
-	const lastSeenProps = useRef('')
+	const lastSeenProps = useRef<Inputs[]>([])
 	useLayoutEffect(watchProps, [varsToWatch])
 
 	function watchProps() {
-		const next = JSON.stringify(varsToWatch)
-		if (lastSeenProps.current !== next) {
-			lastSeenProps.current = next
+		if (!equals(varsToWatch, lastSeenProps.current)) {
+			lastSeenProps.current = varsToWatch
 			return callback()
 		}
 	}
@@ -142,16 +137,13 @@ export function useLayoutEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
  * to avoid misfires
  */
 export function useMemoDeep(callback: Fnc, varsToWatch: Inputs[]) {
-	const [lastSeenProps, setLastSeenProps] = useState(JSON.stringify(varsToWatch))
+	const [lastSeenProps, setLastSeenProps] = useState(varsToWatch)
 	useEffect(watchProps, [varsToWatch])
 	return useMemo(callback, [lastSeenProps])
 
 	function watchProps() {
-		const nextProps = JSON.stringify(varsToWatch)
-		if (lastSeenProps !== nextProps)
-			console.log(nextProps)
-		if (lastSeenProps !== nextProps)
-			setLastSeenProps(nextProps)
+		if (!equals(varsToWatch, lastSeenProps))
+			setLastSeenProps(varsToWatch)
 	}
 }
 
