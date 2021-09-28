@@ -68,7 +68,7 @@ export default function UserEntry({ route }: { route: RouteType }) {
 		assign(entry, formValues)
 		await entry.save()
 		ToastStore.setValue({message: 'Record saved!', icon: 'success', duration: 3e3, placement: 'right'})
-		window.dispatchEvent(new Event('#stack-back'))
+		dispatchEvent(new Event('#stack-back'))
 	}
 
 	function Fields() {

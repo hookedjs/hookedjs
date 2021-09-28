@@ -80,7 +80,7 @@ export const ThemeStore = assign(
 	}
 )
 export const useThemeStore = ThemeStore.use
-window.addEventListener('#theme-toggle', ThemeStore.toggle)
+addEventListener('#theme-toggle', ThemeStore.toggle)
 
 
 
@@ -98,7 +98,7 @@ export const usePortalStore = PortalStore.use
 const bc = document.body.classList
 const sidebarLeftInitial: string = (
 	localStorage.getItem('SidebarLeftStore') && JSON.parse(localStorage.getItem('SidebarLeftStore')!)
-	|| window.innerWidth > 900 && 'full'
+	|| innerWidth > 900 && 'full'
 	|| 'mini'
 )
 if (sidebarLeftInitial === 'mini') bc.add('miniSidebar')
@@ -109,7 +109,7 @@ export const SidebarLeftStore = assign(
 	}
 )
 export const useSidebarLeftStore = SidebarLeftStore.use
-window.addEventListener('#sidebar-toggle', SidebarLeftStore.toggle)
+addEventListener('#sidebar-toggle', SidebarLeftStore.toggle)
 SidebarLeftStore.subscribe(next => next === 'mini' ? bc.add('miniSidebar') : bc.remove('miniSidebar'))
 
 

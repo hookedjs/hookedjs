@@ -205,10 +205,10 @@ export function useMountedState() {
  * A hook that watches a css media breakpoint
  */
 export function useMedia(query: string) {
-	const [state, setState] = useState(window.matchMedia(query).matches)
+	const [state, setState] = useState(matchMedia(query).matches)
 	useEffect(() => {
 		let mounted = true
-		const mql = window.matchMedia(query)
+		const mql = matchMedia(query)
 		const onChange = () => mounted && setState(!!mql.matches)
 		mql.addEventListener('change', onChange)
 		setState(mql.matches)

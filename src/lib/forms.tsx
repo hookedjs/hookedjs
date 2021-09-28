@@ -1,4 +1,4 @@
-window.addEventListener('submit', (e) => e.preventDefault())
+addEventListener('submit', (e) => e.preventDefault())
 
 import EmptyPath from 'mdi-paths-split/CheckboxBlankOutline'
 import MarkedPath from 'mdi-paths-split/CheckboxMarked'

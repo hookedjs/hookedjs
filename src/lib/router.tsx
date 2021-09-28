@@ -188,13 +188,13 @@ function StackFactory(basePath: string) {
 		return <div style={{ visibility: 'hidden' }} ref={ref}>{children}</div>
 
 		function handleStackEvents() {
-			window.addEventListener('#stack-reset', resetStack)
-			window.addEventListener('#stack-back', goback)
-			window.addEventListener('#stack-pop', pop)
+			addEventListener('#stack-reset', resetStack)
+			addEventListener('#stack-back', goback)
+			addEventListener('#stack-pop', pop)
 			return () => {
-				window.removeEventListener('#stack-reset', resetStack)
-				window.removeEventListener('#stack-back', goback)
-				window.removeEventListener('#stack-pop', pop)
+				removeEventListener('#stack-reset', resetStack)
+				removeEventListener('#stack-back', goback)
+				removeEventListener('#stack-pop', pop)
 			}
 			
 			function resetStack() {
@@ -323,7 +323,7 @@ function scrollListener(el: HTMLElement, callback: any) {
 		last_known_scroll_position = el.scrollTop
 		// const navJustHappened = Date.now() - lastNavEvent < 1000
 		if (!ticking) {
-			window.requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
 				callback(last_known_scroll_position)
 				ticking = false
 			})
@@ -452,10 +452,10 @@ PageMetaStore.subscribe(setPageMeta)
 		const ln = findLinkTagInParents(e.target) // aka linkNode
 
 		if (ln?.host === window.location.host) {
-			window.dispatchEvent(new Event('link-clicked'))
+			dispatchEvent(new Event('link-clicked'))
 			e.preventDefault()
 
-			if (ln.hash) window.dispatchEvent(new Event(ln.hash))
+			if (ln.hash) dispatchEvent(new Event(ln.hash))
 
 			if (ln.pathname + ln.search !== window.location.pathname + window.location.search) {
 				if (ln.hash === '#replace')

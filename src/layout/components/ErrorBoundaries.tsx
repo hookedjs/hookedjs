@@ -13,8 +13,8 @@ export function UnhandledErrorNotification() {
 	return promiseErrorEvent ? <ErrorC/> : <F />
 
 	function listenForPromiseErrors() {
-		window.addEventListener('unhandledrejection', handleReject)
-		return () => window.removeEventListener('unhandledrejection', handleReject)
+		addEventListener('unhandledrejection', handleReject)
+		return () => removeEventListener('unhandledrejection', handleReject)
 
 		function handleReject(eventNext: any) {
 			setPromiseErrorEvent(eventNext)
