@@ -107,7 +107,7 @@ Portal.prompt = async <ResponseType extends any>(
 	let fullfilled = false
 	let res: any = undefined
 	PortalStore.setValue({ message: PromptC({resolve: _resolve}), duration, placement, dismissable, onDismiss })
-	while(!fullfilled) await Promise.sleep(100)
+	while(!fullfilled) await sleep(100)
 	return res
 
 	function _resolve(_res: any) {

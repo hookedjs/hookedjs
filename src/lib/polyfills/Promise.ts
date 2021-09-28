@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 /**
  * Polyfills for Promise
  */
@@ -6,6 +7,8 @@
 export {}
 
 declare global {
+	var sleep: (ms: number) => Promise<undefined>
+
 	interface PromiseConstructor {
 		/**
 		 * Return a promise that resolves after ms milliseconds
@@ -34,7 +37,7 @@ declare global {
 	// }
 }
 
-Promise.sleep = async ms => 
+globalThis.sleep = sleep = async ms => 
 	new Promise(resolve => setTimeout(resolve, ms))
 
 Promise.callWithRetry = async function callWithRetry(callback, maxTries = 4) {
