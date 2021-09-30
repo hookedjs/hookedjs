@@ -130,91 +130,75 @@ globalThis.rmUndefAttrs = Object.rmUndefAttrs = function (obj, inPlace) {
 }
 
 /**
- * Adapted from npm/fast-deep-equal
+ * Copied from npm/fast-deep-equal and made easier to step through
  */
-const has = Object.prototype.hasOwnProperty
-globalThis.equals = Object.equals = function (foo, bar) {
-	let ctor, len, tmp
-	if (foo === bar) return true
+globalThis.equals = Object.equals = function (a, b) {
+	if (a === b)
+		return true
 
-	if (foo && bar && (ctor=foo.constructor) === bar.constructor) {
-		if (ctor === Date) return foo.getTime() === bar.getTime()
-		if (ctor === RegExp) return foo.toString() === bar.toString()
+	if (a && b && typeof a == 'object' && typeof b == 'object') {
+		if (a.constructor !== b.constructor)
+			return false
 
-		if (ctor === Array) {
-			if ((len=foo.length) === bar.length) {
-				while (len-- && Object.equals(foo[len], bar[len]));
-			}
-			return len === -1
-		}
-
-		if (ctor === Set) {
-			if (foo.size !== bar.size) {
+		var length, i, keys
+		if (Array.isArray(a)) {
+			length = a.length
+			if (length != b.length)
 				return false
-			}
-			for (len of foo) {
-				tmp = len
-				if (tmp && typeof tmp === 'object') {
-					tmp = find(bar, tmp)
-					if (!tmp) return false
-				}
-				if (!bar.has(tmp)) return false
-			}
-			return true
-		}
-
-		if (ctor === Map) {
-			if (foo.size !== bar.size) {
-				return false
-			}
-			for (len of foo) {
-				tmp = len[0]
-				if (tmp && typeof tmp === 'object') {
-					tmp = find(bar, tmp)
-					if (!tmp) return false
-				}
-				if (!Object.equals(len[1], bar.get(tmp))) {
+			for (i = length; i-- !== 0;)
+				if (!equals(a[i], b[i]))
 					return false
-				}
-			}
 			return true
 		}
 
-		if (ctor === ArrayBuffer) {
-			foo = new Uint8Array(foo)
-			bar = new Uint8Array(bar)
-		} else if (ctor === DataView) {
-			if ((len=foo.byteLength) === bar.byteLength) {
-				while (len-- && foo.getInt8(len) === bar.getInt8(len));
-			}
-			return len === -1
+
+
+		if (a.constructor === RegExp) {
+			if(a.source === b.source && a.flags === b.flags)
+				return true
+			return false
+		}
+		if (a.valueOf !== Object.prototype.valueOf) {
+			if(a.valueOf() === b.valueOf())
+				return true
+			return false
+		}
+		if (a.toString !== Object.prototype.toString) {
+			if(a.toString() === b.toString())
+				return true
+			return false
 		}
 
-		if (ArrayBuffer.isView(foo)) {
-			if ((len=foo.byteLength) === bar.byteLength) {
-				while (len-- && (foo as any)[len] === bar[len]);
+		keys = Object.keys(a)
+		length = keys.length
+		if (length !== Object.keys(b).length)
+			return false
+
+		for (i = length; i-- !== 0;)
+			if (!Object.prototype.hasOwnProperty.call(b, keys[i]))
+				return false
+
+		for (i = length; i-- !== 0;) {
+			var key = keys[i]
+
+			if (key === '_owner' && a.$$typeof) {
+				// React-specific: avoid traversing React elements' _owner.
+				//  _owner contains circular references
+				// and is not needed when comparing the actual elements (and not their owners)
+				continue
 			}
-			return len === -1
+
+			if (!equals(a[key], b[key]))
+				return false
 		}
 
-		if (!ctor || typeof foo === 'object') {
-			len = 0
-			for (ctor in foo) {
-				if (has.call(foo, ctor) && ++len && !has.call(bar, ctor)) return false
-				if (!(ctor in bar) || !Object.equals(foo[ctor], bar[ctor])) return false
-			}
-			return keys(bar).length === len
-		}
+		return true
 	}
 
 	// true if both NaN, false otherwise
-	return foo !== foo && bar !== bar
-
-	function find(iter: any, tar: any, key?: any) {
-		for (key of iter.keys()) {
-			if (Object.equals(key, tar)) return key
-		}
-	}
+	if (a!==a && b!==b)
+		return true
+	return false
 }
 
 // Is imperfect on Classes or objects containing classes
