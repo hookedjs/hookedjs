@@ -25,7 +25,8 @@ declare global {
 	function rmFalseyAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 	function rmNullAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 	function rmUndefAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
-	function equals(foo: any, bar: any): boolean
+	function isEqual(foo: any, bar: any): boolean
+	function isNotEqual(foo: any, bar: any): boolean
 	// Note: Clone is imperfect!
 	function copy<T extends any>(obj: T): T
 
@@ -36,7 +37,8 @@ declare global {
 		rmFalseyAttrs: typeof rmFalseyAttrs
 		rmNullAttrs: typeof rmNullAttrs
 		rmUndefAttrs: typeof rmUndefAttrs
-		equals: typeof equals
+		isEqual: typeof isEqual
+		isNotEqual: typeof isNotEqual
 		// Note: Clone is imperfect!
 		copy: typeof copy
 	}
@@ -57,9 +59,13 @@ declare global {
 		 */
 		_entries<T extends any>(): [keyof T, any][]
 		/**
-		 * Alias for Object.equals
+		 * Alias for Object.isEqual
 		 */
-		_equals(otherObj: any): boolean
+		_isEqualTo(otherObj: any): boolean
+		/**
+		 * Alias for Object.isEqual
+		 */
+		_isNotEqualTo(otherObj: any): boolean
 		/**
 		 * Alias for Object.hasOwnProperty(prop)
 		 */
@@ -132,7 +138,7 @@ globalThis.rmUndefAttrs = Object.rmUndefAttrs = function (obj, inPlace) {
 /**
  * Copied from npm/fast-deep-equal and made easier to step through
  */
-globalThis.equals = Object.equals = function (a, b) {
+globalThis.isEqual = Object.isEqual = function (a, b) {
 	if (a === b)
 		return true
 
@@ -146,7 +152,7 @@ globalThis.equals = Object.equals = function (a, b) {
 			if (length != b.length)
 				return false
 			for (i = length; i-- !== 0;)
-				if (!equals(a[i], b[i]))
+				if (isNotEqual(a[i], b[i]))
 					return false
 			return true
 		}
@@ -188,7 +194,7 @@ globalThis.equals = Object.equals = function (a, b) {
 				continue
 			}
 
-			if (!equals(a[key], b[key]))
+			if (isNotEqual(a[key], b[key]))
 				return false
 		}
 
@@ -199,6 +205,9 @@ globalThis.equals = Object.equals = function (a, b) {
 	if (a!==a && b!==b)
 		return true
 	return false
+}
+globalThis.isNotEqual = Object.isNotEqual = function (a, b) {
+	return isNotEqual(a, b)
 }
 
 // Is imperfect on Classes or objects containing classes
@@ -232,25 +241,31 @@ globalThis.copy = Object.copy = (obj: any) => {
 Object.defineProperties(Object.prototype, {
 	_keys: {
 		value: function() {
-			return Object.keys(this)
+			return keys(this)
 		},
 		enumerable: false
 	},
 	_values: {
 		value: function() {
-			return Object.values(this)
+			return values(this)
 		},
 		enumerable: false
 	},
 	_entries: {
 		value: function() {
-			return Object.entries(this)
+			return entries(this)
 		},
 		enumerable: false
 	},
-	_equals: {
+	_isEqualTo: {
 		value: function(that: any) {
-			return Object.equals(this, that)
+			return isEqual(this, that)
+		},
+		enumerable: false
+	},
+	_isNotEqualTo: {
+		value: function(that: any) {
+			return isNotEqual(this, that)
 		},
 		enumerable: false
 	},

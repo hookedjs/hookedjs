@@ -40,14 +40,14 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 
 	get values() {
 		return rmUndefAttrs(
-			Object.omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])
+			omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])
 		) as IStandardFields & ExtraFields
 	}
 	valuesClean: IStandardFields & ExtraFields
 	get isClean() {
 		console.log(JSON.stringify(this.values))
 		console.log(JSON.stringify(this.valuesClean))
-		return Object.equals(this.values, this.valuesClean)
+		return isEqual(this.values, this.valuesClean)
 	}
 	get isDirty() {
 		return !this.isClean

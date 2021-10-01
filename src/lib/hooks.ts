@@ -109,7 +109,7 @@ export function useEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
 	useEffect(watchProps, [varsToWatch])
 
 	function watchProps() {
-		if (!equals(varsToWatch, lastSeenProps.current)) {
+		if (isNotEqual(varsToWatch, lastSeenProps.current)) {
 			lastSeenProps.current = varsToWatch
 			return callback()
 		}
@@ -125,7 +125,7 @@ export function useLayoutEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
 	useLayoutEffect(watchProps, [varsToWatch])
 
 	function watchProps() {
-		if (!equals(varsToWatch, lastSeenProps.current)) {
+		if (isNotEqual(varsToWatch, lastSeenProps.current)) {
 			lastSeenProps.current = varsToWatch
 			return callback()
 		}
@@ -142,7 +142,7 @@ export function useMemoDeep(callback: Fnc, varsToWatch: Inputs[]) {
 	return useMemo(callback, [lastSeenProps])
 
 	function watchProps() {
-		if (!equals(varsToWatch, lastSeenProps))
+		if (isNotEqual(varsToWatch, lastSeenProps))
 			setLastSeenProps(varsToWatch)
 	}
 }
