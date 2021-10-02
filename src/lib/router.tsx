@@ -109,7 +109,7 @@ function RouterSwitch({ routesByPath }: RouterProps) {
  * Enhances a route object and adds typesafety
  */
 function RouteFactory(props: Omit<RouteType, 'hasBack' | 'hasAccess'> & {hasAccess?: RouteType['hasAccess']}) {
-	const r: RouteType = freeze({
+	const r: RouteType = Object.freeze({
 		hasAccess: (): boolean => true,
 		...props,
 		hasBack: !!props.stack && props.path !== props.stack + '/home',

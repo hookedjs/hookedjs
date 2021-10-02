@@ -76,7 +76,7 @@ class Database {
 		const now = new Date()
 		const doc2 = {
 			createdAt: now,
-			...rmUndefAttrs(doc) as T,
+			...Object.rmUndefAttrs(doc) as T,
 			version: doc.version ? doc.version+1 : 0,
 			_id: doc._id || Database.createId(),
 			updatedAt: now
@@ -150,7 +150,7 @@ class Database {
 		}
 		// Else do full search
 		else {
-			const propsMapped = copy({selector: {}, ...props as any})
+			const propsMapped = Object.copy({selector: {}, ...props as any})
 			if (!propsMapped.selector.deletedAt)
 				propsMapped.selector.deletedAt = {$exists: false}
 			cached.fetchP = this._db

@@ -8,7 +8,7 @@ import { AuthUser, AuthUserRoleEnum, AuthUsers, login, LoginProps, logout, Regis
 // AuthStore: auth user meta
 export interface AuthStoreType extends Pick<AuthUser, 'name' | 'roles' | 'tenants'> { tRoles: TenantPersonRoleEnum[], currentTenant?: { id: string, name: string } }
 const AuthStoreLoggedOut: AuthStoreType = { name: '', roles: [], tenants: [], tRoles: [] }
-export const AuthStore = assign(
+export const AuthStore = Object.assign(
 	new StateStore<typeof AuthStoreLoggedOut>(AuthStoreLoggedOut, 'AuthStore'),
 	{
 		async logout() {
@@ -23,7 +23,7 @@ export const AuthStore = assign(
 			const auth = await login(loginProps.name, loginProps.password)
 			if (auth.roles.includes(AuthStore.dbRoles.ADMIN)) {
 				AuthStore.setValue({
-					...pick(auth, ['name', 'roles']),
+					...Object.pick(auth, ['name', 'roles']),
 					tenants: [],
 					tRoles: [],
 					currentTenant: undefined,
@@ -37,7 +37,7 @@ export const AuthStore = assign(
 					tRoles = tenantProfile?.roles ?? []
 				}
 				AuthStore.setValue({
-					...pick(profile, ['name', 'roles', 'tenants']),
+					...Object.pick(profile, ['name', 'roles', 'tenants']),
 					tRoles,
 					currentTenant: profile.tenants.filter(t => t.id === profile.defaultTenantId)?.[0],
 				})
@@ -73,7 +73,7 @@ setInterval(async function watchRoles() {
 
 
 // ThemeStore: can be dark | light, persists to disk, and can be toggled with #theme-toggle event
-export const ThemeStore = assign(
+export const ThemeStore = Object.assign(
 	new StateStore('light', 'ThemeStore'),
 	{
 		toggle() { ThemeStore.setValue(current => current === 'dark' ? 'light' : 'dark') },
@@ -102,7 +102,7 @@ const sidebarLeftInitial: string = (
 	|| 'mini'
 )
 if (sidebarLeftInitial === 'mini') bc.add('miniSidebar')
-export const SidebarLeftStore = assign(
+export const SidebarLeftStore = Object.assign(
 	new StateStore(sidebarLeftInitial, 'SidebarLeftStore'),
 	{
 		toggle() { SidebarLeftStore.setValue(current => current === 'mini' ? 'full' : 'mini') },
@@ -121,4 +121,4 @@ navListener(() => SidebarRightStore.setValue(false))
 ThemeStore.subscribe(() => SidebarRightStore.setValue(false))
 
 
-assign(window, {AuthStore, PortalStore, ToastStore, ThemeStore, SidebarLeftStore, SidebarRightStore})
+Object.assign(window, {AuthStore, PortalStore, ToastStore, ThemeStore, SidebarLeftStore, SidebarRightStore})

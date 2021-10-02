@@ -72,10 +72,10 @@ export class LoginProps {
 				name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
 				password: assertValid('password', props.password, ['isDefined', 'isString', 'isPassword']),
 			})
-			assign(this, props)
+			Object.assign(this, props)
 		}
 }
-export const LoginPropsExample = new LoginProps(pick(AuthUserExampleCreateFields, ['name', 'password']))
+export const LoginPropsExample = new LoginProps(Object.pick(AuthUserExampleCreateFields, ['name', 'password']))
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
 
 
@@ -94,11 +94,11 @@ export class RegisterProps {
 				surname: assertValid('surname', props.surname, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 				acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
 			})
-			assign(this, props)
+			Object.assign(this, props)
 		}
 }
 export const RegisterPropsExample = new RegisterProps({
-	...pick(AuthUserExampleCreateFields, ['name', 'password', 'givenName', 'surname']),
+	...Object.pick(AuthUserExampleCreateFields, ['name', 'password', 'givenName', 'surname']),
 	acceptedTerms: true,
 })
 export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)

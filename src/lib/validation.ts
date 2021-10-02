@@ -72,7 +72,7 @@ export class ValidationErrorSet<T> extends Error {
 	constructor(entity: any, errorSet: Partial<ValidationErrorType<T>>) {
 		super('ValidationErrorSet: One or more values are invalid')
 		this.context = {
-			entity: assign({}, entity),
+			entity: Object.assign({}, entity),
 			errorSet: errorSet
 		}
 		if (this.context.entity.password) this.context.entity.password = '********'
@@ -100,7 +100,7 @@ export function throwFormValidationErrorSet(entity: any, message: string): never
 export class AssertValidClass {
 	attrName: string
 	attrValue: any
-	constructor(attrName: string, attrValue: any) { assign(this, { attrName, attrValue }) }
+	constructor(attrName: string, attrValue: any) { Object.assign(this, { attrName, attrValue }) }
 	isDefined = () => 
 		this.attrValue === undefined 
 		&& new ValueError(this.attrName, `${this.attrName} is missing`)
@@ -235,7 +235,7 @@ export function assertValid(
 		if (assertion) return assertion
 	}
 	if (complex) {
-		for (const [key,arg] of entries(complex)) {
+		for (const [key,arg] of Object.entries(complex)) {
 			// @ts-ignore: ts doesnt know this is safe
 			const res = assertValid[key](arg)
 			if (res) return res
@@ -250,7 +250,7 @@ export function assertValid(
 }
 
 export function validateSet<T>(obj: T, attrAssertions: ValidationErrorType<T>) {
-	const attrAssertionsClean = rmFalseyAttrs(attrAssertions)
+	const attrAssertionsClean = Object.rmFalseyAttrs(attrAssertions)
 	if (attrAssertionsClean._keys().length) return new ValidationErrorSet(obj, attrAssertionsClean)
 }
 

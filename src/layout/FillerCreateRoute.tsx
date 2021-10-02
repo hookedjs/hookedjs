@@ -54,7 +54,7 @@ export class CreateProps {
 		assertValidSet<CreateProps>(props, {
 			title: assertValid('title', props.title, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30}),
 		})
-		assign(this, props)
+		Object.assign(this, props)
 	}
 }
 export const CreatePropsPlaceholder = new CreateProps({

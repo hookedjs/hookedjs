@@ -28,7 +28,7 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 
 	constructor(data: Partial<IStandardFields> & ExtraFields) {
 		const now = new Date()
-		assign(
+		Object.assign(
 			this,
 			{_id: data._id || PouchModel.createId(), createdAt: now, updatedAt: now, version: 0},
 			data
@@ -39,40 +39,40 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 	static createId() {return Database.createId()}
 
 	get values() {
-		return rmUndefAttrs(
-			omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])
+		return Object.rmUndefAttrs(
+			Object.omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty'])
 		) as IStandardFields & ExtraFields
 	}
 	valuesClean: IStandardFields & ExtraFields
 	get isClean() {
 		console.log(JSON.stringify(this.values))
 		console.log(JSON.stringify(this.valuesClean))
-		return isEqual(this.values, this.valuesClean)
+		return Object.isEqual(this.values, this.valuesClean)
 	}
 	get isDirty() {
 		return !this.isClean
 	}
 
 	async refresh() {
-		return assign(this, await this.db.get(this._id))
+		return Object.assign(this, await this.db.get(this._id))
 	}
 	async save() {
-		rmUndefAttrs(this, true)
+		Object.rmUndefAttrs(this, true)
 		if (this.isClean) return this
 		await this.validate()
-		assign(this, await this.db.set(this.values))
+		Object.assign(this, await this.db.set(this.values))
 		this.valuesClean = this.values
 		return this
 	}
 	async delete() {
-		return assign(this, await this.db.delete(this.values))
+		return Object.assign(this, await this.db.delete(this.values))
 	}
 	async deletePermanent() {
 		await this.db.deletePermanent(this.values)
 	}
 	subscribe(callback: (doc: PouchModel<any> & ExtraFields) => any) {
 		return this.db.subscribe([this._id], doc => {
-			callback(assign(this, doc) as any)
+			callback(Object.assign(this, doc) as any)
 		})
 	}
 

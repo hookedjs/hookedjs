@@ -8,9 +8,9 @@ const pe = process.env as Record<string, string>
 const isProd = pe.NODE_ENV === 'production'
 
 const lambdaVars = ['jwtSecret', 'dbName', 'dbArn', 'dbSecretArn', 's3Bucket', 'region'] as const
-const lambdaEnv = pick(pe, lambdaVars)
+const lambdaEnv = Object.pick(pe, lambdaVars)
 const localVars = ['jwtSecret'] as const
-const localEnv = assign({jwtSecret: 'secret'}, pick(pe, localVars))
+const localEnv = Object.assign({jwtSecret: 'secret'}, Object.pick(pe, localVars))
 
 const currentVars = isProd ? lambdaVars : localVars
 const currentEnv = isProd ? lambdaEnv : localEnv

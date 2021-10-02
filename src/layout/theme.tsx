@@ -6,7 +6,7 @@ export class Theme {
 	dangerH = 0; dangerS = 100; dangerL = 40; dangerHoverLDelta = 10; danger = ''; dangerHover = ''
 
 	constructor(vals: Partial<Theme>) {
-		assign(this, vals)
+		Object.assign(this, vals)
 		this.primary = `hsl(${this.primaryH},${this.primaryS}%,${this.primaryL}%)`
 		this.primaryHover = `hsl(${this.primaryH},${this.primaryS}%,${this.primaryL + this.primaryHoverLDelta}%)`
 		this.secondary = `hsl(${this.secondaryH},${this.secondaryS}%,${this.secondaryL}%)`

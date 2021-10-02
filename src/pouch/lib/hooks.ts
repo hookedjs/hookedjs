@@ -27,7 +27,7 @@ function useDocs<PM extends PouchModel<any>>(
 	useEffect(watch, [findProps])
 	const listener = useRef({cancel(){}})
 
-	const mapped = copy({
+	const mapped = Object.copy({
 		selector: {},
 		...(typeof findProps === 'string' ? {selector: {_id: {$in: [findProps]}}} as any : findProps),
 		...limit && {limit}
@@ -120,7 +120,7 @@ function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindPr
  * A Stateful db query hook to get a count of docs that match a query
  */
 function useCount<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): State<number> {
-	const _findProps = {...copy(findProps), fields: []}
+	const _findProps = {...Object.copy(findProps), fields: []}
 	const docs = useDocs<PM>(collection, _findProps)
 	return {
 		...docs,
@@ -150,7 +150,7 @@ function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindP
  * A Stateful db query hook to get a count of docs that match a query
  */
 function useCountS<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): [number, State<any>['refetch']] {
-	const _findProps = {...copy(findProps), fields: []}
+	const _findProps = {...Object.copy(findProps), fields: []}
 	const docs = useDocsS<PM>(collection, _findProps)
 	return [docs[0].length, docs[1]]
 }

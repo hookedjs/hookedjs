@@ -150,7 +150,7 @@ const cacheDefault = {
 // API
 //
 
-export default assign(memoize,
+export default Object.assign(memoize,
 	{
 		variadic: strategyVariadic,
 		monadic: strategyMonadic

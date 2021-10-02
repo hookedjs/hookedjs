@@ -15,7 +15,7 @@ const AdminLayout = lazy(() => import('#layout/layout/AdminLayout'))
 const TenantLayout = lazy(() => import('#layout/layout/TenantLayout'))
 const MarketingLayout = lazy(() => import('#layout/layout/MarketingLayout'))
 
-export const routes = freeze({
+export const routes = Object.freeze({
 
 
 	// Access Control Routes
@@ -410,12 +410,12 @@ export const routes = freeze({
 } as const)
 
 
-export const routesByPath = values(routes).reduce<Record<string, any>>((acc, r) => {
+export const routesByPath = Object.values(routes).reduce<Record<string, any>>((acc, r) => {
 	acc[r.path] = r
 	return acc
 }, {})
 
-export const Paths = entries(routes).reduce<Record<string, string>>((acc, [name, r]) => {
+export const Paths = Object.entries(routes).reduce<Record<string, string>>((acc, [name, r]) => {
 	acc[name] = r.path
 	return acc
 }, {}) as Record<keyof typeof routes, string>

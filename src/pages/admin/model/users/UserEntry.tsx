@@ -65,7 +65,7 @@ export default function UserEntry({ route }: { route: RouteType }) {
 		if (!formValues.bannedAt) delete formValues.bannedAt
 		if (!formValues.bannedReason) delete formValues.bannedReason
 		
-		assign(entry, formValues)
+		Object.assign(entry, formValues)
 		await entry.save()
 		ToastStore.setValue({message: 'Record saved!', icon: 'success', duration: 3e3, placement: 'right'})
 		dispatchEvent(new Event('#stack-back'))

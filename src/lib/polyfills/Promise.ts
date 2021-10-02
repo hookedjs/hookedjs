@@ -37,7 +37,7 @@ declare global {
 	// }
 }
 
-globalThis.sleep = sleep = async ms => 
+globalThis.sleep = Promise.sleep = async ms => 
 	new Promise(resolve => setTimeout(resolve, ms))
 
 Promise.callWithRetry = async function callWithRetry(callback, maxTries = 4) {

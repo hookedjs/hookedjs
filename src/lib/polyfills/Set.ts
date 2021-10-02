@@ -23,7 +23,7 @@ declare global {
 Object.defineProperties(Set.prototype, {
 	copy: {
 		value: function() {
-			return copy(this)
+			return Object.copy(this)
 		},
 		enumerable: false
 	},

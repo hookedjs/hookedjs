@@ -13,7 +13,7 @@ abstract class PouchCollection<PM extends PouchModel<any>> {
 		return new this.model(await this.db.get(id))
 	}
 	find(props: IFindProps<IStandardFields & PM> = {}): Promise<PM[]> {
-		const propsMapped = copy(props)
+		const propsMapped = Object.copy(props)
 		if (!propsMapped.selector) propsMapped.selector = {}
 		propsMapped.selector.type = this.model.type
 		
@@ -26,7 +26,7 @@ abstract class PouchCollection<PM extends PouchModel<any>> {
 			.then((res: any[]) => res.map((d: any) => new this.model(d)))
 	}
 	async findOne(props: Parameters<PouchCollection<PM>['find']>[0] = {}): Promise<PM> {
-		const propsMapped = copy(props)
+		const propsMapped = Object.copy(props)
 		if (!propsMapped.selector) propsMapped.selector = {}
 		propsMapped.selector.type = this.model.type
 		return new this.model(await this.db.findOne(propsMapped) as any)

@@ -116,10 +116,10 @@ Array.intersection = function (...arrays) {
 	return arrays.reduce((a, b) => b.filter(Set.prototype.has.bind(new Set(a))))
 }
 
-defineProperties(Array.prototype, {
+Object.defineProperties(Array.prototype, {
 	copy: {
 		value: function() {
-			return copy(this)
+			return Object.copy(this)
 		},
 		enumerable: false
 	},

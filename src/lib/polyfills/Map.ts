@@ -23,7 +23,7 @@ declare global {
 Object.defineProperties(Map.prototype, {
 	copy: {
 		value: function() {
-			return copy(this)
+			return Object.copy(this)
 		},
 		enumerable: false
 	},
