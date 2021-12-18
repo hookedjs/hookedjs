@@ -1,3 +1,4 @@
+import { useInterval, useState } from '#src/lib/hooks'
 import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
 
@@ -87,14 +88,27 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 class AuthUserCollection extends PouchCollection<AuthUser> {
 	model = AuthUser
 
+	current: AuthUser | undefined = undefined
 	async getCurrent() {
 		const name = readAuth()?.name ?? throwForbiddenError()
-		return this.get(`org.couchdb.user:${name}`)
+		this.current = await this.get(`org.couchdb.user:${name}`)
+		return this.current
 	}
 }
 export const AuthUsers = new AuthUserCollection()
 
 export const [useAuthUser, useAuthUsers, useAuthUserCount, useAuthUserS, useAuthUsersS, useAuthUserCountS] = createModelHooks<AuthUser>(AuthUsers)
+
+export function useCurrentUser() {
+	const [user, setUser] = useState(AuthUsers.current)
+	useInterval(async () => {
+		const next = await AuthUsers.getCurrent()
+		if (!Object.isEqual(user, next)) {
+			setUser(next)
+		}
+	}, 2000)
+	return user!
+}
 
 export enum AuthUserRoleEnum {
   ADMIN = '_admin',

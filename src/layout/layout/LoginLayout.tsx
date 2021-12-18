@@ -1,17 +1,29 @@
 import { h } from 'preact'
 
-import { useLayoutEffect } from '#lib/hooks'
-import pstyled from '#src/lib/pstyled'
+import { useEffect, useLayoutEffect, useState } from '#lib/hooks'
+import { Alert } from '#lib/icons'
+import { isOnline, waitForOnline } from '#lib/network'
+import pstyled from '#lib/pstyled'
 
 import { applyTheme, defaultTheme } from '../theme'
 
 export default function LoginLayout({children}: any) {
+	const [isOnlineS, setIsOnlineS] = useState(isOnline())
 	useLayoutEffect(() => applyTheme(defaultTheme))
+	useEffect(watchForOnline, [])
 	return <LoginLayoutOuter class="dark">
 		<LoginLayoutInner>
-			{children}
+			{isOnlineS
+				? children
+				: <OfflineNotice />
+			}
 		</LoginLayoutInner>
 	</LoginLayoutOuter>
+	
+	function watchForOnline() {
+		if (!isOnlineS)
+			waitForOnline().then(() => setIsOnlineS(true))
+	}
 }
 const LoginLayoutOuter = pstyled.div`
 	:root
@@ -76,3 +88,12 @@ const LoginLayoutInner = pstyled.div`
 	:root .checkbox svg
 		fill: var(--secondary) !important
 `
+
+function OfflineNotice() {
+	return (
+		<div style={{textAlign: 'center', paddingTop: 30}}>
+			<Alert size={60} />
+			<p>Authentication is unvailable while offline.</p>
+		</div>
+	)
+}

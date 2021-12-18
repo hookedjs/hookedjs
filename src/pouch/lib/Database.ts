@@ -33,7 +33,12 @@ class Database {
 		const {remoteOnly, skipSetup = false} = options || {}
 		this.name = name
 		this.host = host
-		this._remote = new PouchDB(`${this.host}/${this.name}`, {skip_setup: skipSetup})
+		if (host) {
+			this._remote = new PouchDB(`${this.host}/${this.name}`, {skip_setup: skipSetup})
+		}
+		else {
+			this._db = new PouchDB(this.name)
+		}
 		if (remoteOnly) {
 			this._db = this._remote
 			this.connected = true
@@ -42,12 +47,13 @@ class Database {
 	}
 	static createId() {return nanoid()}
 	async sync() {
-		// TODO: Figure out how to allow offline mode
-		await this._db
-			.sync(this._remote, {retry: true})
-			.catch(err => {console.log('Sync failed', err); throw err})
-		this._db.sync(this._remote, {retry: true, live: true})
-		this.connected = true
+		if (this.host) {
+			await this._db
+				.sync(this._remote, {retry: true})
+				.catch(err => {console.log('Sync failed', err); throw err})
+			this._db.sync(this._remote, {retry: true, live: true})
+			this.connected = true
+		}
 	}
 	// Closes connections and deletes local database. Doesn't delete replicated databases.
 	destroy() {

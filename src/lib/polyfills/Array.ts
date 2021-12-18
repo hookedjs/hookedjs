@@ -89,17 +89,9 @@ declare global {
 		/**
 		 * Subtracts the values of an array(s) from the current array
 		 */
-		subtract(...otherArrs: string[][]): undefined
-		/**
-		* Alias of subtract
-		*/
 		minus(...otherArrs: string[][]): undefined
 		/**
 		* Functional version of subtract that returns a new array
-		*/
-		subtractF(...otherArrs: string[][]): T[]
-		/**
-		* Alias of subtractF
 		*/
 		minusF(...otherArrs: string[][]): T[]
 	}
@@ -230,8 +222,7 @@ Object.defineProperties(Array.prototype, {
 	},
 
 
-
-	subtract: {
+	minus: {
 		value: function(...arrs: any[][]) {
 			let i
 			for (const arr of arrs) {
@@ -245,20 +236,10 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
-	minus: {
-		value: Array.prototype.subtract,
-		enumerable: false
-	},
-
-	subtractF: {
+	minusF: {
 		value: function(...arrs: any[][]) {
 			return Array.difference(this, ...arrs)
 		},
-		enumerable: false
-	},
-
-	minusF: {
-		value: Array.prototype.subtractF,
 		enumerable: false
 	},
 

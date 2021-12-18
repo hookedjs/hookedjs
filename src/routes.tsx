@@ -141,14 +141,6 @@ export const routes = Object.freeze({
 		Layout: AdminLayout,
 		hasAccess: isAdmin,
 	}),
-	AdminDeleteAccount: RouteFactory({
-		title: 'Delete Account',
-		Icon: i.Logout,
-		path: '/admin/delete-account',
-		Component: lazy(() => import('./pages/auth/DeleteAccount')),
-		hasAccess: isAdmin,
-	}),
-
     
 	AdminStatsStack: RouteFactory({
 		title: 'Dashboard',

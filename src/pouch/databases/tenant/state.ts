@@ -1,3 +1,4 @@
+import { isOffline, isOnline, waitForOnline } from '#lib/network'
 import { AuthUsers } from '#src/pouch'
 import { AuthStore } from '#src/stores'
 
@@ -11,14 +12,21 @@ export async function initTenantDb() {
 	const tenantId = 
 		AuthStore.value.currentTenant?.id || 
 		(
+			isOnline() &&
 			readAuth()?.roles?.excludes(AuthStore.dbRoles.ADMIN) &&
 			(await AuthUsers.getCurrent().catch(() => null))?.defaultTenantId
 		)
 
 	if (tenantId) {
-		db.handle = new Database(`tenantdb-${tenantId}`, db.host)
-		await db.handle.sync()
-		await db.handle.indexModels([TenantPerson])
+		if (isOffline()) {
+			db.handle = new Database(`tenantdb-${tenantId}`)
+			await db.handle.indexModels([TenantPerson])
+			waitForOnline().then(initTenantDb)
+		} else {
+			db.handle = new Database(`tenantdb-${tenantId}`, db.host)
+			await db.handle.sync()
+			await db.handle.indexModels([TenantPerson])
+		}
 	}
 	return tenantId
 }
