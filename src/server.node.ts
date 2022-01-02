@@ -28,7 +28,7 @@ const
 		} : {}
 	})
 
-app.get('/version', function getVersion(req, reply) {reply.send(config.version)})
+app.get('/api/version', function getVersion(req, reply) {reply.send(config.version)})
 
 ///////////////////////////////
 // Default Headers

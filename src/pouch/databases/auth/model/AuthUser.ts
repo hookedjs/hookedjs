@@ -7,6 +7,7 @@ import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
 import { readAuth } from '..'
 import db from '../db'
+import { isOffline } from '#src/lib/network'
 
 export interface IAuthUserExtra {
 	name: string
@@ -90,8 +91,14 @@ class AuthUserCollection extends PouchCollection<AuthUser> {
 
 	current: AuthUser | undefined = undefined
 	async getCurrent() {
-		const name = readAuth()?.name ?? throwForbiddenError()
-		this.current = await this.get(`org.couchdb.user:${name}`)
+		if (isOffline && !this.current){
+			this.current = new AuthUser(localStorage.getItem('currentUser')?.jsonParse() ?? throwForbiddenError())
+		}
+		else {
+			const name = readAuth()?.name ?? throwForbiddenError()
+			this.current = await this.get(`org.couchdb.user:${name}`)
+			localStorage.setItem('currentUser', this.current._json())	
+		}
 		return this.current
 	}
 }

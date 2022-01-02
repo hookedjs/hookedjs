@@ -3,6 +3,7 @@ import PouchDB from 'pouchdb'
 import FindPlugin from 'pouchdb-find'
 
 import { NotFoundError, throwNotFoundError } from '#lib/validation'
+import { isOffline, waitForOnline } from '#src/lib/network'
 
 PouchDB.plugin(FindPlugin)
 
@@ -33,11 +34,9 @@ class Database {
 		const {remoteOnly, skipSetup = false} = options || {}
 		this.name = name
 		this.host = host
+		this._db = new PouchDB(this.name)
 		if (host) {
 			this._remote = new PouchDB(`${this.host}/${this.name}`, {skip_setup: skipSetup})
-		}
-		else {
-			this._db = new PouchDB(this.name)
 		}
 		if (remoteOnly) {
 			this._db = this._remote
@@ -47,23 +46,35 @@ class Database {
 	}
 	static createId() {return nanoid()}
 	async sync() {
-		if (this.host) {
+		if (!this.host) throw new Error('cannot sync db without a host')
+		const synced: string[] = JSON.parse(localStorage.getItem('synced') || '[]')
+		if (synced.excludes(this.name)) {
+			if (isOffline) {
+				waitForOnline().then(location.reload)
+				throw new DatabaseConnectionError()
+			}
 			await this._db
 				.sync(this._remote, {retry: true})
-				.catch(err => {console.log('Sync failed', err); throw err})
-			this._db.sync(this._remote, {retry: true, live: true})
-			this.connected = true
+				.catch(() => {throw new DatabaseConnectionError()})
+			localStorage.setItem('synced', JSON.stringify([...synced, this.name]))
 		}
+		this._db.sync(this._remote, {retry: true, live: true})
+		this.connected = true
 	}
 	// Closes connections and deletes local database. Doesn't delete replicated databases.
 	destroy() {
 		clearInterval(this.findCacheGarbageCollectInterval)
 		this.connected = false
 		this.findCache.clear()
+		localStorage.setItem('synced', '[]')
 		return this._db.destroy()
 	}
 	// Closes connections and frees memory. Doesn't delete local IndexedDB if exists.
-	close() {return this._db.close()}
+	close() {
+		this.connected = false
+		this.findCache.clear()
+		return this._db.close()
+	}
 	// Gets record(s) from the database and converts date strings to dates
 	get<T extends IStandardFields>(id: string): Promise<T>
 	get<T extends IStandardFields>(ids: string[]): Promise<T[]>
@@ -262,6 +273,11 @@ loadingDb.subscribe = () => {throw new DatabaseLoadingError()}
 class DatabaseLoadingError extends Error {
 	constructor() {
 		super('Database is loading')
+	}
+}
+class DatabaseConnectionError extends Error {
+	constructor() {
+		super('Error Connecting to the internet.')
 	}
 }
 

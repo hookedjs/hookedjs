@@ -71,6 +71,10 @@ declare global {
 		 * Alias for obj._keys().reduce((acc, key) => ..., init)
 		 */
 		_keyReduce<T extends any, A extends any>(fn: (acc: A, key: keyof T) => A, init: A): A
+		/**
+		 * To json
+		 */
+		_json(pretty?: boolean): string
 	}
 }
 
@@ -212,6 +216,12 @@ Object.defineProperties(Object.prototype, {
 	_keyReduce: {
 		value: function(fn: (...props: any) => any, init: any) {
 			return this._keys().reduce(fn, init)
+		},
+		enumerable: false
+	},
+	_json: {
+		value: function(pretty: boolean) {
+			return JSON.stringify(this, null, pretty ? 2 : undefined)
 		},
 		enumerable: false
 	},

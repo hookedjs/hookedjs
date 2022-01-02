@@ -1,42 +1,25 @@
-import { Fragment, h } from 'preact'
+import { h } from 'preact'
 
 import {ErrorBoundary, UnhandledErrorNotification} from './layout/components/ErrorBoundaries'
 import { PortalFromContext } from './layout/components/Portal'
-import Toast, { ToastFromContext } from './layout/components/Toast'
+import { ToastFromContext } from './layout/components/Toast'
 import { RouterComponent as Router } from './lib/router'
+import { StaleBrowserWarning } from './layout/components/StaleBrowserWarning'
 import { DbProvider } from './pouch'
 import { routesByPath } from './routes'
 
 export default function App() {
 	return (
 		<ErrorBoundary>
+			<UnhandledErrorNotification />
 			<DbProvider>
 				<StaleBrowserWarning />
-				<UnhandledErrorNotification />
 				<Router routesByPath={routesByPath} />
 				<PortalFromContext />
 				<ToastFromContext />
 			</DbProvider>
 		</ErrorBoundary>
 	)
-
-	function StaleBrowserWarning() {
-		const isModern = (
-			'fetch' in window &&
-			'Promise' in window &&
-			'assign' in Object &&
-			'keys' in Object
-		)
-		return isModern
-			? <Fragment />
-			: <Toast
-				icon="error"
-				placement="bottom"
-				duration={-1}
-				message={<span>Please use a modern browser and/or update. Internet Explorer is <i>not</i> supported.</span>}
-			/>
-
-	}
 }
 
 function setVh() {

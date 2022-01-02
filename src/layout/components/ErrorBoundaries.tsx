@@ -34,8 +34,10 @@ export function ErrorBoundary({children}: {children: ComponentChildren}) {
 	reportRuntimeError()
 	return (
 		<F>
-			{children}
-			{runtimeError ? <ErrorC /> : ''}
+			{runtimeError
+			? <ErrorC message={runtimeError.message} />
+			: children
+			}
 		</F>
 	)
 	function reportRuntimeError() {
@@ -45,14 +47,14 @@ export function ErrorBoundary({children}: {children: ComponentChildren}) {
 	}
 }
 
-function ErrorC() {
+function ErrorC({message = 'Something went wrong on this page! Shoot.'}: {message?: string}) {
 	return (
 		<Toast 
 			icon="error" 
 			placement="bottom" 
 			duration={-1} 
 			message={<span>
-				Something went wrong on this page! Shoot. Maybe&nbsp;
+				{message} Maybe&nbsp;
 				<a href="javascript:location.reload()">refresh</a>?
 			</span>}
 		/>

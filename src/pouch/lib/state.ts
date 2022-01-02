@@ -9,12 +9,18 @@ import * as dbs from '../databases'
  */
 export function DbProvider({children}: {children: ComponentChildren}) {
 	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState<Error | null>(null)
 	useLayoutEffect(() => {watchLoading()}, [])
+	if (error) throw error
 	return isLoading ? null : children as any
 
 	async function watchLoading() {
-		await initDatabases()
-		setIsLoading(false)
+		try {
+			await initDatabases()
+			setIsLoading(false)
+		} catch(e: any) {
+			setError(e)
+		}
 	}
 }
 

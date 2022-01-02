@@ -36,6 +36,10 @@ declare global {
 		 * Checks if a string is not in an array or object
 		 */
 		isNotIn(arrOrObj: any): boolean
+		/**
+		 * Parse to json
+		 */
+		jsonParse<T extends any>(): T
 	}
 }
 
@@ -74,6 +78,13 @@ Object.defineProperties(String.prototype, {
 	isNotIn: {
 		value: function (arrOrObj: any) {
 			return !this.isIn(arrOrObj)
+		},
+		enumerable: false
+	},
+
+	jsonParse: {
+		value: function () {
+			return JSON.parse(this)
 		},
 		enumerable: false
 	},

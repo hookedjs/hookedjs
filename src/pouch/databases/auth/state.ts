@@ -1,4 +1,3 @@
-import { isOffline, waitForOnline } from '#lib/network'
 import { assertAttrsWithin, assertValid, assertValidSet, throwFormValidationErrorSet } from '#lib/validation'
 
 import Database, { loadingDb } from '../../lib/Database'
@@ -10,24 +9,12 @@ export async function initAuthDb() {
 	destroyAuthDb()
 	const auth = readAuth()
 	if (auth?.roles?.includes(AuthUserRoleEnum.ADMIN)) {
-		if (isOffline()) {
-			db.handle = new Database('_users')
-			await db.handle.indexModels([AuthUser])
-			waitForOnline().then(initAuthDb)
-		}
-		else {
 			db.handle = new Database('_users', db.host)
 			await db.handle.sync()
 			await db.handle.indexModels([AuthUser])
-		}
 	}
 	else {
-		if (isOffline()) {
-			db.handle = new Database('_users', undefined, {skipSetup: true})
-		}
-		else {
-			db.handle = new Database('_users', db.host, {remoteOnly: true, skipSetup: true})
-		}
+		db.handle = new Database('_users', db.host, {remoteOnly: true, skipSetup: true})
 		if (auth.name) {
 			await AuthUsers.getCurrent()
 		}

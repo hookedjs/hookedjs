@@ -6,7 +6,7 @@
   "license": "ISC",
   "scripts": {
     "prepare": "if [ -d \".git\" ]; then husky install; fi",
-    "dev": "PORT=4000 run-p api:dev web:dev db:dev",
+    "dev": "PORT=4000 run-p db:dev api:dev web:dev",
     "build": "pnpm web:build && pnpm api:build",
     "start": "pnpm api:start",
     "web:dev": "snowpack dev --secure --polyfill-node",

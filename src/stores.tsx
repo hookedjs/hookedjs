@@ -1,11 +1,11 @@
 import type { PortalProps } from './layout/components/Portal'
 import type { ToastProps } from './layout/components/Toast'
+import { isOffline, isOnline, waitForOnline } from './lib/network'
 import { navListener, RouteHistoryReset, StackHistoriesReset } from './lib/router'
 import StateStore from './lib/StateStore'
 import { AuthUser, AuthUserRoleEnum, AuthUsers, login, LoginProps, logout, RegisterProps, TenantPersonRoleEnum, TenantPersons } from './pouch'
 
-
-// AuthStore: auth user meta
+// AuthStore: auth user meta, isReady
 export interface AuthStoreType extends Pick<AuthUser, 'name' | 'roles' | 'tenants'> { tRoles: TenantPersonRoleEnum[], currentTenant?: { id: string, name: string } }
 const AuthStoreLoggedOut: AuthStoreType = { name: '', roles: [], tenants: [], tRoles: [] }
 export const AuthStore = Object.assign(
@@ -70,24 +70,20 @@ setInterval(async function watchRoles() {
 // 	setTimeout(() => AuthStore.login({email: 'admin@admin.com', password: 'password'}), 1000)
 // }, 1000)
 
-
-
-// ThemeStore: can be dark | light, persists to disk, and can be toggled with #theme-toggle event
-export const ThemeStore = Object.assign(
-	new StateStore('light', 'ThemeStore'),
-	{
-		toggle() { ThemeStore.setValue(current => current === 'dark' ? 'light' : 'dark') },
+// networkStatusStore: watches the network status
+export interface NetworkStatusStoreType { isOnline: boolean; isOffline: boolean }
+export const NetworkStatusStore = new StateStore<NetworkStatusStoreType>({ isOnline, isOffline })
+export const useNetworkStatusStore = NetworkStatusStore.use
+function refreshNetworkStatusStore() {
+	if (
+		NetworkStatusStore.value.isOnline !== isOnline 
+		|| NetworkStatusStore.value.isOffline !== isOffline
+	) {
+		NetworkStatusStore.setValue({ isOnline, isOffline })
 	}
-)
-export const useThemeStore = ThemeStore.use
-addEventListener('#theme-toggle', ThemeStore.toggle)
-
-
-
-// ToastStore: display a Toast at the bottom or right of the page
-export const ToastStore = new StateStore<ToastProps>({ placement: 'right', message: '', duration: 2e3 })
-export const useToastStore = ToastStore.use
-
+}
+waitForOnline().then(refreshNetworkStatusStore)
+setInterval(refreshNetworkStatusStore, 4000)
 
 // PortalStore: display a Portal overlaying the page
 export const PortalStore = new StateStore<PortalProps>({ placement: 'top', message: '' })
@@ -118,7 +114,21 @@ SidebarLeftStore.subscribe(next => next === 'mini' ? bc.add('miniSidebar') : bc.
 export const SidebarRightStore = new StateStore(false)
 export const useSidebarRightStore = SidebarRightStore.use
 navListener(() => SidebarRightStore.setValue(false))
+
+
+// ThemeStore: can be dark | light, persists to disk, and can be toggled with #theme-toggle event
+export const ThemeStore = Object.assign(
+	new StateStore('light', 'ThemeStore'),
+	{
+		toggle() { ThemeStore.setValue(current => current === 'dark' ? 'light' : 'dark') },
+	}
+)
+export const useThemeStore = ThemeStore.use
+addEventListener('#theme-toggle', ThemeStore.toggle)
 ThemeStore.subscribe(() => SidebarRightStore.setValue(false))
 
+// ToastStore: display a Toast at the bottom or right of the page
+export const ToastStore = new StateStore<ToastProps>({ placement: 'right', message: '', duration: 2e3 })
+export const useToastStore = ToastStore.use
 
-Object.assign(window, {AuthStore, PortalStore, ToastStore, ThemeStore, SidebarLeftStore, SidebarRightStore})
+Object.assign(window, {AuthStore, NetworkStatusStore, PortalStore, SidebarLeftStore, SidebarRightStore, ToastStore, ThemeStore,})
