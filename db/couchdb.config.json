@@ -1,0 +1,16 @@
+{
+  "couchdb": {
+    "uuid": "06d2a8b4-138c-4ce9-9bb1-4421e37ad0c2"
+  },
+  "admins": {
+    "admin@hookedjs.org": "-pbkdf2-29f29cd90b9a1de9a75705e0f96c6de3ec9805a9,1d616418216219b10a15b19319e11015211619e17b12716f,10",
+    "admin": "-pbkdf2-0d33f2af3c7fafbdd200a979a4f226d0456162ee,11a11810d13418c1f21fb16d1b81571da1951391631131f7,10"
+  },
+  "couch_httpd_auth": {
+    "allow_persistent_cookies": true,
+    "timeout": 1e+24
+  },
+  "log": {
+    "file": "./db/log.txt"
+  }
+}

@@ -9,3 +9,9 @@ npm-debug.log
 .eslintcache
 .graveyard
 web-build
+*.log
+db/log.txt
+db/*/LOG.old
+db/*/LOG
+db/*/LOCK
+db/_replicator
