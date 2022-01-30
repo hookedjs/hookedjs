@@ -104,7 +104,7 @@ export interface UseKeyOptions<T extends UseEventTarget> {
  * useEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
+export function useEffectDeep(callback: Fnc, varsToWatch: any[]) {
 	const lastSeenProps = useRef<Inputs[]>([])
 	useEffect(watchProps, [varsToWatch])
 
@@ -120,7 +120,7 @@ export function useEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
  * useLayoutEffectDeep: Like useLayoutEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useLayoutEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
+export function useLayoutEffectDeep(callback: Fnc, varsToWatch: any[]) {
 	const lastSeenProps = useRef<Inputs[]>([])
 	useLayoutEffect(watchProps, [varsToWatch])
 
@@ -136,7 +136,7 @@ export function useLayoutEffectDeep(callback: Fnc, varsToWatch: Inputs[]) {
  * useEffectDeep: Like useEffect, but does a deep compare instead default compare
  * to avoid misfires
  */
-export function useMemoDeep(callback: Fnc, varsToWatch: Inputs[]) {
+export function useMemoDeep(callback: Fnc, varsToWatch: any[]) {
 	const [lastSeenProps, setLastSeenProps] = useState(varsToWatch)
 	useEffect(watchProps, [varsToWatch])
 	return useMemo(callback, [lastSeenProps])

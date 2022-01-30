@@ -3,34 +3,17 @@ import {h} from 'preact'
 import PaddedPage from '#layout/components/PaddedPage'
 import Section from '#layout/components/Section'
 import pstyled from '#src/lib/pstyled'
-import { AuthUsers, useCurrentUser } from '#src/pouch'
+import { useCurrentUser } from '#src/pouch'
 import { Paths } from '#src/routes'
-import { AuthStore, useAuthStore } from '#src/stores'
 
 // Further copy the styles of https://account.zenmate.com/en_US/account, especially the form inputs.
 
-
 export default function Account() {
-	const [auth] = useAuthStore()
-	return auth.roles.includes(AuthStore.dbRoles.ADMIN) ? <AdminAccount /> : <TenantAccount />
-}
-
-function AdminAccount() {
+	const user = useCurrentUser()
 	return (
 		<PaddedPage>
 			<Section header1="Account Settings">
-			Hello Admin.
-			</Section>
-		</PaddedPage>
-	)
-}
-
-function TenantAccount() {
-	const profile = useCurrentUser()
-	return (
-		<PaddedPage>
-			<Section header1="Account Settings">
-				<p>Hello, {profile.fullName}!</p>
+				<p>Hello, {user.fullName}!</p>
 			user form here
 			</Section>
 			<Section header1="Account overview">

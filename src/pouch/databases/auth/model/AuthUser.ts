@@ -1,6 +1,7 @@
-import { useInterval, useState } from '#src/lib/hooks'
+import { useInterval, useLayoutEffect, useLayoutEffectDeep, useState } from '#src/lib/hooks'
 import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
+import { AuthStore, useAuthStore } from '#src/stores'
 
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
@@ -100,14 +101,15 @@ export const AuthUsers = new AuthUserCollection()
 export const [useAuthUser, useAuthUsers, useAuthUserCount, useAuthUserS, useAuthUsersS, useAuthUserCountS] = createModelHooks<AuthUser>(AuthUsers)
 
 export function useCurrentUser() {
-	const [user, setUser] = useState(AuthUsers.current)
-	useInterval(async () => {
-		const next = await AuthUsers.getCurrent()
-		if (!Object.isEqual(user, next)) {
-			setUser(next)
-		}
-	}, 2000)
+	const [auth] = useAuthStore()
+	const isAdmin = auth.roles.includes(AuthUserRoleEnum.ADMIN)
+	const [user, setUser] = useState(isAdmin ? adminUser : AuthUsers.current)
+	useLayoutEffectDeep(() => {onAuthChange()}, [auth])
 	return user!
+
+	async function onAuthChange() {
+		setUser(isAdmin ? adminUser : await AuthUsers.getCurrent())
+	}
 }
 
 export enum AuthUserRoleEnum {
@@ -147,3 +149,26 @@ export const AuthUserExampleFields: IAuthUser = {
 export const AuthUserExample = new AuthUser(AuthUserExampleFields)
 
 export const AuthUserFieldsEnum = Enum.getEnumFromClassInstance(AuthUserExample)
+
+const adminUser: AuthUser = new AuthUser({
+	_id: 'admin',
+	_rev: '',
+	type: AuthUser.type,
+	version: 0,
+	name: 'admin@hookedjs.org',
+	createdAt: new Date(),
+	updatedAt: new Date(),
+	givenName: 'Admin',
+	surname: 'Admin',
+	roles: [AuthUserRoleEnum.ADMIN],
+	status: AuthUserStatusEnum.ACTIVE,
+	tenants: [],
+	password: undefined,
+	password_scheme: undefined,
+	iterations: undefined,
+	derived_key: undefined,
+	salt: undefined,
+	defaultTenantId: undefined,
+	bannedAt: undefined,
+	bannedReason: undefined,
+})

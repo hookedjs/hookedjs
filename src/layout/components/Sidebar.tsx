@@ -3,7 +3,8 @@ import { h } from 'preact'
 import NavLink from '#layout/components/SidebarNavLink'
 import * as i from '#lib/icons'
 import pstyled from '#src/lib/pstyled'
-import { AuthStore, SidebarLeftStore } from '#src/stores'
+import { useCurrentUser } from '#src/pouch'
+import { AuthStore } from '#src/stores'
 
 import type { NavLinks } from '../types'
 
@@ -32,18 +33,19 @@ const SidebarDiv = pstyled.div`
 `
 
 export function SidebarHeader() {
+	const user = useCurrentUser()
 	return (
 		<SidebarHeaderDiv>
 			<div class='left'>
 				<i.Person size={76} class="svg-div full"/>
 				<i.Person size={50} class="svg-div mini" />
-				<div class='label full'>{AuthStore.value.roles.includes(AuthStore.dbRoles.ADMIN) ? 'Admin' : 'Tenant'}</div>
-				<div class='label mini'>Nancy</div>
+				<div class='label full'>{user.roles.includes(AuthStore.dbRoles.ADMIN) ? 'Admin' : 'Tenant'}</div>
+				<div class='label mini'>{user.givenName}</div>
 			</div>
 			<div class='right'>
-				<div class='top'>Active</div>
-				<div class='middle'>Nancy Dombrowski</div>
-				<div class='bottom'>nancy.smith@gmail.com</div>
+				<div class='top'>{user.status.toTitleCase()}</div>
+				<div class='middle'>{user.fullName}</div>
+				<div class='bottom'>{user.name}</div>
 			</div>
 		</SidebarHeaderDiv>
 	)
