@@ -10,8 +10,5 @@ npm-debug.log
 .graveyard
 web-build
 *.log
-db/log.txt
-db/*/LOG.old
-db/*/LOG
-db/*/LOCK
-db/_replicator
+db/*
+!db/couchdb.config.json
