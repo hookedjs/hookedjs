@@ -24,8 +24,9 @@
 			"#layout/*": ["./src/layout/*"],
       // Add this line to get types for streaming imports (packageOptions.source="remote"):
       "*": [".snowpack/types/*"]
-		}
+		},
+    "noEmit": true,
   },
   "include": ["src"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "src/api"],
 }

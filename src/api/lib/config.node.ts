@@ -23,7 +23,9 @@ export default {
 	version: packageJson.version,
 	isProd,
 	apiPrefix: '/api',
-	authPrefix: '/authApi',
+	dbUrl: 'https://localhost:3000/db',
+	dbUser: 'admin',
+	dbPass: 'Password8',
 	...lambdaEnv,
 	...localEnv,
 }

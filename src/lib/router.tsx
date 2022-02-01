@@ -16,9 +16,8 @@
 import { ComponentChildren, Fragment as F, FunctionalComponent, h } from 'preact'
 import {Suspense} from 'preact/compat'
 
-import { applyTheme, defaultTheme } from '#layout/theme'
-import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from '#lib/hooks'
-
+import { applyTheme, defaultTheme } from '../layout/theme'
+import { useEffect, useErrorBoundary, useLayoutEffect, useRef, useState } from './hooks'
 import pstyled from './pstyled'
 import StateStore from './StateStore'
 import { ForbiddenError, NotFoundError } from './validation'

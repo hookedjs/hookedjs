@@ -1,8 +1,8 @@
-import '../lib/polyfills'
+import '../lib/polyfills/node'
+import './lib/pouch/init'
 
 import fastify from 'fastify'
-import fileUploadPlugin from 'fastify-file-upload'
-// const proxyPlugin = require('fastify-http-proxy')
+// import fileUploadPlugin from 'fastify-file-upload'
 import fastifyPluginize from 'fastify-plugin'
 import * as glob from 'glob'
 
@@ -28,7 +28,7 @@ app.get(`${config.apiPrefix}/version`, function getVersion(req, reply) {reply.se
 ///////////////////////////////
 // Plugins
 ///////////////////////////////
-app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
+// app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
 
 
 ///////////////////////////////

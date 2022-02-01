@@ -1,10 +1,17 @@
 import {nanoid} from 'nanoid'
-import PouchDB from 'pouchdb'
-import FindPlugin from 'pouchdb-find'
+import PouchDbEs from 'pouchdb'
+import * as PouchDbAll from 'pouchdb'
+import FindPluginEs from 'pouchdb-find'
+import * as FindPluginAll from 'pouchdb-find'
 
 import { NotFoundError, throwNotFoundError } from '#lib/validation'
 
-PouchDB.plugin(FindPlugin)
+// I don't know why, but this is the only way I can get imports to
+// work isomorphically
+const PouchDb = PouchDbEs || PouchDbAll
+const FindPlugin = FindPluginEs || FindPluginAll
+
+PouchDb.plugin(FindPlugin)
 
 interface IDb {
 	name: string
@@ -12,8 +19,8 @@ interface IDb {
 }
 
 class Database {
-	_db = new PouchDB('loading')
-	_remote = new PouchDB('loading')
+	_db = new PouchDb('loading')
+	_remote = new PouchDb('loading')
 	name: IDb['name']
 	host: IDb['host']
 	connected = false
@@ -34,10 +41,15 @@ class Database {
 		this.name = name
 		this.host = host
 		if (host) {
-			this._remote = new PouchDB(`${this.host}/${this.name}`, {skip_setup: skipSetup})
+			this._remote = new PouchDb(
+				`${this.host}/${this.name}`,
+				{
+					skip_setup: skipSetup,
+					fetch, // this allows for globalThis.fetch override for node
+				})
 		}
 		else {
-			this._db = new PouchDB(this.name)
+			this._db = new PouchDb(this.name)
 		}
 		if (remoteOnly) {
 			this._db = this._remote

@@ -1,5 +1,5 @@
 import { useInterval, useLayoutEffect, useLayoutEffectDeep, useState } from '#src/lib/hooks'
-import { assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
+import { assertAttrsWithin, assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
 import { AuthStore, useAuthStore } from '#src/stores'
 
@@ -149,6 +149,47 @@ export const AuthUserExampleFields: IAuthUser = {
 export const AuthUserExample = new AuthUser(AuthUserExampleFields)
 
 export const AuthUserFieldsEnum = Enum.getEnumFromClassInstance(AuthUserExample)
+
+export class LoginProps {
+	name = ''
+	password = ''
+	constructor(props: any) {
+		assertAttrsWithin(props, this)
+		assertValidSet<LoginProps>(props, {
+			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
+			password: assertValid('password', props.password, ['isDefined', 'isString', 'isPassword']),
+		})
+		Object.assign(this, props)
+	}
+}
+export const LoginPropsExample = new LoginProps(Object.pick(AuthUserExampleCreateFields, ['name', 'password']))
+export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
+
+
+export class RegisterProps {
+	name = ''
+	password = ''
+	givenName = ''
+	surname = ''
+	acceptedTerms = false
+	constructor(props: any) {
+		assertAttrsWithin(props, this)
+		assertValidSet<RegisterProps>(props, {
+			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
+			password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty', 'isPassword']),
+			givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
+			surname: assertValid('surname', props.surname, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
+			acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
+		})
+		Object.assign(this, props)
+	}
+}
+export const RegisterPropsExample = new RegisterProps({
+	...Object.pick(AuthUserExampleCreateFields, ['name', 'password', 'givenName', 'surname']),
+	acceptedTerms: true,
+})
+export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)
+
 
 const adminUser: AuthUser = new AuthUser({
 	_id: 'admin',

@@ -1,5 +1,5 @@
 import 'preact/devtools'
-import './lib/polyfills'
+import './lib/polyfills/web'
 
 import { h, render } from 'preact'
 

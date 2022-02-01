@@ -1,10 +1,8 @@
-import '../lib/polyfills'
+import '../lib/polyfills/node'
 
 import fastify from 'fastify'
-import fileUploadPlugin from 'fastify-file-upload'
 import helmetPlugin from 'fastify-helmet'
 const proxyPlugin = require('fastify-http-proxy')
-// import fastifyPluginize from 'fastify-plugin'
 import staticPlugin from 'fastify-static'
 import * as fs from 'fs'
 import * as helmet from 'helmet'
@@ -14,18 +12,16 @@ import { ForbiddenError, NotFoundError, ValidationErrorSet } from '../lib/valida
 import config from './lib/config.node'
 
 const 
-	htmlPath = path.join(__dirname, '/../web-build')
-	,notFoundHtml = config.isProd ? fs.readFileSync(path.join(htmlPath, '/index.html')) : ''
+	htmlPath = path.join(__dirname, '/../../web-build')
+	,notFoundHtml = fs.readFileSync(path.join(htmlPath, '/index.html'))
 	,app = fastify({
 		logger: true,
-		...!config.isProd ? {
-			http2: true,
-			https: { 
-				allowHTTP1: true, 
-				key: fs.readFileSync(__dirname + '/../snowpack.key', 'utf8'), 
-				cert: fs.readFileSync(__dirname + '/../snowpack.crt', 'utf8'),
-			},
-		} : {}
+		http2: true,
+		https: { 
+			allowHTTP1: true, 
+			key: fs.readFileSync(__dirname + '/../../snowpack.key', 'utf8'), 
+			cert: fs.readFileSync(__dirname + '/../../snowpack.crt', 'utf8'),
+		},
 	})
 
 
@@ -41,21 +37,9 @@ app.register(helmetPlugin, {
 		},
 	},
 })
-app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
+app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5001', prefix: '/api', rewritePrefix: '/api'})
 app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5984', prefix: '/db'})
-app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5000', prefix: '/auth'})
-app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5001', prefix: '/api'})
 app.register(staticPlugin, { root: htmlPath })
-
-
-///////////////////////////////
-// Dynamic Modules
-///////////////////////////////
-// const dynamicMiddlewares: string[] = glob.sync(`${__dirname}/**/*.api.ts`)
-// dynamicMiddlewares.forEach(file => {
-// 	const plugin = require(file.slice(0, -3))?.default
-// 	if (plugin) app.register(fastifyPluginize(plugin))
-// })
 
 
 ///////////////////////////////
