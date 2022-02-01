@@ -1,4 +1,4 @@
-import './lib/polyfills'
+import '../lib/polyfills'
 
 import fastify from 'fastify'
 import fileUploadPlugin from 'fastify-file-upload'
@@ -10,8 +10,8 @@ import * as fs from 'fs'
 import * as helmet from 'helmet'
 import * as path from 'path'
 
+import { ForbiddenError, NotFoundError, ValidationErrorSet } from '../lib/validation'
 import config from './lib/config.node'
-import { ForbiddenError, NotFoundError, ValidationErrorSet } from './lib/validation'
 
 const 
 	htmlPath = path.join(__dirname, '/../web-build')
@@ -28,16 +28,6 @@ const
 		} : {}
 	})
 
-app.get('/version', function getVersion(req, reply) {reply.send(config.version)})
-
-///////////////////////////////
-// Default Headers
-///////////////////////////////
-app.addHook('onRequest', async function setHeaders(req, reply) {
-	if (req.method === 'GET' || req.method === 'OPTIONS')
-		reply.headers({'cache-control': 'public, max-age=86400'})
-})
-
 
 ///////////////////////////////
 // Plugins
@@ -53,6 +43,8 @@ app.register(helmetPlugin, {
 })
 app.register(fileUploadPlugin, { limits: { fileSize: 50 * 1024 * 1024 }})
 app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5984', prefix: '/db'})
+app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5000', prefix: '/auth'})
+app.register(proxyPlugin, {upstream: 'http://0.0.0.0:5001', prefix: '/api'})
 app.register(staticPlugin, { root: htmlPath })
 
 
@@ -89,7 +81,7 @@ app.setErrorHandler(async function errorHandler(error, req, reply) {
 		reply.code(500).send({ error: new InternalServerError(error.message) })
 })
 
-app.listen(process.env.PORT || 3000, process.env.ADDRESS || '0.0.0.0', (err, address) => {
+app.listen(process.env.PORT || 8080, process.env.ADDRESS || '0.0.0.0', (err, address) => {
 	if (err) throw err
 	app.log.info(`server listening on ${address}`)
 })

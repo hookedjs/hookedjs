@@ -16,11 +16,8 @@ module.exports = {
 		'**/src/db/**/index.ts',
 		'**/src/db/migration/*',
 		'**/src/db/subscriber/*',
-		'**/src/**/*.api.ts',
-		'**/src/**/*.node.ts',
-		'**/*.api.ts',
-		'**/*.node.ts',
-		'**/*.node/**/*',
+		'**/src/api/*',
+		'**/src/api/**/*',
 	],
 	plugins: [
 		[
@@ -35,7 +32,7 @@ module.exports = {
 	],
 	routes: [
 		{src: '/db/.*', dest: (req, res) => {req.url = req.url.slice(3); proxy.web(req, res, {hostname: 'localhost',port: 5984, protocol:'http', rejectUnauthorized: false})}},
-		{src: '/api/.*', dest: (req, res) => proxy.web(req, res, {hostname: 'localhost',port: 4000, protocol:'https', rejectUnauthorized: false})},
+		{src: '/(api|authApi)/.*', dest: (req, res) => proxy.web(req, res, {hostname: 'localhost',port: 5001, protocol:'http', rejectUnauthorized: false})},
 		/* Enable an SPA Fallback in development: */
 		// {"match": "routes", "src": ".*", "dest": "/index.html"},
 		// The recommend approach (above) doesn't work for deep routes for some reason

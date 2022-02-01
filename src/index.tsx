@@ -4,7 +4,7 @@ import './lib/polyfills'
 import { h, render } from 'preact'
 
 import App from './App.jsx'
-import config from './lib/config.web'
+import config from './lib/config'
 
 const root = document.getElementById('root')
 
