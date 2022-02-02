@@ -77,20 +77,24 @@ class Database {
 	// Closes connections and frees memory. Doesn't delete local IndexedDB if exists.
 	close() {return this._db.close()}
 	// Gets record(s) from the database and converts date strings to dates
-	get<T extends IStandardFields>(id: string): Promise<T>
-	get<T extends IStandardFields>(ids: string[]): Promise<T[]>
-	get<T extends IStandardFields>(idOrIds: string | string[]): Promise<any> {
+	async get<T extends IStandardFields>(id: string): Promise<T>
+	async get<T extends IStandardFields>(ids: string[]): Promise<T[]>
+	async get<T extends IStandardFields>(idOrIds: string | string[]): Promise<any> {
 		const getter = (id: string) => this._db
 			.get<T>(id, {})
 			.then(mapDateFields)
 			.catch(err => {throw err.status === 404 ? new NotFoundError(id) : err})
-		if (Array.isArray(idOrIds))
-			// The format for bulkGet is really strange, so just do brute force	
-			return Promise.all(idOrIds.map(getter))
-		else
-			return getter(idOrIds)
+		if (Array.isArray(idOrIds)) {
+			// The format for bulkGet is really strange, so just do brute force
+			const res = await Promise.all(idOrIds.map(getter))
+			return res
+		}
+		else {
+			const res = await getter(idOrIds)
+			return res
+		}
 	}
-	set<T extends IStandardFieldsCreate>(doc: T): Promise<T & IStandardFields> {
+	async set<T extends IStandardFieldsCreate>(doc: T): Promise<T & IStandardFields> {
 		const now = new Date()
 		const doc2 = {
 			createdAt: now,
@@ -99,18 +103,19 @@ class Database {
 			_id: doc._id || Database.createId(),
 			updatedAt: now
 		}
-		return this._db
+		const res = await this._db
 			.put(doc2, {})
 			.then(idAndRev => ({...doc2, _rev: idAndRev.rev}))
+		return res
 	}
-	setMany<T extends IStandardFieldsCreate>(docs: T[]) {
+	async setMany<T extends IStandardFieldsCreate>(docs: T[]) {
 		const now = new Date()
 		const docs2 = docs.map(doc => {
 			if (!doc._id) doc._id = Database.createId()
 			if (!doc.createdAt) doc.createdAt = now
 			doc.updatedAt = now
 		})
-		return this._db.bulkDocs<any>(docs2, {})
+		const res = await this._db.bulkDocs<any>(docs2, {})
 			.then((idAndRevs)  => {
 				const errors = idAndRevs
 					.filter(idAndRev => 'error' in idAndRev)
@@ -119,6 +124,7 @@ class Database {
 					throw {...new Error('Put Errors'), errors}
 				return idAndRevs
 			})
+		return res
 	}
 	/**
 	 * A smart find feature that:
@@ -126,7 +132,7 @@ class Database {
 	 *   2. Sets a cach that can be accessed externally for hooks
 	 *   3. Uses db.get for simple getbyid queries
 	 */
-	find<T extends IStandardFields>(props: IFindProps<T>): Promise<T[]> {
+	async find<T extends IStandardFields>(props: IFindProps<T>): Promise<T[]> {
 		const key = JSON.stringify(props)
 		const cached = {
 			fetching: false,
@@ -202,28 +208,32 @@ class Database {
 			})
 
 		this.findCache.set(key, cached)
-		return cached.fetchP.then(res => res.docs)
+		const res = cached.fetchP.then(res => res.docs)
+		return res
 	}
-	findOne<T extends IStandardFields>(props: IFindProps<T>): Promise<T> {
-		return this.find({...props, limit: 1}).then(docs => docs?.[0] ?? throwNotFoundError())
+	async findOne<T extends IStandardFields>(props: IFindProps<T>): Promise<T> {
+		const res = this.find({...props, limit: 1}).then(docs => docs?.[0] ?? throwNotFoundError())
+		return res
 	}
-	delete<T extends IStandardFields>(doc: T): Promise<T> {
+	async delete<T extends IStandardFields>(doc: T): Promise<T> {
 		const now = new Date()
 		const doc2 = {
 			...doc,
 			updatedAt: now,
 			deletedAt: now,
 		}
-		return this._db.put<T>(doc2, {})
+		const res = this._db.put<T>(doc2, {})
 			.then(idAndRev => ({...doc2, _rev: idAndRev.rev}))
+		return res
 	}
-	deletePermanent(doc: {_id: string, _rev: string}) {
-		return new Promise<any>((resolve, reject) => {
+	async deletePermanent(doc: {_id: string, _rev: string}) {
+		const res = new Promise<any>((resolve, reject) => {
 			this._db.remove(doc, {}, (err, res) => {
 				if (err) return reject(new Error('Error permanent delete'))
 				resolve(null)
 			})
 		})
+		return res
 	}
 	subscribe(ids: string[], callback: (change: any) => void) {
 		const handle = this._db.changes({
@@ -241,13 +251,14 @@ class Database {
 			})
 		return handle
 	}
-	indexModels(models: any[]) {
-		return Promise.all([
+	async indexModels(models: any[]) {
+		const res = Promise.all([
 			this._db.createIndex({index: {fields: ['type']}}),
 			...models.map(model => 
 				this._db.createIndex({index: {fields: model.indexes, name: model.type}})
 			)
 		])
+		return res
 	}
 	findCacheGarbageCollect() {
 		const maxAge = 10 * 60 * 1000

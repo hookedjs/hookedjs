@@ -16,6 +16,10 @@ export interface IAuthUserExtra {
 	iterations?: number
 	derived_key?: string
 	salt?: string
+	passwordTmp?: string
+	passwordTmpAt?: Date
+	failedLoginAttempts?: number
+	failedLoginAttemptAt?: Date
 	bannedAt?: Date
 	bannedReason?: string
 	givenName: string
@@ -41,6 +45,10 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	iterations: IAuthUserExtra['iterations']
 	derived_key: IAuthUserExtra['derived_key']
 	salt: IAuthUserExtra['salt']
+	passwordTmp: IAuthUserExtra['passwordTmp']
+	passwordTmpAt: IAuthUserExtra['passwordTmpAt']
+	failedLoginAttempts: IAuthUserExtra['failedLoginAttempts']
+	failedLoginAttemptAt: IAuthUserExtra['failedLoginAttemptAt']
 	bannedAt: IAuthUserExtra['bannedAt']
 	bannedReason: IAuthUserExtra['bannedReason']
 	givenName: IAuthUserExtra['givenName']
@@ -52,6 +60,13 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 
 	get fullName() {return `${this.givenName} ${this.surname}`}
 
+	// Ensure password never hangs around
+	async save() {
+		await super.save()
+		delete this.password
+		return this
+	}
+
 	async validate() {
 		return assertValidSet<IStandardFields & IAuthUserExtra>(this, {
 			...this.baseValidations(),
@@ -62,16 +77,20 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 				this.name !== this.valuesClean.name && new ValueError('email cannot be changed')
 			]),
 			type: assertValid('type', this.type, [], {isEqual: {expected: AuthUser.type, message: `type must be ${AuthUser.type}`}}),
-			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isRequired', 'isString', 'isPassword']),
+			password: isDefinedAndNotNull(this.password) && assertValid('password', this.password, ['isRequired', 'isString', 'isTruthy']),
 			password_scheme: false,
 			iterations: false,
 			derived_key: false,
 			salt: false,
+			passwordTmp: isDefined(this.passwordTmp) && assertValid('passwordTmp', this.passwordTmp, ['isString', 'isTruthy']),
+			passwordTmpAt: isDefined(this.passwordTmpAt) && assertValid('passwordTmpAt', this.passwordTmpAt, ['isDate']),
+			failedLoginAttempts: isDefined(this.failedLoginAttempts) && assertValid('failedLoginAttempts', this.failedLoginAttempts, ['isNumber']),
+			failedLoginAttemptAt: isDefined(this.failedLoginAttemptAt) && assertValid('failedLoginAttemptAt', this.failedLoginAttemptAt, ['isDate']),
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			status: assertValid('status', this.status, ['isRequired'], { isOneOfSet: AuthUserStatusSet }),
 			bannedAt: isDefined(this.bannedAt) && assertValid('bannedAt', this.bannedAt, ['isDate']),
-			bannedReason: isDefined(this.bannedReason) && assertValid('bannedReason', this.bannedReason, ['isRequired', 'isString', 'isTruthy']),
+			bannedReason: isDefined(this.bannedReason) && assertValid('bannedReason', this.bannedReason, ['isString', 'isTruthy']),
 			roles: assertValid('roles', this.roles, ['isRequired', 'isArray'], { arrayValuesAreOneOfSet: AuthUserRoleSet }),
 			tenants: assertValid('tenants', this.tenants, ['isRequired', 'isArray']),
 			defaultTenantId: assertValid('defaultTenantId', this.defaultTenantId, ['isRequired', 'isString']),
@@ -157,7 +176,7 @@ export class LoginProps {
 		assertAttrsWithin(props, this)
 		assertValidSet<LoginProps>(props, {
 			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
-			password: assertValid('password', props.password, ['isDefined', 'isString', 'isPassword']),
+			password: assertValid('password', props.password, ['isDefined', 'isTruthy']),
 		})
 		Object.assign(this, props)
 	}
@@ -165,6 +184,18 @@ export class LoginProps {
 export const LoginPropsExample = new LoginProps(Object.pick(AuthUserExampleCreateFields, ['name', 'password']))
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
 
+export class PasswordTmpProps {
+	name = ''
+	constructor(props: any) {
+		assertAttrsWithin(props, this)
+		assertValidSet<PasswordTmpProps>(props, {
+			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
+		})
+		Object.assign(this, props)
+	}
+}
+export const PasswordTmpPropsExample = new PasswordTmpProps(Object.pick(AuthUserExampleCreateFields, ['name']))
+export const PasswordTmpPropsEnum = Enum.getEnumFromClassInstance(PasswordTmpPropsExample)
 
 export class RegisterProps {
 	name = ''
@@ -176,7 +207,7 @@ export class RegisterProps {
 		assertAttrsWithin(props, this)
 		assertValidSet<RegisterProps>(props, {
 			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
-			password: assertValid('password', props.password, ['isDefined', 'isString', 'isNoneEmpty', 'isPassword']),
+			password: assertValid('password', props.password, ['isRequired', 'isString', 'isPassword']),
 			givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			surname: assertValid('surname', props.surname, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),

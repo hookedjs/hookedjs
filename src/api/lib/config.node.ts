@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * An interface for config variables
  */
@@ -26,6 +27,10 @@ export default {
 	dbUrl: 'https://localhost:3000/db',
 	dbUser: 'admin',
 	dbPass: 'Password8',
+	smtpHost: 'smtp.ethereal.email',
+	smtpPort: 587,
+	smtpUser: 'manuela.gusikowski29@ethereal.email',
+	smtpPass: 'fXvFzaqdCHBCS5pz5N',
 	...lambdaEnv,
 	...localEnv,
 }

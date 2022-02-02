@@ -119,7 +119,7 @@ Object.isEqual = function (a, b) {
 	const res = isEqual(a, b)
 	if (!res && (globalThis as any).isEqualDebug)
 		console.log(Object.diff(a, b))
-	return Object.keys(res).length === 0
+	return res
 }
 
 Object.isNotEqual = function (a, b) {
@@ -133,6 +133,8 @@ Object.copy = (obj: any) => {
 		return obj
 
 	switch (obj.constructor) {
+	case Date:
+		return new Date(obj)
 	case Array:
 		return obj.map(Object.copy)
 	case Set:

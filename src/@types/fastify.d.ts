@@ -15,7 +15,3 @@ declare global {
 // 		hello: any
 // 	}
 // }
-
-declare module 'fastify-jwt' {
-  interface FastifyJWT {payload: {id: string, roles: number[], createdAt: number}}
-}

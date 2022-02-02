@@ -12,3 +12,4 @@ web-build
 *.log
 db/*
 !db/couchdb.config.json
+loading

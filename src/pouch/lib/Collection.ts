@@ -31,8 +31,13 @@ abstract class PouchCollection<PM extends PouchModel<any>> {
 		propsMapped.selector.type = this.model.type
 		return new this.model(await this.db.findOne(propsMapped) as any)
 	}
-	async save(docs: PM[]) {
-		return Promise.all(docs.map(d => d.save())) as Promise<PM[]>
+	async create(initials: PM[]): Promise<PM[]> {
+		const docs = initials.map(i => new this.model(i))
+		return Promise.all(docs.map(d => d.save()))
+	}
+	async createOne(initial: PM): Promise<PM> {
+		const doc = new this.model(initial)
+		return doc.save()
 	}
 	async delete(docs: PM[]) {
 		return Promise.all(docs.map(d => d.delete())) as Promise<PM[]>

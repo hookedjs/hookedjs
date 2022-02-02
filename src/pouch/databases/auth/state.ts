@@ -40,7 +40,7 @@ export function destroyAuthDb() {
 }
 
 export function initAuthDbApi() {
-	db.handle = new Database('_users', db.host, {remoteOnly: true, skipSetup: true})
+	db.handle = new Database('_users', db.host, {remoteOnly: true, skipSetup: false})
 }
 
 const host = 'https://localhost:3000/db'

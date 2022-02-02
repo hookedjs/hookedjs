@@ -65,7 +65,7 @@ app.setErrorHandler(async function errorHandler(error, req, reply) {
 		reply.code(500).send({ error: new InternalServerError(error.message) })
 })
 
-app.listen(process.env.PORT || 8080, process.env.ADDRESS || '0.0.0.0', (err, address) => {
+app.listen(process.env.PORT || 3000, process.env.ADDRESS || '0.0.0.0', (err, address) => {
 	if (err) throw err
 	app.log.info(`server listening on ${address}`)
 })
