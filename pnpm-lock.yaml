@@ -14,6 +14,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ~4.8.2
   '@typescript-eslint/parser': ~4.8.2
   '@web/test-runner': ~0.13.3
+  casual: ^1.6.2
   chai: ~4.3.4
   eslint: ~7.18.0
   eslint-plugin-simple-import-sort: ~6.0.1
@@ -77,6 +78,7 @@ devDependencies:
   '@typescript-eslint/eslint-plugin': 4.8.2_6adf521224c9e9b6a36894d8f9b31cc5
   '@typescript-eslint/parser': 4.8.2_eslint@7.18.0+typescript@4.4.2
   '@web/test-runner': 0.13.15
+  casual: 1.6.2
   chai: 4.3.4
   eslint: 7.18.0
   eslint-plugin-simple-import-sort: 6.0.1_eslint@7.18.0
@@ -3100,6 +3102,13 @@ packages:
 
   /caseless/0.12.0:
     resolution: {integrity: sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=}
+    dev: true
+
+  /casual/1.6.2:
+    resolution: {integrity: sha512-NQObL800rg32KZ9bBajHbyDjxLXxxuShChQg7A4tbSeG3n1t7VYGOSkzFSI9gkSgOHp+xilEJ7G0L5l6M30KYA==}
+    dependencies:
+      mersenne-twister: 1.1.0
+      moment: 2.29.1
     dev: true
 
   /chai/4.3.4:
@@ -6257,6 +6266,10 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
+  /mersenne-twister/1.1.0:
+    resolution: {integrity: sha1-+RZhjuQ9cXnvz2Qb7EUx65Zwl4o=}
+    dev: true
+
   /methods/1.1.2:
     resolution: {integrity: sha1-VSmk1nZUE07cxSZmVoNbD4Ua/O4=}
     engines: {node: '>= 0.6'}
@@ -6446,6 +6459,10 @@ packages:
     dependencies:
       obliterator: 2.0.1
     dev: false
+
+  /moment/2.29.1:
+    resolution: {integrity: sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==}
+    dev: true
 
   /monocle-ts/2.3.10_fp-ts@2.10.5:
     resolution: {integrity: sha512-UvzfU1LR0XMfPN0ySPvMhIu54mzfuAzoggtIOc2JlEAfnR6sfv/5zGkxrNtYvLNYzm5bo/qc1v0DlUq4VlzE0g==}

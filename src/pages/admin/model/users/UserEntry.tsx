@@ -12,9 +12,11 @@ import type { IStandardFields } from '#src/pouch/lib/Database'
 import { ToastStore } from '#src/stores'
 
 export default function UserEntry({ route }: { route: RouteType }) {
+	// TODO: rename id to name
 	const
 		{id} = qs.parse<Record<string,string>>(),
 		entry = id
+			// TODO: I think we can omit 'org:couchdb.user' now that AuthUsers.get is autoprefixing
 			? useAuthUserS('org.couchdb.user:' + id)
 			: new AuthUser({
 				_id: '',

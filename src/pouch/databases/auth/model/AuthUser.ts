@@ -1,3 +1,5 @@
+import { nanoid } from 'nanoid'
+
 import { useInterval, useLayoutEffect, useLayoutEffectDeep, useState } from '#src/lib/hooks'
 import { assertAttrsWithin, assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
@@ -6,11 +8,14 @@ import { AuthStore, useAuthStore } from '#src/stores'
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
+import { TenantPersonRoleEnum, TenantPersons, TenantPersonStatusEnum } from '../../tenant'
+import { initTenantDbApi, tenantDbPrefix } from '../../tenant/state'
 import { readAuth } from '..'
 import db from '../db'
 
-export interface IAuthUserExtra {
+export type IAuthUserExtra = {
 	name: string
+	roles: AuthUserRoleEnum[]
 	password?: string
 	password_scheme?: string
 	iterations?: number
@@ -24,12 +29,12 @@ export interface IAuthUserExtra {
 	bannedReason?: string
 	givenName: string
 	surname: string
-	roles: AuthUserRoleEnum[]
 	status: AuthUserStatusEnum
 	tenants: {id: string, name: string}[],
 	defaultTenantId?: string
 }
 export interface IAuthUser extends IStandardFields, IAuthUserExtra {}
+export interface IAuthUserCreate extends Partial<IStandardFields>, IAuthUserExtra {}
 
 export class AuthUser extends PouchModel<IAuthUserExtra> {
 	static get db() {return db.handle}
@@ -62,8 +67,11 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 
 	// Ensure password never hangs around
 	async save() {
+		// Ensure _id always matches name
+		this._id = `org.couchdb.user:${this.name}`
 		await super.save()
-		delete this.password
+		// refresh to ensure password is replaced by derived_key,salt,iterations
+		await this.refresh()
 		return this
 	}
 
@@ -97,6 +105,24 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 		})
 	}
 
+	async createTenant(name: string) {
+		const defaultTenantId = `${tenantDbPrefix}${nanoid(10)}`
+		initTenantDbApi(defaultTenantId)
+		await sleep(1000)
+		await TenantPersons.createOne({
+			surname: this.surname,
+			givenName: this.givenName,
+			email: this.name,
+			roles: [TenantPersonRoleEnum.ADMIN],
+			status: TenantPersonStatusEnum.ACTIVE,
+		})
+		this.status = AuthUserStatusEnum.ACTIVE
+		this.defaultTenantId = defaultTenantId
+		this.tenants = this.tenants || []
+		this.tenants.push({id: defaultTenantId, name})
+		await this.save()
+	}
+
 	async ban(reason: IAuthUserExtra['bannedReason']) {
 		this.status = AuthUserStatusEnum.BANNED
 		this.bannedAt = new Date()
@@ -105,8 +131,19 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	}
 }
 
-class AuthUserCollection extends PouchCollection<AuthUser> {
+class AuthUserCollection extends PouchCollection<AuthUser, IAuthUserCreate> {
 	model = AuthUser
+
+	get(id: string) {
+		return super.get(this.autoPrefixId(id))
+	}
+
+	autoPrefixId(id: string) {
+		const prefixed = id.startsWith('org.couchdb.user:')
+			? id
+			: `org.couchdb.user:${id}`
+		return prefixed
+	}
 
 	current: AuthUser | undefined = undefined
 	async getCurrent() {
@@ -122,12 +159,12 @@ export const [useAuthUser, useAuthUsers, useAuthUserCount, useAuthUserS, useAuth
 export function useCurrentUser() {
 	const [auth] = useAuthStore()
 	const isAdmin = auth.roles.includes(AuthUserRoleEnum.ADMIN)
-	const [user, setUser] = useState(isAdmin ? adminUser : AuthUsers.current)
+	const [user, setUser] = useState(isAdmin ? adminAuthUserStub : AuthUsers.current)
 	useLayoutEffectDeep(() => {onAuthChange()}, [auth])
 	return user!
 
 	async function onAuthChange() {
-		setUser(isAdmin ? adminUser : await AuthUsers.getCurrent())
+		setUser(isAdmin ? adminAuthUserStub : await AuthUsers.getCurrent())
 	}
 }
 
@@ -143,7 +180,7 @@ export enum AuthUserStatusEnum {
 }
 export const AuthUserStatusSet = new Set(Enum.getEnumValues(AuthUserStatusEnum))
 
-export const AuthUserExampleCreateFields: IAuthUserExtra = {
+export const AuthUserExampleCreateFields: IAuthUserCreate = {
 	name: 'sallyfields@hookedjs.org',
 	password: 'Password8',
 	bannedAt: undefined,
@@ -178,6 +215,7 @@ export class LoginProps {
 			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
 			password: assertValid('password', props.password, ['isDefined', 'isTruthy']),
 		})
+		props.name = props.name.toLowerCase()
 		Object.assign(this, props)
 	}
 }
@@ -191,6 +229,7 @@ export class PasswordTmpProps {
 		assertValidSet<PasswordTmpProps>(props, {
 			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
 		})
+		props.name = props.name.toLowerCase()
 		Object.assign(this, props)
 	}
 }
@@ -212,6 +251,7 @@ export class RegisterProps {
 			surname: assertValid('surname', props.surname, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
 		})
+		props.name = props.name.toLowerCase()
 		Object.assign(this, props)
 	}
 }
@@ -222,7 +262,7 @@ export const RegisterPropsExample = new RegisterProps({
 export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)
 
 
-const adminUser: AuthUser = new AuthUser({
+export const adminAuthUserStub: AuthUser = new AuthUser({
 	_id: 'admin',
 	_rev: '',
 	type: AuthUser.type,
@@ -230,16 +270,16 @@ const adminUser: AuthUser = new AuthUser({
 	name: 'admin@hookedjs.org',
 	createdAt: new Date(),
 	updatedAt: new Date(),
-	givenName: 'Admin',
-	surname: 'Admin',
 	roles: [AuthUserRoleEnum.ADMIN],
-	status: AuthUserStatusEnum.ACTIVE,
-	tenants: [],
 	password: undefined,
 	password_scheme: undefined,
 	iterations: undefined,
 	derived_key: undefined,
 	salt: undefined,
+	givenName: 'Admin',
+	surname: 'Admin',
+	status: AuthUserStatusEnum.ACTIVE,
+	tenants: [],
 	defaultTenantId: undefined,
 	bannedAt: undefined,
 	bannedReason: undefined,

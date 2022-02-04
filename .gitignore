@@ -10,6 +10,5 @@ npm-debug.log
 .graveyard
 web-build
 *.log
-db/*
-!db/couchdb.config.json
+db/data
 loading

@@ -26,7 +26,6 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		// create user
 		const user = await AuthUsers.createOne({
 			...props,
-			_id: `org.couchdb.user:${props.name}`,
 			roles: [],
 			status: AuthUserStatusEnum.PENDING,
 			tenants: [],
@@ -66,7 +65,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		const passwordHashed = String(props.password.toHash())
 
 		// Get user
-		const user = await AuthUsers.get(`org.couchdb.user:${props.name}`)
+		const user = await AuthUsers.get(props.name)
 			.catch(e => {
 				throw (
 					e.type === 'NotFound' && new FormValidationErrorSet(req.query, 'email and/or password are invalid')
@@ -100,7 +99,6 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		// If isValidPasswordTmp, activate user and set activate tmp password
 		if (isValidPasswordTmp) {
 			user.status = AuthUserStatusEnum.ACTIVE
-			// TODO: create user/tenant db
 			delete user.derived_key
 			delete user.salt
 			user.password = user.passwordTmp
@@ -160,10 +158,11 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 	 * Send a tmp password to user's email
 	 */
 	app.post('/api/passwordTmp', async function postPasswordTmp(req, reply) {
+		// TODO: Limit the number of passwordTmp requests per user per day
 		const props = new PasswordTmpProps(req.body)
 
 		// Get user
-		const user = await AuthUsers.get(`org.couchdb.user:${props.name}`)
+		const user = await AuthUsers.get(props.name)
 			.catch(e => {
 				throw (
 					e.type === 'NotFound' && new FormValidationErrorSet(req.query, 'name is invalid')

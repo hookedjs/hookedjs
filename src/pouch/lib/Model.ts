@@ -53,7 +53,11 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 	}
 
 	async refresh() {
-		return Object.assign(this, await this.db.get(this._id))
+		const _id = this._id
+		for (const key of Object.keys(this.values)) {
+			delete this[key as keyof this]
+		}
+		return Object.assign(this, await this.db.get(_id))
 	}
 	async save() {
 		Object.rmUndefAttrs(this, true)

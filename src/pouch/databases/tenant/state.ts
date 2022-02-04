@@ -7,6 +7,8 @@ import { readAuth } from '../auth'
 import db from './db'
 import { TenantPerson } from './model/TenantPerson'
 
+export const tenantDbPrefix = 't-'
+
 export async function initTenantDb() {
 	destroyTenantDb()
 	const tenantId = 
@@ -19,16 +21,21 @@ export async function initTenantDb() {
 
 	if (tenantId) {
 		if (isOffline()) {
-			db.handle = new Database(`tenantdb-${tenantId}`)
+			db.handle = new Database(tenantId)
 			await db.handle.indexModels([TenantPerson])
 			waitForOnline().then(initTenantDb)
 		} else {
-			db.handle = new Database(`tenantdb-${tenantId}`, db.host)
+			db.handle = new Database(tenantId, db.host)
 			await db.handle.sync()
 			await db.handle.indexModels([TenantPerson])
 		}
 	}
 	return tenantId
+}
+
+export function initTenantDbApi(dbName: string) {
+	dbName = dbName.startsWith(tenantDbPrefix) ? dbName : `${tenantDbPrefix}${dbName}`
+	db.handle = new Database(dbName, db.host, {remoteOnly: true, skipSetup: false})
 }
 
 export function destroyTenantDb() {

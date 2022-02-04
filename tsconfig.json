@@ -27,6 +27,6 @@
 		},
     "noEmit": true,
   },
-  "include": ["src"],
+  "include": ["src", "scripts", "db"],
   "exclude": ["node_modules"],
 }

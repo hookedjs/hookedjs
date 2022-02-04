@@ -11,6 +11,6 @@
     "timeout": 1e+24
   },
   "log": {
-    "file": "./db/log.txt"
+    "file": "./db/data/log.txt"
   }
 }
