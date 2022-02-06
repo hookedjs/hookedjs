@@ -23,8 +23,7 @@ export type IAuthUserExtra = {
 	salt?: string
 	passwordTmp?: string
 	passwordTmpAt?: Date
-	failedLoginAttempts?: number
-	failedLoginAttemptAt?: Date
+	passwordTmpFailCount?: number
 	bannedAt?: Date
 	bannedReason?: string
 	givenName: string
@@ -52,8 +51,7 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	salt: IAuthUserExtra['salt']
 	passwordTmp: IAuthUserExtra['passwordTmp']
 	passwordTmpAt: IAuthUserExtra['passwordTmpAt']
-	failedLoginAttempts: IAuthUserExtra['failedLoginAttempts']
-	failedLoginAttemptAt: IAuthUserExtra['failedLoginAttemptAt']
+	passwordTmpFailCount: IAuthUserExtra['passwordTmpFailCount']
 	bannedAt: IAuthUserExtra['bannedAt']
 	bannedReason: IAuthUserExtra['bannedReason']
 	givenName: IAuthUserExtra['givenName']
@@ -76,7 +74,7 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	}
 
 	async validate() {
-		return assertValidSet<IStandardFields & IAuthUserExtra>(this, {
+		return assertValidSet<IStandardFields & IAuthUserExtra>(this.values, {
 			...this.baseValidations(),
 			_id: assertValid('_id', this._id, ['isRequired', 'isString'], { isEqual: {expected: `org.couchdb.user:${this.name}`} }),
 			name: assertValid('name', this.name, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
@@ -92,8 +90,7 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 			salt: false,
 			passwordTmp: isDefined(this.passwordTmp) && assertValid('passwordTmp', this.passwordTmp, ['isString', 'isTruthy']),
 			passwordTmpAt: isDefined(this.passwordTmpAt) && assertValid('passwordTmpAt', this.passwordTmpAt, ['isDate']),
-			failedLoginAttempts: isDefined(this.failedLoginAttempts) && assertValid('failedLoginAttempts', this.failedLoginAttempts, ['isNumber']),
-			failedLoginAttemptAt: isDefined(this.failedLoginAttemptAt) && assertValid('failedLoginAttemptAt', this.failedLoginAttemptAt, ['isDate']),
+			passwordTmpFailCount: isDefined(this.passwordTmpFailCount) && assertValid('passwordTmpFailCount', this.passwordTmpFailCount, ['isNumber']),
 			givenName: assertValid('givenName', this.givenName, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			surname: assertValid('surname', this.surname, ['isRequired', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			status: assertValid('status', this.status, ['isRequired'], { isOneOfSet: AuthUserStatusSet }),
@@ -222,23 +219,22 @@ export class LoginProps {
 export const LoginPropsExample = new LoginProps(Object.pick(AuthUserExampleCreateFields, ['name', 'password']))
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
 
-export class PasswordTmpProps {
+export class PasswordRequestProps {
 	name = ''
 	constructor(props: any) {
 		assertAttrsWithin(props, this)
-		assertValidSet<PasswordTmpProps>(props, {
+		assertValidSet<PasswordRequestProps>(props, {
 			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
 		})
 		props.name = props.name.toLowerCase()
 		Object.assign(this, props)
 	}
 }
-export const PasswordTmpPropsExample = new PasswordTmpProps(Object.pick(AuthUserExampleCreateFields, ['name']))
-export const PasswordTmpPropsEnum = Enum.getEnumFromClassInstance(PasswordTmpPropsExample)
+export const PasswordRequestPropsExample = new PasswordRequestProps(Object.pick(AuthUserExampleCreateFields, ['name']))
+export const PasswordRequestPropsEnum = Enum.getEnumFromClassInstance(PasswordRequestPropsExample)
 
 export class RegisterProps {
 	name = ''
-	password = ''
 	givenName = ''
 	surname = ''
 	acceptedTerms = false
@@ -246,7 +242,6 @@ export class RegisterProps {
 		assertAttrsWithin(props, this)
 		assertValidSet<RegisterProps>(props, {
 			name: assertValid('name', props.name, ['isDefined', 'isString', 'isEmail']),
-			password: assertValid('password', props.password, ['isRequired', 'isString', 'isPassword']),
 			givenName: assertValid('givenName', props.givenName, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			surname: assertValid('surname', props.surname, ['isDefined', 'isString'], { isLongerThan: 2, isShorterThan: 30 }),
 			acceptedTerms: assertValid('acceptedTerms', props.acceptedTerms, ['isDefined', 'isBoolean', 'isTruthy']),
@@ -256,7 +251,7 @@ export class RegisterProps {
 	}
 }
 export const RegisterPropsExample = new RegisterProps({
-	...Object.pick(AuthUserExampleCreateFields, ['name', 'password', 'givenName', 'surname']),
+	...Object.pick(AuthUserExampleCreateFields, ['name', 'givenName', 'surname']),
 	acceptedTerms: true,
 })
 export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)

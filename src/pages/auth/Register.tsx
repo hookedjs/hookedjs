@@ -55,17 +55,6 @@ export default function Register() {
 				disabled={submitting}
 				error={errors[RegisterPropsEnum.name]?.note}
 			/>
-			<InputField
-				name={RegisterPropsEnum.password}
-				labelText="Password"
-				inputProps={{
-					type: 'password',
-					placeholder: '********',
-					defaultValue: RegisterPropsExample.password,
-				}}
-				disabled={submitting}
-				error={errors[RegisterPropsEnum.password]?.note}
-			/>
 			<BooleanField
 				inputProps={{ name: RegisterPropsEnum.acceptedTerms, disabled: submitting, 'aria-label': 'Do you agree to the terms at the following link? {put link here}'}}
 				labelText={<span>Do you agree to these<br/>terms?</span>}

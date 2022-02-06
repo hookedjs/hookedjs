@@ -15,7 +15,7 @@
     "web:test": "web-test-runner \"src/**/*.test.tsx\"",
     "api:build": "pnpm lint && tsc && SAM_CLI_TELEMETRY=0 sam build && pnpm api:clean",
     "api:clean": "tsc -b --clean",
-    "api:dev": "ts-node-dev --transpile-only -P tsconfig.node.json src/api/api.node.ts",
+    "api:dev": "sleep 3 && ts-node-dev --transpile-only -P tsconfig.node.json src/api/api.node.ts",
     "gateway:start": "ts-node-dev --transpile-only -P tsconfig.node.json src/api/gateway.node.ts",
     "validate": "pnpm lint && tsc --noEmit",
     "lint": "eslint --cache --ext .ts,.tsx",

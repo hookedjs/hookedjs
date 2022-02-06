@@ -17,12 +17,12 @@ declare global {
 	interface String {
 		copy(): string;
 		/**
-		 * Converts a string into a semi-unique, numeric hash
+		 * Converts a string into a semi-unique hash
 		 *
-		 * Compared to other hash algs (MD5), is much simpler, faster while less perfect
+		 * Compared to other hash algs (MD5), is much simpler, shorter, faster while less perfect
 		 * Src: https://stackoverflow.com/a/8831937/1202757
 		 */
-		toHash(): number
+		toHash(): string
 		/**
 		 * Converts a string into title-case: "hello world" -> "Hello World"
 		 */
@@ -49,10 +49,13 @@ Object.defineProperties(String.prototype, {
 
 	toHash: {
 		value: function() {
-			return Array.from(this).reduce(
-				(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
-				0,
+			const hashInt = Math.abs(
+				Array.from(this).reduce(
+					(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
+					0,
+				)
 			)
+			return hashInt.toString(32)
 		},
 		enumerable: false
 	},

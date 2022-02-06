@@ -32,7 +32,7 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	get fullName() {return `${this.givenName} ${this.surname}`}
 
 	async validate() { 
-		return assertValidSet<IStandardFields & ITenantPersonExtra>(this, {
+		return assertValidSet<IStandardFields & ITenantPersonExtra>(this.values, {
 			...this.baseValidations(),
 			type: assertValid('type', this.type, [], {isEqual: {expected: TenantPerson.type, message: `type must be ${TenantPerson.type}`}}),
 			email: assertValid('email', this.email, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [

@@ -79,7 +79,9 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 		})
 	}
 
-	async validate() {}
+	async validate() {
+		throw new Error('validate() must be implemented by subclass')
+	}
 	baseValidations() {
 		return {
 			_rev: isDefinedAndNotNull(this._rev) && assertValid('_rev', this._rev, ['isRequired', 'isString'], { isLongerThan: 25, isShorterThan: 60 }),

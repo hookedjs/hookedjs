@@ -21,7 +21,6 @@ export default function UserEntry({ route }: { route: RouteType }) {
 			: new AuthUser({
 				_id: '',
 				name: '',
-				password: '',
 				surname: '',
 				givenName: '',
 				roles: [],
@@ -64,10 +63,11 @@ export default function UserEntry({ route }: { route: RouteType }) {
 		if (!formValues.iterations) delete formValues.iterations
 		if (!formValues.derived_key) delete formValues.derived_key
 		if (!formValues.salt) delete formValues.salt
+		if (!formValues.passwordTmp) delete formValues.passwordTmp
+		if (!formValues.passwordTmpAt) delete formValues.passwordTmpAt
+		if (!formValues.passwordTmpFailCount) delete formValues.passwordTmpFailCount
 		if (!formValues.bannedAt) delete formValues.bannedAt
 		if (!formValues.bannedReason) delete formValues.bannedReason
-		if (!formValues.failedLoginAttemptAt) delete formValues.failedLoginAttemptAt
-		if (!formValues.failedLoginAttempts) delete formValues.failedLoginAttempts
 		
 		Object.assign(entry, formValues)
 		await entry.save()
@@ -125,6 +125,27 @@ export default function UserEntry({ route }: { route: RouteType }) {
 				inputProps={{defaultValue: entry.salt}}
 				disabled={true} hidden={true}
 				error={errors[AuthUserFieldsEnum.salt]?.note}
+			/>,
+			passwordTmp: <InputField
+				name={AuthUserFieldsEnum.passwordTmp}
+				labelText="Temp Password"
+				inputProps={{defaultValue: entry.passwordTmp}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.passwordTmp]?.note}
+			/>,
+			passwordTmpAt: <InputField
+				name={AuthUserFieldsEnum.passwordTmpAt}
+				labelText="Temp password created At"
+				inputProps={{type: 'date', defaultValue: entry.passwordTmpAt?.toISOString() ?? ''}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.passwordTmpAt]?.note}
+			/>,
+			passwordTmpFailCount: <InputField
+				name={AuthUserFieldsEnum.passwordTmpFailCount}
+				labelText="Temp password failed login Attempts"
+				inputProps={{defaultValue: entry.passwordTmpFailCount, type: 'number'}}
+				disabled={submitting}
+				error={errors[AuthUserFieldsEnum.passwordTmpFailCount]?.note}
 			/>,
 			givenName: <InputField
 				name={AuthUserFieldsEnum.givenName}
@@ -188,34 +209,6 @@ export default function UserEntry({ route }: { route: RouteType }) {
 				inputProps={{defaultValue: entry.bannedReason}}
 				disabled={submitting}
 				error={errors[AuthUserFieldsEnum.bannedReason]?.note}
-			/>,
-			failedLoginAttemptAt: <InputField
-				name={AuthUserFieldsEnum.failedLoginAttemptAt}
-				labelText="Failed Login Attempt At"
-				inputProps={{type: 'date', defaultValue: entry.failedLoginAttemptAt?.toISOString() ?? ''}}
-				disabled={submitting}
-				error={errors[AuthUserFieldsEnum.failedLoginAttemptAt]?.note}
-			/>,
-			failedLoginAttempts: <InputField
-				name={AuthUserFieldsEnum.failedLoginAttempts}
-				labelText="Failed Login Attempts"
-				inputProps={{defaultValue: entry.failedLoginAttempts, type: 'number'}}
-				disabled={submitting}
-				error={errors[AuthUserFieldsEnum.failedLoginAttempts]?.note}
-			/>,
-			passwordTmpAt: <InputField
-				name={AuthUserFieldsEnum.passwordTmpAt}
-				labelText="Temporary Password At"
-				inputProps={{type: 'date', defaultValue: entry.passwordTmpAt?.toISOString() ?? ''}}
-				disabled={submitting}
-				error={errors[AuthUserFieldsEnum.passwordTmpAt]?.note}
-			/>,
-			passwordTmp: <InputField
-				name={AuthUserFieldsEnum.passwordTmp}
-				labelText="Temp Password"
-				inputProps={{defaultValue: entry.passwordTmp}}
-				disabled={submitting}
-				error={errors[AuthUserFieldsEnum.passwordTmp]?.note}
 			/>,
 		}
 		return Object.values(fields)

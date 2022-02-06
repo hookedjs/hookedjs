@@ -1,28 +1,29 @@
+/**
+ * API Endpoints for authentication that utilize emailed temporary passwords.
+ * 
+ * Better than direct DB auth, bc it's more secure and less prone to brute force.
+ * 
+ * Decisions:
+ *  - Use cheap password hashing bc they are temporary and cheap = less CPU cost
+ *  - Use email verification bc they are more secure and better promise that an
+ *    account is not being shared between people
+ */
+
 import { FormValidationErrorSet, throwFormValidationErrorSet } from '../../lib/validation'
-import { AuthUsers, AuthUserStatusEnum, LoginProps, PasswordTmpProps } from '../../pouch/databases'
+import { AuthUsers, AuthUserStatusEnum, LoginProps, PasswordRequestProps, RegisterProps } from '../../pouch/databases'
 import config from '../lib/config.node'
 import mail from '../lib/mail'
 
 const TEN_MINUTES = 1000 * 60 * 10
 
 export default async function authorizationPlugin(app: FastifyInstance, options: FastifyOptions) {
-	// app.addHook('onRequest', async function setAuthHeaders(req, reply) {
-	// 	if (req.url.startsWith('_session')) {
-	// 		reply.headers({'cache-control': 'no-store, max-age=0'})
-	// 		// await createConnection()
-	// 	}
-	// })
-	// app.addHook('onRequest', async function setAuthContext(req, reply) {
-	// 	try {await req.jwtVerify()}
-	// 	catch (err) {req.user = { id: '', roles: [], createdAt: 0 }}
-	// })
-
 	/**
 	 * Registers a user
 	 */
 	app.post('/api/register', async function postRegisterEndpoint(req, reply) {
-		const props: any = req.body || {}
+		const props = new RegisterProps(req.body)
 		const passwordTmp = createPasswordTmp()
+		const now = new Date()
 		// create user
 		const user = await AuthUsers.createOne({
 			...props,
@@ -30,15 +31,32 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 			status: AuthUserStatusEnum.PENDING,
 			tenants: [],
 			defaultTenantId: '',
-			passwordTmp: String(passwordTmp.toHash()),
-			passwordTmpAt: new Date(),
+			passwordTmp: passwordTmp.toHash(),
+			passwordTmpAt: now,
+			passwordTmpFailCount: 0,
 		})
-			.catch(e => {
-				throw (
-					e.status === 409 && new FormValidationErrorSet(req.body, 'email is already taken')
-					|| e
-				)
+			.catch(async e => {
+				if (e.status === 409) { // 409 means exists
+					const existing = await AuthUsers.get(props.name)
+					// If passwordTmp is expired, create a new one
+					if (
+						!existing.passwordTmpAt || existing.passwordTmpAt.getTime() < now.getTime() - TEN_MINUTES
+					) {
+						existing.passwordTmp = passwordTmp.toHash()
+						existing.passwordTmpAt = now
+						existing.passwordTmpFailCount = 0
+						await existing.save()
+					}
+					return existing
+				}
+				throw e
 			})
+
+		// If passwordTmp is not new, user existed and already had a current passwordTmp so ignore this request
+		if (user.passwordTmpAt?.getTime() !== now.getTime()) {
+			reply.send({})
+			return
+		}
 		
 		mail.send({
 			to: user.name,
@@ -52,7 +70,10 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		})
 
 		reply
-			.send({data: Object.omit(user.values, ['passwordTmp', 'passwordTmpAt'])})
+			.send({
+				// WARNING: this is a security risk, do not send the passwordTmp to the client
+				passwordTmp,
+			})
 	})
 
 	/**
@@ -61,56 +82,47 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 	app.post('/api/login', async function postLoginEndpoint(req, reply) {
 		// Validate props
 		const props = new LoginProps(req.body)
-		const tenMinutesAgo = new Date(Date.now() - TEN_MINUTES)
-		const passwordHashed = String(props.password.toHash())
+		const genericError = new FormValidationErrorSet({...props, password: '********'}, 'email and/or password are invalid')
 
 		// Get user
 		const user = await AuthUsers.get(props.name)
 			.catch(e => {
-				throw (
-					e.type === 'NotFound' && new FormValidationErrorSet(req.query, 'email and/or password are invalid')
-					|| e
-				)
+				throw e.type === 'NotFound' ? genericError : e
 			})
-		
-		let { failedLoginAttempts = 0 } = user
-		const {
-			failedLoginAttemptAt = new Date(0),
-			derived_key: derivedKeyOrig,
-			salt: saltOrig,
-			passwordTmpAt = new Date(0),
-		} = user
 
-		// Allow more logins after ten minutes after last failed login attempt	
-		if (failedLoginAttemptAt < tenMinutesAgo) {
-			user.failedLoginAttempts = failedLoginAttempts = 2
+		// Refuse if user has no active passwordTmp
+		if (!(user.passwordTmp && typeof user.passwordTmpFailCount === 'number')) {
+			throw genericError
 		}
-
 		// Refuse if too many failed login attempts
-		if (failedLoginAttempts >= 5) {
-			throwFormValidationErrorSet(req.body, 'too many failed login attempts. retry again later.')
-		}
-
-		const isValidPasswordTmp = (
-			passwordHashed === user.passwordTmp
-			&& passwordTmpAt > tenMinutesAgo
-		)
-
-		// If isValidPasswordTmp, activate user and set activate tmp password
-		if (isValidPasswordTmp) {
-			user.status = AuthUserStatusEnum.ACTIVE
+		if (user.passwordTmpFailCount > 2) {
 			delete user.derived_key
 			delete user.salt
-			user.password = user.passwordTmp
+			delete user.iterations
+			delete user.password_scheme
+			delete user.passwordTmp
+			delete user.passwordTmpAt
+			delete user.passwordTmpFailCount
 			await user.save()
+			throw genericError
 		}
-
-		if (user.status === AuthUserStatusEnum.PENDING) {
-			throwFormValidationErrorSet(req.body, 'Please confirm your account with the code sent to your email.')
+		// Refuse if password is wrong and track failed login attempt
+		// TODO: Secure compare passwords
+		if (props.password.toHash() !== user.passwordTmp) {
+			user.passwordTmpFailCount++
+			await user.save()
+			throw genericError
 		}
+		// Refuse if user is banned
 		if (user.status === AuthUserStatusEnum.BANNED) {
 			throwFormValidationErrorSet(req.body, 'Your account is blocked.')
 		}
+
+		// All checks pass!
+
+		// activate tmp password for user
+		user.password = user.passwordTmp
+		await user.save()
 
 		// Get login response confirm creds and extract cookie token
 		const loginRes = await fetch(
@@ -119,60 +131,62 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 				method: 'POST',
 				body: JSON.stringify({
 					name: props.name,
-					password: isValidPasswordTmp ? passwordHashed : props.password
+					password: user.passwordTmp
 				}),
 			},
 		)
 		const loginResBody = await loginRes.json()
 		if (loginResBody.error) {
 			if (loginResBody.error === 'unauthorized') {
-				user.failedLoginAttempts = failedLoginAttempts + 1
-				user.failedLoginAttemptAt = new Date()
+				user.passwordTmpFailCount++
 				await user.save()
-				throwFormValidationErrorSet(req.body, 'email and/or password are invalid')
+				throw genericError
 			}
 			throw Object.assign(new Error(loginResBody.reason), {error: loginResBody.error})
 		}
-
-		// If passwordTmp, restore original user password
-		if (isValidPasswordTmp) {
-			delete user.password
-			user.derived_key = derivedKeyOrig
-			user.salt = saltOrig
-		}
-
-		delete user.failedLoginAttempts
-		delete user.failedLoginAttemptAt
+		
+		user.status = AuthUserStatusEnum.ACTIVE
+		delete user.password
+		delete user.derived_key
+		delete user.salt
+		delete user.iterations
+		delete user.password_scheme
 		delete user.passwordTmp
 		delete user.passwordTmpAt
-		if (user.isDirty) {
-			await user.save()
-		}
+		delete user.passwordTmpFailCount
+		await user.save()
 
 		reply
 			.header('set-cookie', loginRes.headers.get('set-cookie'))
-			.send({data: user.values})
+			.send({user: user.values})
 	})
 	
 	/**
 	 * Send a tmp password to user's email
 	 */
-	app.post('/api/passwordTmp', async function postPasswordTmp(req, reply) {
-		// TODO: Limit the number of passwordTmp requests per user per day
-		const props = new PasswordTmpProps(req.body)
+	app.post('/api/passwordRequest', async function postPasswordRequest(req, reply) {
+		const props = new PasswordRequestProps(req.body)
+		const user = await AuthUsers.get(props.name).catch(() => {})
+		const now = new Date()
 
-		// Get user
-		const user = await AuthUsers.get(props.name)
-			.catch(e => {
-				throw (
-					e.type === 'NotFound' && new FormValidationErrorSet(req.query, 'name is invalid')
-					|| e
-				)
-			})
+		// If not user, pretend it's a valid request by returning 200
+		if (!user) {
+			reply.send({})
+			return
+		}
+
+		// If user requested a password reset too recently, ignore request
+		if (
+			user.passwordTmpAt && user.passwordTmpAt.getTime() > now.getTime() - TEN_MINUTES
+		) {
+			reply.send({})
+			return
+		}
 
 		const passwordTmp = createPasswordTmp()
 		user.passwordTmp = String(passwordTmp.toHash())
-		user.passwordTmpAt = new Date()
+		user.passwordTmpAt = now
+		user.passwordTmpFailCount = 0
 		await user.save()
 		
 		mail.send({
@@ -186,7 +200,10 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 			})
 		})
 		
-		reply.send({})
+		reply.send({
+			// WARNING: this is a security risk, do not send the passwordTmp to the client
+			passwordTmp,
+		})
 	})
 
 }
@@ -207,7 +224,7 @@ function createWelcomeEmail(passwordTmp: string) {
 			<b style="font-size: 3em; letter-spacing: .2em">${passwordTmp}</b>
 		</p>
 		<p>
-			Note: This code expires in 10 minutes.
+			This code expires in 10 minutes or 3 failed attempts.
 		</p>
 	`)
 }
@@ -215,7 +232,7 @@ function createWelcomeEmail(passwordTmp: string) {
 function createBorderedEmail(body: string) {
 	return `
 		<div style="background: #aaa; padding: 20px 20px 50px; text-align: center;">
-			<div style="max-width: 400px; padding: 20px; border-radius: 8px; background: white; box-sizing: border-box;">
+			<div style="padding: 20px; border-radius: 8px; background: white; box-sizing: border-box;">
 				${body}
 			</div>
 		</div>

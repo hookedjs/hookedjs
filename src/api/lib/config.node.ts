@@ -23,6 +23,7 @@ if (missing.length)
 export default {
 	version: packageJson.version,
 	isProd,
+	gateway: 'https://localhost:3000',
 	apiPrefix: '/api',
 	dbUrl: 'https://localhost:3000/db',
 	dbUser: 'admin',
