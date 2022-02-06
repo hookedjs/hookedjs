@@ -102,24 +102,7 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 		})
 	}
 
-	async createTenant(name: string) {
-		const defaultTenantId = `${tenantDbPrefix}${nanoid(10)}`
-		initTenantDbApi(defaultTenantId)
-		await sleep(1000)
-		await TenantPersons.createOne({
-			surname: this.surname,
-			givenName: this.givenName,
-			email: this.name,
-			roles: [TenantPersonRoleEnum.ADMIN],
-			status: TenantPersonStatusEnum.ACTIVE,
-		})
-		this.status = AuthUserStatusEnum.ACTIVE
-		this.defaultTenantId = defaultTenantId
-		this.tenants = this.tenants || []
-		this.tenants.push({id: defaultTenantId, name})
-		await this.save()
-	}
-
+	
 	async ban(reason: IAuthUserExtra['bannedReason']) {
 		this.status = AuthUserStatusEnum.BANNED
 		this.bannedAt = new Date()
