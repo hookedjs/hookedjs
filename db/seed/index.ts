@@ -1,7 +1,7 @@
 import '../../src/lib/polyfills/node'
 import '../../src/api/lib/pouch/init'
 
-import * as casual from 'casual'
+import casual from 'casual'
 
 import {
 	AuthUsers,
@@ -17,11 +17,10 @@ async function main() {
 
 async function createUser() {
 	// const name = casual.email.toLowerCase()
-	const name = 'sallyfields@hookedjs3.org'
+	const name = 'sallyfields@hookedjs.org'
 	const user = await AuthUsers.createOne({
 		name,
 		roles: [],
-		password: 'Password8',
 		status: AuthUserStatusEnum.ACTIVE,
 		givenName: casual.first_name,
 		surname: casual.last_name,

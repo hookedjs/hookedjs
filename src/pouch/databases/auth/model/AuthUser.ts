@@ -1,9 +1,9 @@
 import { nanoid } from 'nanoid'
 
-import { useInterval, useLayoutEffect, useLayoutEffectDeep, useState } from '#src/lib/hooks'
+import { useLayoutEffectDeep, useState } from '#src/lib/hooks'
 import { assertAttrsWithin, assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
-import { AuthStore, useAuthStore } from '#src/stores'
+import { useAuthStore } from '#src/stores'
 
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'

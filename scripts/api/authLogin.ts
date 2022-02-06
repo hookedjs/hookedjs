@@ -4,11 +4,10 @@
  * Usage:
  * 1. Start the stack: `pnpm dev`
  * 2. Run ./authRegister or ./authPasswordRequest to get a passwordTmp
- * 2. Run this script `npx ts-node -P tsconfig.node.json scripts/authLogin.ts`
+ * 2. Run this script `npx ts-node -P tsconfig.node.json scripts/api/authLogin.ts`
  */
 import '../../src/lib/polyfills/node'
 
-import * as casual from 'casual'
 import {inspect} from 'util'
 
 import config from '../../src/api/lib/config.node'
@@ -19,7 +18,7 @@ main()
 async function main() {
 	const props: LoginProps = {
 		name: 'zoey.blanda@yahoo.com',
-		password: '21619857',
+		password: '68213396',
 	}
 		
 	const res = await post(`${config.gateway}/api/login`, props)

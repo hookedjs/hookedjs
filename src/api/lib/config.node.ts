@@ -2,7 +2,7 @@
 /**
  * An interface for config variables
  */
-import * as packageJson from '../../../package.json'
+import packageJson from '../../../package.json'
  
 const pe = process.env as Record<string, string>
 const isProd = pe.NODE_ENV === 'production'

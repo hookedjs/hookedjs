@@ -1,8 +1,8 @@
 /**
  * An interface for localfolder file storage
  */
-import * as fs from 'fs'
-import * as path from 'path'
+import fs from 'fs'
+import path from 'path'
 
 import type { GetResult } from './types'
 

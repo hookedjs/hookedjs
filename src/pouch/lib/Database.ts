@@ -1,15 +1,8 @@
 import {nanoid} from 'nanoid'
-import PouchDbEs from 'pouchdb'
-import * as PouchDbAll from 'pouchdb'
-import FindPluginEs from 'pouchdb-find'
-import * as FindPluginAll from 'pouchdb-find'
+import PouchDb from 'pouchdb'
+import FindPlugin from 'pouchdb-find'
 
 import { NotFoundError, throwNotFoundError } from '#lib/validation'
-
-// I don't know why, but this is the only way I can get imports to
-// work isomorphically
-const PouchDb = PouchDbEs || PouchDbAll
-const FindPlugin = FindPluginEs || FindPluginAll
 
 PouchDb.plugin(FindPlugin)
 

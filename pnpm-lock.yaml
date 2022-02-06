@@ -5,6 +5,7 @@ specifiers:
   '@snowpack/plugin-typescript': ~1.2.1
   '@snowpack/web-test-runner-plugin': ~0.2.2
   '@testing-library/preact': ~2.0.1
+  '@tsconfig/node16': ^1.0.2
   '@types/chai': ~4.2.14
   '@types/glob': ^7.2.0
   '@types/node': ~14.14.41
@@ -69,6 +70,7 @@ devDependencies:
   '@snowpack/plugin-typescript': 1.2.1_typescript@4.4.2
   '@snowpack/web-test-runner-plugin': 0.2.2_a96fb1b49eb0fdd03971bb9727930c90
   '@testing-library/preact': 2.0.1_preact@10.5.14
+  '@tsconfig/node16': 1.0.2
   '@types/chai': 4.2.21
   '@types/glob': 7.2.0
   '@types/node': 14.14.45
@@ -1632,6 +1634,10 @@ packages:
       mkdirp: 1.0.4
       multimatch: 5.0.0
       typescript: 4.1.6
+    dev: true
+
+  /@tsconfig/node16/1.0.2:
+    resolution: {integrity: sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==}
     dev: true
 
   /@typed/content-hash/0.10.0:

@@ -9,10 +9,15 @@
  *    account is not being shared between people
  */
 
+import crypto from 'crypto'
+
 import { FormValidationErrorSet, throwFormValidationErrorSet } from '../../lib/validation'
 import { AuthUsers, AuthUserStatusEnum, LoginProps, PasswordRequestProps, RegisterProps } from '../../pouch/databases'
 import config from '../lib/config.node'
 import mail from '../lib/mail'
+
+// @ts-ignore: ts-node is unaware of webcrypto
+const getRandomValues = crypto.webcrypto.getRandomValues
 
 const TEN_MINUTES = 1000 * 60 * 10
 
@@ -107,8 +112,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 			throw genericError
 		}
 		// Refuse if password is wrong and track failed login attempt
-		// TODO: Secure compare passwords
-		if (props.password.toHash() !== user.passwordTmp) {
+		if (!crypto.timingSafeEqual(Buffer.from(props.password.toHash()), Buffer.from(user.passwordTmp))) {
 			user.passwordTmpFailCount++
 			await user.save()
 			throw genericError
@@ -208,10 +212,11 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 
 }
 
-const passwordTmpCharset = '0123456789'
 function createPasswordTmp(): string {
-	return [...Array(8)]
-		.reduce((acc) => acc += passwordTmpCharset[Math.floor(Math.random() * passwordTmpCharset.length)],'')
+	const passwordTmp = String(getRandomValues(new Uint32Array(1))[0])
+		.slice(-8)
+		.padStart(8, '0')
+	return passwordTmp
 }
 
 function createWelcomeEmail(passwordTmp: string) {

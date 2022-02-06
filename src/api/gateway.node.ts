@@ -4,9 +4,9 @@ import fastify from 'fastify'
 import helmetPlugin from 'fastify-helmet'
 const proxyPlugin = require('fastify-http-proxy')
 import staticPlugin from 'fastify-static'
-import * as fs from 'fs'
-import * as helmet from 'helmet'
-import * as path from 'path'
+import fs from 'fs'
+import helmet from 'helmet'
+import path from 'path'
 
 import { ForbiddenError, NotFoundError, ValidationErrorSet } from '../lib/validation'
 import config from './lib/config.node'

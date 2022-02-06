@@ -4,8 +4,8 @@
  * Some polyfills are functional, some are not.
  */
 
-import * as http from 'http'
-import * as https from 'https'
+import http from 'http'
+import https from 'https'
 import nodeFetch from 'node-fetch'
 
 if (!globalThis.window) {

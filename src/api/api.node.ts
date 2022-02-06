@@ -4,7 +4,7 @@ import './lib/pouch/init'
 import fastify from 'fastify'
 // import fileUploadPlugin from 'fastify-file-upload'
 import fastifyPluginize from 'fastify-plugin'
-import * as glob from 'glob'
+import glob from 'glob'
 
 import { ForbiddenError, NotFoundError, ValidationErrorSet } from '../lib/validation'
 import config from './lib/config.node'
