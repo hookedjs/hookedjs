@@ -16,7 +16,7 @@ main()
 
 async function main() {
 	const props: PasswordRequestProps = {
-		name: 'zoey.blanda@yahoo.com',
+		name: 'sallyfields@hookedjs.org',
 	}
 		
 	const res = await post(`${config.gateway}/api/passwordRequest`, props)

@@ -3,6 +3,7 @@ import '../../src/api/lib/pouch/init'
 
 import casual from 'casual'
 
+import config from '../../src/api/lib/config.node'
 import {
 	AuthUsers,
 	AuthUserStatusEnum,
@@ -16,10 +17,10 @@ async function main() {
 }
 
 async function createUser() {
-	// const name = casual.email.toLowerCase()
-	const name = 'sallyfields@hookedjs.org'
 	const user = await AuthUsers.createOne({
-		name,
+		name: 'sallyfields@hookedjs.org',
+		// name: casual.email.toLowerCase(),
+		password: config.dbPass,
 		roles: [],
 		status: AuthUserStatusEnum.ACTIVE,
 		givenName: casual.first_name,
@@ -32,8 +33,6 @@ async function createUser() {
 			console.log(e.context)
 			process.exit(1)
 		})
-
-	await user.createTenant('Acme Incs.')
 
 	console.log({user: user.values})
 

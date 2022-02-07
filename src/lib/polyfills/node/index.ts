@@ -1,2 +1,2 @@
-import '../iso'
 import './window'
+import '../iso'

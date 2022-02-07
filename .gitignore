@@ -4,6 +4,7 @@ npm-debug.log
 .env
 .vscode
 .history
+.lh
 .aws-sam
 .fileStorage
 .eslintcache

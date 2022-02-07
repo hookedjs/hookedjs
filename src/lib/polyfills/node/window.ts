@@ -4,6 +4,7 @@
  * Some polyfills are functional, some are not.
  */
 
+import nodeCrypto from 'crypto'
 import http from 'http'
 import https from 'https'
 import nodeFetch from 'node-fetch'
@@ -45,6 +46,8 @@ if (!globalThis.window) {
 			hostname: 'blah',
 		},
 		fetch,
+		// @ts-ignore: ts is unaware of webcrypto
+		crypto: nodeCrypto.webcrypto,
 	}
 
 	Object.assign(globalThis, {window: windowMock, ...windowMock})
@@ -58,7 +61,7 @@ function fetch(url: string, options: any = {}) {
 			'Content-Type': 'application/json',
 			'Accept': 'application/json',
 			...options.headers,
-			cookie: `${options.headers?.cookie ?? ''} ${globalThis?.document?.cookie ?? ''}`.trim() || undefined,
+			cookie: options.headers?.cookie || globalThis?.document?.cookie || undefined,
 		},
 		credentials: 'include',
 		agent: (url) => url.protocol == 'http:' ? httpAgent : httpsAgent,

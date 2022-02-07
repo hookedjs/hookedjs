@@ -1,5 +1,3 @@
-import { nanoid } from 'nanoid'
-
 import { useLayoutEffectDeep, useState } from '#src/lib/hooks'
 import { assertAttrsWithin, assertValid, assertValidSet, isDefined, isDefinedAndNotNull, throwForbiddenError, ValueError } from '#src/lib/validation'
 import type { IStandardFields } from '#src/pouch/lib/Database'
@@ -8,8 +6,6 @@ import { useAuthStore } from '#src/stores'
 import PouchCollection from '../../../lib/Collection'
 import {createModelHooks} from '../../../lib/hooks'
 import PouchModel from '../../../lib/Model'
-import { TenantPersonRoleEnum, TenantPersons, TenantPersonStatusEnum } from '../../tenant'
-import { initTenantDbApi, tenantDbPrefix } from '../../tenant/state'
 import { readAuth } from '..'
 import db from '../db'
 

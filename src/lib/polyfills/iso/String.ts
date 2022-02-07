@@ -10,10 +10,18 @@
  * 2. Drop support for older Internet Explorer
  */
 
+import { customAlphabet } from 'nanoid'
+
 // You must export something or TS gets confused.
 export {}
 
 declare global {
+	interface StringConstructor {
+		/**
+		 * Create a unique id string
+		 */
+		uid(): string
+	}
 	interface String {
 		copy(): string;
 		/**
@@ -23,6 +31,8 @@ declare global {
 		 * Src: https://stackoverflow.com/a/8831937/1202757
 		 */
 		toHash(): string
+		toHashInt(): number
+
 		/**
 		 * Converts a string into title-case: "hello world" -> "Hello World"
 		 */
@@ -39,10 +49,25 @@ declare global {
 	}
 }
 
+String.uid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 12)
+
 Object.defineProperties(String.prototype, {
 	copy: {
 		value: function() {
 			return new String(this)
+		},
+		enumerable: false
+	},
+
+	toHashInt: {
+		value: function() {
+			const hashInt = Math.abs(
+				Array.from(this).reduce(
+					(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
+					0,
+				)
+			)
+			return hashInt
 		},
 		enumerable: false
 	},

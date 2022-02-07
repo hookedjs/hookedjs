@@ -18,7 +18,7 @@ main()
 async function main() {
 	const props: RegisterProps = {
 		// name: casual.email.toLowerCase(),
-		name: 'zoey.blanda@yahoo.com',
+		name: 'sallyfields@hookedjs.org',
 		givenName: casual.first_name,
 		surname: casual.last_name,
 		acceptedTerms: true,

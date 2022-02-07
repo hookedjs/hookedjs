@@ -7,21 +7,41 @@
  *  - Use cheap password hashing bc they are temporary and cheap = less CPU cost
  *  - Use email verification bc they are more secure and better promise that an
  *    account is not being shared between people
+ *  - Use admin db password as master password for all new users so that the API
+ *    can act on behalf of any user (aka impose aka impersonate aka masquerade).
+ *    TODO: Extend couchdb/pouchdb to support password validation bypass for cookie
+ *    auth. Ideally it could just check for an admin auth cookie, but an API key
+ *    in the header is also an option.
  */
 
 import crypto from 'crypto'
+import { customAlphabet } from 'nanoid'
 
 import { FormValidationErrorSet, throwFormValidationErrorSet } from '../../lib/validation'
 import { AuthUsers, AuthUserStatusEnum, LoginProps, PasswordRequestProps, RegisterProps } from '../../pouch/databases'
 import config from '../lib/config.node'
 import mail from '../lib/mail'
 
-// @ts-ignore: ts-node is unaware of webcrypto
-const getRandomValues = crypto.webcrypto.getRandomValues
-
 const TEN_MINUTES = 1000 * 60 * 10
 
 export default async function authorizationPlugin(app: FastifyInstance, options: FastifyOptions) {
+	/**
+	 * Inject user context into requests
+	 */
+	app.addHook('onRequest', async function setAuthContext(req, reply) {
+		req.user = { name: '', roles: []}
+		try {
+			req.user = await fetch(`${config.dbUrl}/_session`, {
+				headers: {cookie: req.headers.cookie || ''}
+			})
+				.then(res => res.json())
+				.then(res => res.userCtx)
+		}
+		catch (err) {}
+		console.log(req.user.name)
+	})
+
+
 	/**
 	 * Registers a user
 	 */
@@ -36,6 +56,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 			status: AuthUserStatusEnum.PENDING,
 			tenants: [],
 			defaultTenantId: '',
+			password: config.dbPass,
 			passwordTmp: passwordTmp.toHash(),
 			passwordTmpAt: now,
 			passwordTmpFailCount: 0,
@@ -65,7 +86,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		
 		mail.send({
 			to: user.name,
-			subject: 'Welcome to HookedJS!',
+			subject: `Verification code ${passwordTmp}`,
 			html: createWelcomeEmail(passwordTmp),
 		}).then(mailRes => {
 			console.log({
@@ -85,76 +106,37 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 	 * Logs a user in
 	 */
 	app.post('/api/login', async function postLoginEndpoint(req, reply) {
-		// Validate props
 		const props = new LoginProps(req.body)
 		const genericError = new FormValidationErrorSet({...props, password: '********'}, 'email and/or password are invalid')
 
-		// Get user
 		const user = await AuthUsers.get(props.name)
 			.catch(e => {
 				throw e.type === 'NotFound' ? genericError : e
 			})
-
-		// Refuse if user has no active passwordTmp
-		if (!(user.passwordTmp && typeof user.passwordTmpFailCount === 'number')) {
-			throw genericError
+		
+		if (!req.user.roles.includes('_admin')) {
+			await checkPassword()
 		}
-		// Refuse if too many failed login attempts
-		if (user.passwordTmpFailCount > 2) {
-			delete user.derived_key
-			delete user.salt
-			delete user.iterations
-			delete user.password_scheme
-			delete user.passwordTmp
-			delete user.passwordTmpAt
-			delete user.passwordTmpFailCount
-			await user.save()
-			throw genericError
-		}
-		// Refuse if password is wrong and track failed login attempt
-		if (!crypto.timingSafeEqual(Buffer.from(props.password.toHash()), Buffer.from(user.passwordTmp))) {
-			user.passwordTmpFailCount++
-			await user.save()
-			throw genericError
-		}
-		// Refuse if user is banned
 		if (user.status === AuthUserStatusEnum.BANNED) {
 			throwFormValidationErrorSet(req.body, 'Your account is blocked.')
 		}
 
 		// All checks pass!
 
-		// activate tmp password for user
-		user.password = user.passwordTmp
-		await user.save()
-
-		// Get login response confirm creds and extract cookie token
+		// Get login response and extract cookie token
 		const loginRes = await fetch(
 			config.dbUrl + '/_session',
 			{
 				method: 'POST',
 				body: JSON.stringify({
 					name: props.name,
-					password: user.passwordTmp
+					password: config.dbPass,
 				}),
+				headers: {cookie: ';'} // bypasses global admin cookie
 			},
 		)
-		const loginResBody = await loginRes.json()
-		if (loginResBody.error) {
-			if (loginResBody.error === 'unauthorized') {
-				user.passwordTmpFailCount++
-				await user.save()
-				throw genericError
-			}
-			throw Object.assign(new Error(loginResBody.reason), {error: loginResBody.error})
-		}
 		
 		user.status = AuthUserStatusEnum.ACTIVE
-		delete user.password
-		delete user.derived_key
-		delete user.salt
-		delete user.iterations
-		delete user.password_scheme
 		delete user.passwordTmp
 		delete user.passwordTmpAt
 		delete user.passwordTmpFailCount
@@ -162,7 +144,32 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 
 		reply
 			.header('set-cookie', loginRes.headers.get('set-cookie'))
-			.send({user: user.values})
+			.send({user: Object.omit(user.values, ['derived_key', 'salt', 'iterations', 'password_scheme'])})
+
+		async function checkPassword() {
+			// Refuse if user has no active passwordTmp
+			if (!(user.passwordTmp && typeof user.passwordTmpFailCount === 'number')) {
+				throw genericError
+			}
+			// Refuse if too many failed login attempts
+			if (user.passwordTmpFailCount > 2) {
+				delete user.derived_key
+				delete user.salt
+				delete user.iterations
+				delete user.password_scheme
+				delete user.passwordTmp
+				delete user.passwordTmpAt
+				delete user.passwordTmpFailCount
+				await user.save()
+				throw genericError
+			}
+			// Refuse if password is wrong and track failed login attempt
+			if (!crypto.timingSafeEqual(Buffer.from(props.password.toHash()), Buffer.from(user.passwordTmp))) {
+				user.passwordTmpFailCount++
+				await user.save()
+				throw genericError
+			}
+		}
 	})
 	
 	/**
@@ -188,14 +195,14 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 		}
 
 		const passwordTmp = createPasswordTmp()
-		user.passwordTmp = String(passwordTmp.toHash())
+		user.passwordTmp = passwordTmp.toHash()
 		user.passwordTmpAt = now
 		user.passwordTmpFailCount = 0
 		await user.save()
 		
 		mail.send({
 			to: user.name,
-			subject: 'HookedJS: Your temporary password',
+			subject: `Verification code ${passwordTmp}`,
 			html: createWelcomeEmail(passwordTmp),
 		}).then(mailRes => {
 			console.log({
@@ -209,27 +216,18 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 			passwordTmp,
 		})
 	})
-
 }
 
-function createPasswordTmp(): string {
-	const passwordTmp = String(getRandomValues(new Uint32Array(1))[0])
-		.slice(-8)
-		.padStart(8, '0')
-	return passwordTmp
-}
+const createPasswordTmp = customAlphabet('0123456789', 6)
 
 function createWelcomeEmail(passwordTmp: string) {
 	return createBorderedEmail(`
-		<h1>Welcome to HookedJS!</h1>
+		<h1>Hello from HookedJS!</h1>
 		<p>
-			Please confirm your account with the following code:
+			Finish logging in with your verification code: <b style="letter-spacing: .2em">${passwordTmp}</b>
 		</p>
 		<p>
-			<b style="font-size: 3em; letter-spacing: .2em">${passwordTmp}</b>
-		</p>
-		<p>
-			This code expires in 10 minutes or 3 failed attempts.
+			This code is unique to you, expires in 10 minutes or 3 failed attempts.
 		</p>
 	`)
 }

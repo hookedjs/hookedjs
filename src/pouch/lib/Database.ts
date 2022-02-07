@@ -1,4 +1,3 @@
-import {nanoid} from 'nanoid'
 import PouchDb from 'pouchdb'
 import FindPlugin from 'pouchdb-find'
 
@@ -50,7 +49,6 @@ class Database {
 		}
 		this.findCacheGarbageCollect()
 	}
-	static createId() {return nanoid()}
 	async sync() {
 		if (this.host) {
 			await this._db
@@ -93,7 +91,7 @@ class Database {
 			createdAt: now,
 			...Object.rmUndefAttrs(doc) as T,
 			version: doc.version ? doc.version+1 : 0,
-			_id: doc._id || Database.createId(),
+			_id: doc._id || String.uid(),
 			updatedAt: now
 		}
 		const res = await this._db
@@ -104,7 +102,7 @@ class Database {
 	async setMany<T extends IStandardFieldsCreate>(docs: T[]) {
 		const now = new Date()
 		const docs2 = docs.map(doc => {
-			if (!doc._id) doc._id = Database.createId()
+			if (!doc._id) doc._id = String.uid()
 			if (!doc.createdAt) doc.createdAt = now
 			doc.updatedAt = now
 		})

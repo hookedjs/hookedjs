@@ -1,4 +1,4 @@
-import type { FastifyInstance as FastifyInstanceSrc } from 'fastify'
+import type fastify, { FastifyInstance as FastifyInstanceSrc } from 'fastify'
 
 declare global {
 	type FastifyInstance = FastifyInstanceSrc
@@ -10,8 +10,8 @@ declare global {
 	}
 }
 
-// declare module 'fastify' {
-// 	interface FastifyRequest {
-// 		hello: any
-// 	}
-// }
+declare module 'fastify' {
+	interface FastifyRequest {
+		user: { name: string, roles: string[] }
+	}
+}

@@ -8,8 +8,6 @@
  */
 import '../../src/lib/polyfills/node'
 
-import {inspect} from 'util'
-
 import config from '../../src/api/lib/config.node'
 import type { LoginProps } from '../../src/pouch'
 
@@ -17,26 +15,17 @@ main()
 
 async function main() {
 	const props: LoginProps = {
-		name: 'zoey.blanda@yahoo.com',
-		password: '68213396',
+		name: 'sallyfields@hookedjs.org',
+		password: '52243012',
 	}
 		
-	const res = await post(`${config.gateway}/api/login`, props)
-	logDeep(res)
+	const res = await fetch(
+		`${config.gateway}/api/login`,
+		{
+			method: 'POST',
+			body: JSON.stringify(props),
+		}
+	)
+	console.log({setCookie: res.headers.get('set-cookie')})
 }
 
-async function post(url: string, body: any) {
-	const f = await fetch(url, {
-		method: 'POST',
-		body: JSON.stringify(body),
-	})
-	const json = await f.json()
-	return json
-}
-
-function logDeep(obj: any, additionalObjs: any[] = []) {
-	console.log(dump(obj), ...additionalObjs.map(dump))
-	function dump(_obj: any) {
-		return inspect(_obj, {depth: null})
-	}
-}
