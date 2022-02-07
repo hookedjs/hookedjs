@@ -22,7 +22,7 @@ import { AuthUsers, AuthUserStatusEnum, LoginProps, PasswordRequestProps, Regist
 import config from '../lib/config.node'
 import mail from '../lib/mail'
 
-const TEN_MINUTES = 1000 * 60 * 10
+const LIFESPAN = 1000 * 60 * 10
 
 export default async function authorizationPlugin(app: FastifyInstance, options: FastifyOptions) {
 	/**
@@ -66,7 +66,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 					const existing = await AuthUsers.get(props.name)
 					// If passwordTmp is expired, create a new one
 					if (
-						!existing.passwordTmpAt || existing.passwordTmpAt.getTime() < now.getTime() - TEN_MINUTES
+						!existing.passwordTmpAt || existing.passwordTmpAt.getTime() < now.getTime() - LIFESPAN
 					) {
 						existing.passwordTmp = passwordTmp.toHash()
 						existing.passwordTmpAt = now
@@ -163,7 +163,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 				await user.save()
 				throw genericError
 			}
-			// Refuse if password is wrong and track failed login attempt
+			// Refuse if password is wrong
 			if (!crypto.timingSafeEqual(Buffer.from(props.password.toHash()), Buffer.from(user.passwordTmp))) {
 				user.passwordTmpFailCount++
 				await user.save()
@@ -188,7 +188,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 
 		// If user requested a password reset too recently, ignore request
 		if (
-			user.passwordTmpAt && user.passwordTmpAt.getTime() > now.getTime() - TEN_MINUTES
+			user.passwordTmpAt && user.passwordTmpAt.getTime() > now.getTime() - LIFESPAN
 		) {
 			reply.send({})
 			return

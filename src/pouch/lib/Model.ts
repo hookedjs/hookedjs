@@ -30,13 +30,11 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 		const now = new Date()
 		Object.assign(
 			this,
-			{_id: data._id || PouchModel.createId(), createdAt: now, updatedAt: now, version: 0},
+			{_id: data._id || String.uid(), createdAt: now, updatedAt: now, version: 0},
 			data
 		)
 		this.valuesClean = this.values
 	}
-
-	static createId() {return Database.createId()}
 
 	get values() {
 		const sanitized = Object.rmUndefAttrs(

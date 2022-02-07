@@ -20,19 +20,13 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
 	 * Creates a tenant db for a user
 	 */
 	app.post('/api/tenants', async function postTenantEndpoint(req, reply) {
-		// TODO: initTenantDbApi should return a scoped handle to the tenant db and TenantPerson and TenantPersons
-
 		const props: { name: string } = req.body as any
-
 		if (!req.user.name) {
 			throwForbiddenError()
 		}
-
 		const user = await AuthUsers.get(req.user.name)
-		
 		const tenantId = `${tenantDbPrefix}${String.uid()}`
-		initTenantDbApi(tenantId)
-
+		await initTenantDbApi(tenantId)
 		user.defaultTenantId = user.defaultTenantId || tenantId
 		user.tenants = user.tenants || []
 		user.tenants.push({id: tenantId, name: props.name})

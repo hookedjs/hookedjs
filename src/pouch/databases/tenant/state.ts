@@ -33,9 +33,11 @@ export async function initTenantDb() {
 	return tenantId
 }
 
-export function initTenantDbApi(dbName: string) {
+// TODO: initTenantDbApi should return a scoped handle to the tenant db and TenantPerson and TenantPersons
+export async function initTenantDbApi(dbName: string) {
 	dbName = dbName.startsWith(tenantDbPrefix) ? dbName : `${tenantDbPrefix}${dbName}`
 	db.handle = new Database(dbName, db.host, {remoteOnly: true, skipSetup: false})
+	await db.handle.indexModels([TenantPerson])
 }
 
 export function destroyTenantDb() {

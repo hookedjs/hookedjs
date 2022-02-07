@@ -55,7 +55,7 @@ if (!globalThis.window) {
 
 // Wraps fetch to inject global cookies, similar to browsers
 function fetch(url: string, options: any = {}) {
-	return nodeFetch(url, {
+	const res = nodeFetch(url, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -66,6 +66,7 @@ function fetch(url: string, options: any = {}) {
 		credentials: 'include',
 		agent: (url) => url.protocol == 'http:' ? httpAgent : httpsAgent,
 	})
+	return res
 }
 const httpAgent = new http.Agent({
 	keepAlive: true,

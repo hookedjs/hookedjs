@@ -23,8 +23,10 @@ async function createUser() {
 		password: config.dbPass,
 		roles: [],
 		status: AuthUserStatusEnum.ACTIVE,
-		givenName: casual.first_name,
-		surname: casual.last_name,
+		// givenName: casual.first_name,
+		givenName: 'Sally',
+		// surname: casual.last_name,
+		surname: 'Fields',
 		tenants: [],
 		defaultTenantId: '',
 	})
