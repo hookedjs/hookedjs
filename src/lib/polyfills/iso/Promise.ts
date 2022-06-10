@@ -1,7 +1,8 @@
-/* eslint-disable no-var */
 /**
  * Polyfills for Promise
  */
+
+/* eslint-disable no-var */
 
 // You must export something or TS gets confused.
 export {}
@@ -25,27 +26,17 @@ declare global {
 		 **/
 		sleep(ms: number): Promise<undefined>
 		/**
-		 * Call a callback repeatedly until it completes without error
-		 * @param callback - the callback to try
-		 * @param maxTries - the maximum number of tries
-		 * @returns - whatever the callback returns
+		 * Wraps a function in async so that it always returns a promise
 		 */
-		callWithRetry<T extends any>(callback: () => T, maxTries?: number): Promise<T>
+		promisify<T extends (...props: any) => any>(fn: T): (...props: Parameters<T>) => Promise<ReturnTypeP<T>>
 	}
 	// interface Promise<T> {
 	// 	foo: 'bar'
 	// }
 }
 
+
 globalThis.sleep = Promise.sleep = async ms => 
 	new Promise(resolve => setTimeout(resolve, ms))
 
-Promise.callWithRetry = async function callWithRetry(callback, maxTries = 4) {
-	const callbackPromise = async () => callback() // promisify callback
-	let lastError: any = new Error()
-	for (let tryCount = 0; tryCount < maxTries; tryCount++) {
-		try { return await callbackPromise()} 
-		catch(err) { lastError = err }
-	}
-	throw lastError
-}
+Promise.promisify = (fn) => async () => fn()

@@ -21,15 +21,23 @@ export default function Portal(p: PortalProps) {
 	const
 		{ placement = 'center', message, duration, styled = true, onDismiss, dismissable = true } = p,
 		[timedOut, setTimedOut] = useState(false),
-		[dismissed, dismiss] = useState(false),
+		[dismissed, setDismissed] = useState(false),
 		ref = useRef<HTMLDivElement>(null)
 
 	useEffect(init, [p])
-	useClickAway(ref, () => dismissable && dismiss(true))
-	useKey(useKey.codes['Esc'], () => dismissable && dismiss(true))
+	useClickAway(ref, () => dismissable && setDismissed(true))
+	useKey(useKey.codes['Esc'], () => dismissable && setDismissed(true))
 	useEffect(() => {dismissed && onDismiss?.()}, [dismissed])
 
-	return !!message && !timedOut && !dismissed ? (
+	const contentE = document.getElementById('content') ?? {} as any
+
+	if (!message || timedOut || dismissed) {
+		contentE.inert = false
+		return null
+	}
+
+	contentE.inert = true
+	return (
 		<PortalOuter data-placement={placement} data-styled={styled}>
 			<div>
 				<div ref={ref as any}>
@@ -37,10 +45,10 @@ export default function Portal(p: PortalProps) {
 				</div>
 			</div>
 		</PortalOuter>
-	) : null
+	)
 
 	function init() {
-		dismiss(false)
+		setDismissed(false)
 		if (duration) 
 			setTimeout(() => setTimedOut(true), duration)
 	}
@@ -120,3 +128,31 @@ Portal.prompt = async <ResponseType extends any>(
 		fullfilled = true
 	}
 }
+
+Portal.confirm = ({message = 'Are you sure?', body = ''} = {}) => {
+	return Portal.prompt<boolean>(({resolve}) => (
+		<ConfirmPrompt resolve={resolve}>
+			{body || <p>{message}</p>}
+		</ConfirmPrompt>
+	))
+}
+
+function ConfirmPrompt({resolve, children = 'Are you sure?'}: {resolve: (res: boolean) => void, children?: ComponentChildren}) {
+	return (
+		<div>
+			<div>{children}</div>
+			<ButtonGroup>
+				<button onClick={() => resolve(true)} class="primary large">Proceed</button>
+				<button onClick={() => resolve(false)} class="link">Cancel</button>
+			</ButtonGroup>
+		</div>
+	)
+}
+
+const ButtonGroup = pstyled.div`
+	:root
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 2px;
+`

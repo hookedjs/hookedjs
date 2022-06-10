@@ -7,7 +7,7 @@ import {ComponentChildren, Fragment as F, FunctionalComponent, h} from 'preact'
 import { useCallback, useEffect, useInterval, useRef, useState, useUpdateEffect } from '#lib/hooks'
 import { IconSvg } from '#lib/icons'
 import CodeSnippet from '#src/layout/components/CodeSnippet'
-import pstyled from '#src/lib/pstyled'
+import pstyled, { classes } from '#src/lib/pstyled'
 import { ValidationErrorSet } from '#src/lib/validation'
 
 import { useMountedState } from './hooks'
@@ -109,9 +109,9 @@ interface FormEvent {
   preventDefault(): null;
   target: HTMLFormElement;
 }
-export function Form({ onSubmit, onSubmitJson, reset, children, class: className, ...formProps }: FormProps) {
+export function Form({ onSubmit, onSubmitJson, reset, children, ...p }: FormProps) {
 	return (
-		<FormForm class={`form ${className}`} onSubmit={onSubmitInner as any} {...formProps}>
+		<FormForm onSubmit={onSubmitInner as any} {...p} class={classes('form',p.class)}>
 			{children}
 		</FormForm>
 	)
@@ -273,14 +273,13 @@ interface CheckboxProps {
 	hasError?: boolean
 	hidden?: boolean
 }
+
 export function Checkbox({ divProps = {}, inputProps, hasError, hidden }: CheckboxProps) {
 	const [checked, setChecked] = useState(inputProps.checked || inputProps.default || false)
 	useUpdateEffect(function _pullDown() { setChecked(inputProps.checked || false) }, [inputProps.checked])
 	const onClick = useCallback(_onClick, [])
 	return (
-		<CheckboxDiv {...divProps} class={divProps.class + ' checkbox'} ref={divProps.forwardRef} data-checked={checked} data-hidden={hidden} data-error={hasError}>
-			<IconSvg fill="var(--gray6)" class="marked" path={MarkedPath} />
-			<IconSvg fill="var(--gray4)" class="empty" path={EmptyPath} />
+		<CheckboxDiv {...divProps} ref={divProps.forwardRef} data-hidden={hidden} data-error={hasError}>
 			<input type="checkbox" {...inputProps} ref={inputProps.forwardRef!} checked={checked} onClick={onClick} />
 		</CheckboxDiv>
 	)
@@ -291,32 +290,17 @@ export function Checkbox({ divProps = {}, inputProps, hasError, hidden }: Checkb
 }
 const CheckboxDiv = pstyled.div`
 	:root
-		position: relative
-		margin-top: -2px
+		margin-top: -6px
 		margin-bottom: -8px
 		cursor: pointer
-	:root input
-		opacity: 0
-	:root svg
-		cursor: pointer
-		position: absolute
-		top: 0
-		left: 0
-		border-radius: 3px
-    border: 1px solid hsla(0,0%,0%,0)
-	:root .marked
-		display: none
-	:root .empty
-		display: initial
-	:root[data-checked="true"] .marked
-		display: initial
-	:root[data-checked="true"] .empty
-		display: none
-	:root[data-error="true"] svg
+		transform: scale(.7);
+	:root[data-error="true"]
 		border-radius: 3px
     border: 1px solid var(--danger)
 	:root[data-hidden="true"]
 		display: none
+	:root input
+		accent-color: var(--black);
 `
 
 export function Switch({ divProps = {}, inputProps, hasError }: CheckboxProps) {
@@ -382,9 +366,9 @@ export function ErrorMessage({ errors }: {errors: UseFormState['errors']}) {
 	</F>) : <F></F>
 }
 
-export function SubmitButton({ children, class: className = '', forwardRef, ...buttonProps }: h.JSX.HTMLAttributes<HTMLButtonElement> & {forwardRef?: Ref<any>}) {
+export function SubmitButton({ children, forwardRef, ...p }: h.JSX.HTMLAttributes<HTMLButtonElement> & {forwardRef?: Ref<any>}) {
 	return (
-		<button style={{marginBottom:'.3rem'}} class={`primary large ${className}`} {...buttonProps} ref={forwardRef} type="submit">{children}</button>
+		<button style={{marginBottom:'.3rem'}} {...p} class={classes('primary','large',p.class)} ref={forwardRef} type="submit">{children}</button>
 	)
 }
 

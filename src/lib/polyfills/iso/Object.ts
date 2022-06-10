@@ -21,6 +21,14 @@ declare global {
 		rmNullAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 		rmUndefAttrs<T extends Record<string, any>>(obj: T, inPlace?: boolean): Partial<T>
 		
+		/**
+		 * Converts an object into a semi-unique hash
+		 *
+		 * Compared to other hash algs (MD5), is much simpler, shorter, faster while less perfect
+		 * Src: https://stackoverflow.com/a/8831937/1202757
+		 */
+		toHash(obj: any): string
+		
 		diff: typeof detailedDiff
 		isEqual(foo: any, bar: any): boolean
 		isNotEqual(foo: any, bar: any): boolean
@@ -31,6 +39,16 @@ declare global {
 	// Sadly, Object is not generic, so we cannot extend it and acces this in a typesafe way :-(.
 	// interface Object<T> {}
 	interface Object {
+		/**
+		 * Converts an object into a semi-unique hash
+		 *
+		 * Compared to other hash algs (MD5), is much simpler, shorter, faster while less perfect
+		 * Src: https://stackoverflow.com/a/8831937/1202757
+		 * 
+		 * Known weaknesses:
+		 * 	- If hashing a function, two different functions could have the same hash
+		 */
+		_toHash(): string
 		/**
 		 * Alias for keys(obj) but MORE TYPESAFE!
 		 */
@@ -110,6 +128,16 @@ Object.rmUndefAttrs = function (obj, inPlace) {
 	return Object.filterAttrs(obj, (_, val) => val !== undefined, inPlace)
 }
 
+Object.toHash = (obj) => {
+	const hash = Math.abs(
+		Array.from(typeof obj === 'string' ? obj : JSON.stringify(obj)).reduce(
+			(hash, char) => 0 | (31 * hash + char.charCodeAt(0)),
+			0,
+		)
+	)
+	return hash.toString(32)
+}
+
 Object.diff = detailedDiff
 
 /**
@@ -157,6 +185,12 @@ Object.copy = (obj: any) => {
 
 
 Object.defineProperties(Object.prototype, {
+	_toHash: {
+		value: function() {
+			return Object.toHash(this)
+		},
+		enumerable: false
+	},
 	_keys: {
 		value: function() {
 			return Object.keys(this)

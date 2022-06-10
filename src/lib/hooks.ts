@@ -106,7 +106,7 @@ export interface UseKeyOptions<T extends UseEventTarget> {
  */
 export function useEffectDeep(callback: Fnc, varsToWatch: any[]) {
 	const lastSeenProps = useRef<Inputs[]>([])
-	useEffect(watchProps, [varsToWatch])
+	useEffect(watchProps, varsToWatch)
 
 	function watchProps() {
 		if (Object.isNotEqual(varsToWatch, lastSeenProps.current)) {
@@ -122,7 +122,7 @@ export function useEffectDeep(callback: Fnc, varsToWatch: any[]) {
  */
 export function useLayoutEffectDeep(callback: Fnc, varsToWatch: any[]) {
 	const lastSeenProps = useRef<Inputs[]>([])
-	useLayoutEffect(watchProps, [varsToWatch])
+	useLayoutEffect(watchProps, varsToWatch)
 
 	function watchProps() {
 		if (Object.isNotEqual(varsToWatch, lastSeenProps.current)) {
@@ -138,7 +138,7 @@ export function useLayoutEffectDeep(callback: Fnc, varsToWatch: any[]) {
  */
 export function useMemoDeep(callback: Fnc, varsToWatch: any[]) {
 	const [lastSeenProps, setLastSeenProps] = useState(varsToWatch)
-	useEffect(watchProps, [varsToWatch])
+	useEffect(watchProps, varsToWatch)
 	return useMemo(callback, [lastSeenProps])
 
 	function watchProps() {
@@ -195,6 +195,8 @@ export function useMountedState() {
 
 /**
  * A hook that watches a css media breakpoint
+ * 
+ * e.g. isWide = useMedia('(min-width: 768px)')
  */
 export function useMedia(query: string) {
 	const [state, setState] = useState(matchMedia(query).matches)

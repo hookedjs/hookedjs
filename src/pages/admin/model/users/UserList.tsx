@@ -67,11 +67,7 @@ export default function UserList({ route }: { route: RouteType }) {
 	/>
 
 	async function deleteCb(selection: any[]) {
-		const confirmed = await Portal.prompt<boolean>(({resolve}) => (
-			<ConfirmPrompt resolve={resolve}>
-				<p>Okay to delete {selection.length} user(s)?</p>
-			</ConfirmPrompt>
-		))
+		const confirmed = await Portal.confirm({ message: `Okay to delete ${selection.length} user(s)?` })
 		if (confirmed) {
 			await Promise.all(selection.map((entry: AuthUser) => entry.delete()))
 			ToastStore.setValue({ message: `Deleted ${selection.length} entries`, icon: 'success', placement: 'right' })
@@ -81,11 +77,7 @@ export default function UserList({ route }: { route: RouteType }) {
 
 	async function banCb(selection: any[]) {
 		// TODO: Ban should prompt for reason
-		const confirmed = await Portal.prompt<boolean>(({resolve}) => (
-			<ConfirmPrompt resolve={resolve}>
-				<p>Okay to ban {selection.length} user(s)?</p>
-			</ConfirmPrompt>
-		))
+		const confirmed = await Portal.confirm({ message: `Okay to ban ${selection.length} user(s)?` })
 		if (confirmed) {
 			await Promise.all(selection.map((entry: AuthUser) => entry.ban('Banned by bulk action')))
 			ToastStore.setValue({ message: `Banned ${selection.length} entries`, icon: 'success', placement: 'right' })
@@ -93,23 +85,3 @@ export default function UserList({ route }: { route: RouteType }) {
 		}
 	}
 }
-
-function ConfirmPrompt({resolve, children = 'Are you sure?'}: {resolve: (res: boolean) => void, children?: ComponentChildren}) {
-	return (
-		<div>
-			<div>{children}</div>
-			<ButtonGroup>
-				<button onClick={() => resolve(true)} class="primary large">Proceed</button>
-				<button onClick={() => resolve(false)} class="link">Cancel</button>
-			</ButtonGroup>
-		</div>
-	)
-}
-
-const ButtonGroup = pstyled.div`
-	:root
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: 2px;
-`

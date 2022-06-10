@@ -10,17 +10,19 @@ import * as i from '../../lib/icons'
 export default function RoundedContent(p: { children: ComponentChildren, withSidebar?: boolean }) {
 	const isWide = useMedia('(min-width: 700px)')
 	const cornerSize = 10
-	return <ContentDiv id="content" data-withSidebar={p.withSidebar} data-isWide={isWide}>
-		{p.children}
-		<div class='frame'>
-			<div class='topBumper' />
-			<i.RoundedCornerInv class="corner1" size={cornerSize} />
-			<i.RoundedCornerInv class="corner2" size={cornerSize} horizontal />
-			<i.RoundedCornerInv class="corner3" size={cornerSize} vertical />
-			<i.RoundedCornerInv class="corner4" size={cornerSize} vertical horizontal />
-			<div class='bottomBumper' />
-		</div>
-	</ContentDiv>
+	return (
+		<ContentDiv id="content" data-withSidebar={p.withSidebar} data-isWide={isWide}>
+			{p.children}
+			<div class='frame'>
+				<div class='topBumper' />
+				<i.RoundedCornerInv class="corner1" size={cornerSize} />
+				<i.RoundedCornerInv class="corner2" size={cornerSize} horizontal />
+				<i.RoundedCornerInv class="corner3" size={cornerSize} vertical />
+				<i.RoundedCornerInv class="corner4" size={cornerSize} vertical horizontal />
+				<div class='bottomBumper' />
+			</div>
+		</ContentDiv>
+	)
 }
 const ContentDiv = pstyled.div`
 	:root

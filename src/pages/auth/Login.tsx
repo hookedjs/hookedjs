@@ -45,7 +45,7 @@ export default function Login() {
 				disabled={submitting}
 				error={errors[LoginPropsEnum.password]?.note}
 			/>
-			<SubmitButton class="large">Login</SubmitButton>
+			<SubmitButton>Login</SubmitButton>
 			<ErrorMessage errors={errors}/>
 		</Form.Component>
 		<div>

@@ -7,12 +7,13 @@ import config from '../../src/api/lib/config.node'
 import {
 	AuthUsers,
 	AuthUserStatusEnum,
+	TenantPersons,
 } from '../../src/pouch/databases'
 
 sleep(1000).then(main)
 
 async function main() {
-	await createUser()
+	const user = await createUser()
 	process.exit(0)
 }
 
@@ -40,3 +41,4 @@ async function createUser() {
 
 	return user
 }
+

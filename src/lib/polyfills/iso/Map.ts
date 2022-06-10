@@ -17,6 +17,12 @@ declare global {
 	interface Map<K, V> {
 		copy(): Map<K, V>;
 		toObj(): Record<string, V>;
+		/**
+		 * Like set but the value is a callback that accepts the prior
+		 * value and returns the next value, kinda like react's useState
+		 * updater
+		**/
+		update(key: K, valueCb: (previous: V) => V): Map<K, V>;
 	}
 }
 
@@ -30,6 +36,12 @@ Object.defineProperties(Map.prototype, {
 	toObj: {
 		value: function () {
 			return Object.fromEntries(this)
+		},
+		enumerable: false
+	},
+	update: {
+		value: function(key: any, valueCb: (previous: any) => any) {
+			return this.set(key, valueCb(this.get(key)))
 		},
 		enumerable: false
 	},

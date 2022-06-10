@@ -31,7 +31,6 @@ declare global {
 		 * Src: https://stackoverflow.com/a/8831937/1202757
 		 */
 		toHash(): string
-		toHashInt(): number
 
 		/**
 		 * Converts a string into title-case: "hello world" -> "Hello World"
@@ -59,28 +58,9 @@ Object.defineProperties(String.prototype, {
 		enumerable: false
 	},
 
-	toHashInt: {
-		value: function() {
-			const hashInt = Math.abs(
-				Array.from(this).reduce(
-					(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
-					0,
-				)
-			)
-			return hashInt
-		},
-		enumerable: false
-	},
-
 	toHash: {
 		value: function() {
-			const hashInt = Math.abs(
-				Array.from(this).reduce(
-					(hash: number, char: any) => 0 | (31 * hash + char.charCodeAt(0)),
-					0,
-				)
-			)
-			return hashInt.toString(32)
+			return this._toHash()
 		},
 		enumerable: false
 	},

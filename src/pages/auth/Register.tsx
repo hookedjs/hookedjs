@@ -60,7 +60,7 @@ export default function Register() {
 				labelText={<span>Do you agree to these<br/>terms?</span>}
 				error={errors[RegisterPropsEnum.acceptedTerms]?.note}
 			/>
-			<SubmitButton class="large">Register</SubmitButton>
+			<SubmitButton>Register</SubmitButton>
 			<ErrorMessage errors={errors}/>
 		</Form.Component>
 		<a href={`${Paths.Login}${location.search}#replace`}>Have an account?</a><br />
