@@ -57,6 +57,11 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
 	tenants: IAuthUserExtra['tenants']
 	defaultTenantId: IAuthUserExtra['defaultTenantId']
 
+	constructor(data: IAuthUserCreate) {
+		super(data)
+		Object.assign(this, data)
+	}
+
 	get fullName() {return `${this.givenName} ${this.surname}`}
 
 	// Ensure password never hangs around
@@ -236,7 +241,7 @@ export const RegisterPropsExample = new RegisterProps({
 export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)
 
 
-export const adminAuthUserStub: AuthUser = new AuthUser({
+export const adminAuthUserStub = new AuthUser({
 	_id: 'admin',
 	_rev: '',
 	type: AuthUser.type,

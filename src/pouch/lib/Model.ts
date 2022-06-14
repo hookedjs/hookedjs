@@ -1,6 +1,6 @@
 import { assertValid, isDefined, isDefinedAndNotNull, ValueError } from '#src/lib/validation'
 
-import Database, { IStandardFields, loadingDb } from './Database'
+import { IStandardFields, loadingDb } from './Database'
 
 abstract class PouchModel<ExtraFields extends Record<string, any>> {
 	// TS doesn't support abstract static props yet: https://github.com/microsoft/TypeScript/issues/34516
@@ -31,7 +31,7 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 		Object.assign(
 			this,
 			{_id: data._id || String.uid(), createdAt: now, updatedAt: now, version: 0},
-			data
+			data,
 		)
 		this.valuesClean = this.values
 	}

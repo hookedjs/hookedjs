@@ -1,4 +1,4 @@
-import { useEffect, useRef, useUpdate } from '#lib/hooks'
+import { useEffect, useRef, useUpdate } from '#src/lib/hooks'
 import { NotFoundError, throwNotFoundError } from '#src/lib/validation'
 
 import type { IFindProps } from './Database'

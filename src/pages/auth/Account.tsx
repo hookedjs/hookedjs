@@ -1,7 +1,7 @@
 import {h} from 'preact'
 
-import PaddedPage from '#layout/components/PaddedPage'
-import Section from '#layout/components/Section'
+import PaddedPage from '#src/layout/components/PaddedPage'
+import Section from '#src/layout/components/Section'
 import pstyled from '#src/lib/pstyled'
 import { useCurrentUser } from '#src/pouch'
 import { Paths } from '#src/routes'

@@ -1,7 +1,7 @@
 import PouchDb from 'pouchdb'
 import FindPlugin from 'pouchdb-find'
 
-import { NotFoundError, throwNotFoundError } from '#lib/validation'
+import { NotFoundError, throwNotFoundError } from '#src/lib/validation'
 
 PouchDb.plugin(FindPlugin)
 

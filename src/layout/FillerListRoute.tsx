@@ -1,6 +1,6 @@
 import { h } from 'preact'
 
-import { getParentPath, RouteType } from '#lib/router'
+import { getParentPath, RouteType } from '#src/lib/router'
 import { ToastStore } from '#src/stores'
 
 import CmsTablePage from './components/CmsTablePage'

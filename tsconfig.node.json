@@ -2,7 +2,12 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "jsx": "react",
-    "paths": {},
+    "paths": {
+      "#src/*": ["./src/*"],
+    },
+    "composite": true,
+    // "module": "esnext",
+    // "moduleResolution": "node"
   },
-  "include": ["src/api", "scripts", "db"],
+  "include": ["src/api", "src/lib", "scripts", "db", "vite.config.ts"],
 }

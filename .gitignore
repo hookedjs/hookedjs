@@ -13,3 +13,4 @@ web-build
 *.log
 db/data
 loading
+dist

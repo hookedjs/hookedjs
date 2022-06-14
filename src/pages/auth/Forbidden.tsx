@@ -1,6 +1,6 @@
 import {h} from 'preact'
 
-import {Auth} from '#lib/icons'
+import {Auth} from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
 import { nav } from '#src/lib/router'
 import { Paths } from '#src/routes'
