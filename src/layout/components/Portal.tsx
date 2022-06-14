@@ -1,6 +1,6 @@
 import {ComponentChildren, h} from 'preact'
 
-import { useClickAway, useEffect, useKey, useRef, useState } from '#lib/hooks'
+import { useClickAway, useEffect, useKey, useRef, useState } from '#src/lib/hooks'
 import pstyled from '#src/lib/pstyled'
 import { PortalStore, usePortalStore } from '#src/stores'
 

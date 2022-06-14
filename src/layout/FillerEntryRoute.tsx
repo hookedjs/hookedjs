@@ -1,7 +1,7 @@
 import { h } from 'preact'
 
-import qs from '#lib/queryStrings'
-import {PageMetaStore, RouteType} from '#lib/router'
+import qs from '#src/lib/queryStrings'
+import {PageMetaStore, RouteType} from '#src/lib/router'
 
 import PaddedPage from './components/PaddedPage'
 import Section from './components/Section'

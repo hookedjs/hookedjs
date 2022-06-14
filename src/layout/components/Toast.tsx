@@ -1,7 +1,7 @@
 import {ComponentChildren, h} from 'preact'
 
-import { useEffect, useLayoutEffect, useRef } from '#lib/hooks'
-import * as i from '#lib/icons'
+import { useEffect, useLayoutEffect, useRef } from '#src/lib/hooks'
+import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
 import { useToastStore } from '#src/stores'
 

@@ -500,6 +500,9 @@ PageMetaStore.subscribe(setPageMeta)
 	}
 })()
 
+export type {
+	RouteType,
+}
 
 export {
 	BlankLayout,
@@ -514,7 +517,6 @@ export {
 	RouteFactory,
 	RouteHistoryReset,
 	RouterComponent,
-	RouteType,
 	scrollListener,
 	setPageMeta,
 	StackFactory,

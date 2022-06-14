@@ -1,4 +1,4 @@
-import { isOffline, isOnline, waitForOnline } from '#lib/network'
+import { isOffline, isOnline, waitForOnline } from '#src/lib/network'
 import { AuthUsers } from '#src/pouch'
 import { AuthStore } from '#src/stores'
 

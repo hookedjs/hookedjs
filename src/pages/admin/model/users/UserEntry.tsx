@@ -1,9 +1,9 @@
 import { ComponentChildren, h } from 'preact'
 
-import PaddedPage from '#layout/components/PaddedPage'
-import Section from '#layout/components/Section'
-import qs from '#lib/queryStrings'
-import {PageMetaStore, RouteType} from '#lib/router'
+import PaddedPage from '#src/layout/components/PaddedPage'
+import Section from '#src/layout/components/Section'
+import qs from '#src/lib/queryStrings'
+import {PageMetaStore, RouteType} from '#src/lib/router'
 import CodeSnippet from '#src/layout/components/CodeSnippet'
 import { ErrorMessage, InputField, SubmitButton, useForm } from '#src/lib/forms'
 import { useCallback } from '#src/lib/hooks'

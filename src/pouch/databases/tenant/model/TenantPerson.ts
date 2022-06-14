@@ -29,6 +29,11 @@ export class TenantPerson extends PouchModel<ITenantPersonExtra> {
 	roles: ITenantPersonExtra['roles']
 	status: ITenantPersonExtra['status']
 
+	constructor(data: ITenantPersonCreate) {
+		super(data)
+		Object.assign(this, data)
+	}
+
 	get fullName() {return `${this.givenName} ${this.surname}`}
 
 	async validate() { 

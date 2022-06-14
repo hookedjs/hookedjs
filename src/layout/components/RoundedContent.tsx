@@ -1,7 +1,7 @@
 import { ComponentChildren, h } from 'preact'
 
-import { useMedia } from '#lib/hooks'
-import { Content } from '#lib/router'
+import { useMedia } from '#src/lib/hooks'
+import { Content } from '#src/lib/router'
 import pstyled from '#src/lib/pstyled'
 
 import * as i from '../../lib/icons'

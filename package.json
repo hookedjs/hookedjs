@@ -7,17 +7,16 @@
   "scripts": {
     "prepare": "if [ -d \".git\" ]; then husky install; fi",
     "dev": "run-p db:dev api:dev web:dev",
-    "build": "pnpm web:build && pnpm api:build",
-    "start": "pnpm api:start",
-    "web:dev": "snowpack dev --secure --polyfill-node",
-    "//web:build:hint": "must mv lib out of public to avoid adding hashes to the filenames",
-    "web:build": "mv public/lib . && NODE_ENV=production snowpack build && cp -r lib web-build && mv lib public && workbox generateSW && date > web-build/buildTime.txt",
-    "web:test": "web-test-runner \"src/**/*.test.tsx\"",
-    "api:build": "pnpm lint && tsc && SAM_CLI_TELEMETRY=0 sam build && pnpm api:clean",
+    "build": "run-p web:build api:build",
+    "start": "npm run api:start",
+    "web:dev": "vite",
+    "web:build": "vite build && date > dist/buildTime.txt",
+    "web:preview": "vite preview",
+    "api:build": "npm run lint && tsc && SAM_CLI_TELEMETRY=0 sam build && npm run api:clean",
     "api:clean": "tsc -b --clean",
     "api:dev": "sleep 3 && ts-node-dev --transpile-only -P tsconfig.node.json src/api/api.node.ts",
     "gateway:start": "ts-node-dev --transpile-only -P tsconfig.node.json src/api/gateway.node.ts",
-    "validate": "pnpm lint && tsc --noEmit",
+    "validate": "npm run lint && tsc --noEmit",
     "lint": "eslint --cache --ext .ts,.tsx",
     "db:dev": "pouchdb-server --port 5984 -d db -n -c db/couchdb.config.json --dir db/data",
     "db:seed": "ts-node --transpile-only -P tsconfig.node.json db/seed",
@@ -25,19 +24,16 @@
   },
   "files": [
     "src",
-    "web-build"
+    "dist"
   ],
   "imports": {
     "#hint": "Subpath folder mappings are deprecated after node v16 -- Maybe consider npm/module-alias later",
-    "#src/": "./src/",
-    "#lib/": "./src/lib/",
-    "#db/": "./src/db/"
+    "#src/": "./src/"
   },
   "dependencies": {
     "fastify": "~3.27.0",
     "fastify-helmet": "~7.0.1",
     "fastify-http-proxy": "^6.2.1",
-    "fastify-jwt": "^4.1.3",
     "fastify-plugin": "^3.0.1",
     "fastify-static": "~4.5.0",
     "glob": "^7.2.0",
@@ -47,18 +43,13 @@
     "node-fetch": "^2.6.0",
     "nodemailer": "^6.7.2",
     "npm-run-all": "~4.1.5",
-    "pnp": "^0.0.3",
     "pouchdb": "^7.2.2",
     "pouchdb-find": "^7.2.2",
     "pouchdb-server": "^4.2.0"
   },
   "devDependencies": {
-    "@prefresh/snowpack": "~3.1.0",
-    "@snowpack/plugin-typescript": "~1.2.1",
-    "@snowpack/web-test-runner-plugin": "~0.2.2",
-    "@testing-library/preact": "~2.0.1",
-    "@tsconfig/node16": "^1.0.2",
-    "@types/chai": "~4.2.14",
+    "@preact/preset-vite": "^2.1.5",
+    "@tsconfig/node16": "^1.0.3",
     "@types/glob": "^7.2.0",
     "@types/node": "~14.14.41",
     "@types/node-fetch": "2",
@@ -66,22 +57,20 @@
     "@types/pouchdb": "^6.4.0",
     "@typescript-eslint/eslint-plugin": "~4.8.2",
     "@typescript-eslint/parser": "~4.8.2",
-    "@web/test-runner": "~0.13.3",
     "casual": "^1.6.2",
-    "chai": "~4.3.4",
     "eslint": "~7.18.0",
     "eslint-plugin-simple-import-sort": "~6.0.1",
+    "events": "^3.3.0",
     "husky": "~6.0.0",
     "mdi-paths-split": "~5.9.55",
-    "preact": "~10.5.13",
-    "snowpack": "~3.5.2",
-    "snowpack-plugin-hash": "~0.16.0",
+    "preact": "~10.5.15",
     "ts-node": "~9.1.1",
     "ts-node-dev": "~1.1.8",
-    "typescript": "~4.4.2",
-    "workbox-cli": "~6.0.2"
+    "typescript": "~4.5.4",
+    "vite": "^2.9.9",
+    "vite-plugin-pwa": "^0.12.0"
   },
   "engines": {
-    "node": ">=14 <15"
+    "node": "^16"
   }
 }

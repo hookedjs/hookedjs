@@ -1,32 +1,36 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2019",
-    "moduleResolution": "node",
-    "sourceMap": true,
-		"jsx": "preserve",
-    "jsxFactory": "h",
-    "baseUrl": ".",
-    "strict": true,
+    // Vite defaults
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
-    "importsNotUsedAsValues": "error",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    
+    // Custom
     "allowUnreachableCode": true,
-    "lib": ["ES2019", "DOM", "dom.Iterable"],
-		"emitDecoratorMetadata": true,
+    "importsNotUsedAsValues": "error",
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "paths": {
 			"#src/*": ["./src/*"],
-      "#lib/*": ["./src/lib/*"],
-			"#layout/*": ["./src/layout/*"],
-      // Add this line to get types for streaming imports (packageOptions.source="remote"):
-      "*": [".snowpack/types/*"]
 		},
-    "noEmit": true,
   },
+  
   "include": ["src"],
   "exclude": ["node_modules"],
+  // "references": [{ "path": "./tsconfig.node.json" }]
 }

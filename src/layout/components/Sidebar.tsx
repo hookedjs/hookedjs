@@ -1,7 +1,7 @@
 import { h } from 'preact'
 
-import NavLink from '#layout/components/SidebarNavLink'
-import * as i from '#lib/icons'
+import NavLink from '#src/layout/components/SidebarNavLink'
+import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
 import { useCurrentUser } from '#src/pouch'
 import { AuthStore } from '#src/stores'

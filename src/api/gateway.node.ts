@@ -12,15 +12,15 @@ import { ForbiddenError, NotFoundError, ValidationErrorSet } from '../lib/valida
 import config from './lib/config.node'
 
 const 
-	htmlPath = path.join(__dirname, '/../../web-build')
+	htmlPath = path.join(__dirname, '/../../dist')
 	,notFoundHtml = fs.readFileSync(path.join(htmlPath, '/index.html'))
 	,app = fastify({
 		logger: true,
 		http2: true,
 		https: { 
 			allowHTTP1: true, 
-			key: fs.readFileSync(__dirname + '/../../snowpack.key', 'utf8'), 
-			cert: fs.readFileSync(__dirname + '/../../snowpack.crt', 'utf8'),
+			key: fs.readFileSync(__dirname + '/lib/rsa.key', 'utf8'), 
+			cert: fs.readFileSync(__dirname + '/lib/rsa.crt', 'utf8'),
 		},
 	})
 

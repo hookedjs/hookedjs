@@ -1,8 +1,8 @@
 import { h } from 'preact'
 
-import { useCallback, useEffect, useState } from '#lib/hooks'
-import * as i from '#lib/icons'
-import {useLocationStore} from '#lib/router'
+import { useCallback, useEffect, useState } from '#src/lib/hooks'
+import * as i from '#src/lib/icons'
+import {useLocationStore} from '#src/lib/router'
 import pstyled from '#src/lib/pstyled'
 import { useSidebarRightStore } from '#src/stores'
 

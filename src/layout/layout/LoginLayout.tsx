@@ -1,9 +1,9 @@
 import { h } from 'preact'
 
-import { useEffect, useLayoutEffect, useState } from '#lib/hooks'
-import { Alert } from '#lib/icons'
-import { isOnline, waitForOnline } from '#lib/network'
-import pstyled from '#lib/pstyled'
+import { useEffect, useLayoutEffect, useState } from '#src/lib/hooks'
+import { Alert } from '#src/lib/icons'
+import { isOnline, waitForOnline } from '#src/lib/network'
+import pstyled from '#src/lib/pstyled'
 
 import { applyTheme, defaultTheme } from '../theme'
 

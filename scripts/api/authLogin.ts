@@ -17,6 +17,8 @@ async function main() {
 	const props: LoginProps = {
 		name: 'sallyfields@hookedjs.org',
 		password: '52243012',
+		// name: 'admin@hookedjs.org',
+		// password: 'Password8',
 	}
 		
 	const res = await fetch(

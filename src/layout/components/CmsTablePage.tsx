@@ -1,6 +1,6 @@
 import { Fragment as F, h } from 'preact'
 
-import { getParentPath } from '#lib/router'
+import { getParentPath } from '#src/lib/router'
 import pstyled from '#src/lib/pstyled'
 
 import CmsTable from './CmsTable'

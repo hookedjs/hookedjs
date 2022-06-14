@@ -1,6 +1,6 @@
 import { h } from 'preact'
 
-import { useEffect } from '#lib/hooks'
+import { useEffect } from '#src/lib/hooks'
 import { nav } from '#src/lib/router'
 import { Paths } from '#src/routes'
 import { AuthStore } from '#src/stores'

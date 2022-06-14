@@ -1,6 +1,6 @@
 import { h } from 'preact'
 
-import { useLayoutEffect } from '#lib/hooks'
+import { useLayoutEffect } from '#src/lib/hooks'
 import { routes } from '#src/routes'
 import { useAuthStore } from '#src/stores'
 

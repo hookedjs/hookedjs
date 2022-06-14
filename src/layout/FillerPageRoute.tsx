@@ -1,6 +1,6 @@
 import { h } from 'preact'
 
-import type { RouteType } from '#lib/router'
+import type { RouteType } from '#src/lib/router'
 
 import PaddedPage from './components/PaddedPage'
 import Section from './components/Section'

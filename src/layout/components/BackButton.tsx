@@ -1,6 +1,6 @@
 import {h} from 'preact'
 
-import { ArrowL } from '#lib/icons'
+import { ArrowL } from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
 
 export default function BackButton() {

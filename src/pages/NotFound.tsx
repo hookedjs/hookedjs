@@ -1,6 +1,6 @@
 import {h} from 'preact'
 
-import {MapPin} from '#lib/icons'
+import {MapPin} from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
 
 export default function NotFound() {

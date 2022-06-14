@@ -1,8 +1,8 @@
 import {ComponentChildren, Fragment as F, h} from 'preact'
 
-import CmsTablePage from '#layout/components/CmsTablePage'
-import queryStrings from '#lib/queryStrings'
-import { getParentPath, RouteType } from '#lib/router'
+import CmsTablePage from '#src/layout/components/CmsTablePage'
+import queryStrings from '#src/lib/queryStrings'
+import { getParentPath, RouteType } from '#src/lib/router'
 import Portal from '#src/layout/components/Portal'
 import pstyled from '#src/lib/pstyled'
 import { AuthUser, useAuthUsersS } from '#src/pouch'

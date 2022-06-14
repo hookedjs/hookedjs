@@ -1,6 +1,6 @@
 import { Fragment as F, FunctionalComponent, h } from 'preact'
 
-import NavLink from '#layout/components/SidebarNavLink'
+import NavLink from '#src/layout/components/SidebarNavLink'
 import pstyled from '#src/lib/pstyled'
 import { useSidebarRightStore } from '#src/stores'
 

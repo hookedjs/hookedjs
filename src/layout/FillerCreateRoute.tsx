@@ -1,9 +1,9 @@
 import { Fragment as F, h } from 'preact'
 
-import { ErrorMessage, FormJson, InputField, SubmitButton, useForm } from '#lib/forms'
-import { useCallback } from '#lib/hooks'
-import { getParentPath, nav, RouteType } from '#lib/router'
-import { assertAttrsWithin, assertValid, assertValidSet } from '#lib/validation'
+import { ErrorMessage, FormJson, InputField, SubmitButton, useForm } from '#src/lib/forms'
+import { useCallback } from '#src/lib/hooks'
+import { getParentPath, nav, RouteType } from '#src/lib/router'
+import { assertAttrsWithin, assertValid, assertValidSet } from '#src/lib/validation'
 import { ToastStore } from '#src/stores'
 
 import PaddedPage from './components/PaddedPage'
