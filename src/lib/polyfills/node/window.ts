@@ -7,7 +7,7 @@
 import nodeCrypto from 'crypto'
 import http from 'http'
 import https from 'https'
-import nodeFetch from 'node-fetch'
+import nodeFetch, { RequestInit } from 'node-fetch'
 
 if (!globalThis.window) {
 	const querySelector = () => element
@@ -55,7 +55,7 @@ if (!globalThis.window) {
 
 // Wraps fetch to inject global cookies, similar to browsers
 function fetch(url: string, options: any = {}) {
-	const res = nodeFetch(url, {
+	const init: RequestInit = {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -64,8 +64,10 @@ function fetch(url: string, options: any = {}) {
 			cookie: options.headers?.cookie || globalThis?.document?.cookie || undefined,
 		},
 		credentials: 'include',
-		agent: (url) => url.protocol == 'http:' ? httpAgent : httpsAgent,
-	})
+		agent: url => url.protocol == 'http:' ? httpAgent : httpsAgent,
+	}
+	const res = nodeFetch(url, init)
+	// res.then(r => console.log({url, init, r}))
 	return res
 }
 const httpAgent = new http.Agent({
