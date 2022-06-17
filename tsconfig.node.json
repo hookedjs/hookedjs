@@ -3,11 +3,11 @@
   "compilerOptions": {
     "jsx": "react",
     "paths": {
-      "#src/*": ["./src/*"],
+      "#src/*": ["./src/*"]
     },
-    "composite": true,
+    "composite": true
     // "module": "esnext",
     // "moduleResolution": "node"
   },
-  "include": ["src/api", "src/lib", "scripts", "db", "vite.config.ts"],
+  "include": ["src/api", "src/lib", "scripts", "db", "vite.config.ts"]
 }

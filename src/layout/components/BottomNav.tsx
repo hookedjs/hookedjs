@@ -1,21 +1,23 @@
-import { h } from 'preact'
-
-import { useCallback, useEffect, useState } from '#src/lib/hooks'
+import {useCallback, useEffect, useState} from '#src/lib/hooks'
 import * as i from '#src/lib/icons'
-import {useLocationStore} from '#src/lib/router'
 import pstyled from '#src/lib/pstyled'
-import { useSidebarRightStore } from '#src/stores'
+import {useLocationStore} from '#src/lib/router'
+import {useSidebarRightStore} from '#src/stores'
+import {h} from 'preact'
 
-import type { NavLinkProps, NavLinks } from '../types'
+import type {NavLinkProps, NavLinks} from '../types'
 
-
-export default function BottomNav({ navLinks }: { navLinks: NavLinks }) {
-	return <Nav>
-		{navLinks
-			.filter(nl => nl.hasAccess ? nl.hasAccess() : true)
-			.map(nl => <NavLink {...nl} />)}
-		<NavBurger />
-	</Nav>
+export default function BottomNav({navLinks}: {navLinks: NavLinks}) {
+  return (
+    <Nav>
+      {navLinks
+        .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+        .map(nl => (
+          <NavLink {...nl} />
+        ))}
+      <NavBurger />
+    </Nav>
+  )
 }
 const Nav = pstyled.div`
 	:root
@@ -33,20 +35,21 @@ const Nav = pstyled.div`
 		background: var(--gray1)
 `
 
-
 function NavLink(p: NavLinkProps) {
-	const [_location] = useLocationStore()
-	const [isSidebarActive] = useSidebarRightStore()
-	const isActive = _location.pathname.startsWith(p.path)
-	const Icon = p.Icon ?? i.Info
-	return (
-		<NavLinkA
-			aria-label={p.title}
-			data-active={isActive && !isSidebarActive}
-			href={p.path + (isActive && 'stack' in p ? '#stack-reset' : '')}>
-			<div><Icon /></div>
-		</NavLinkA>
-	)
+  const [_location] = useLocationStore()
+  const [isSidebarActive] = useSidebarRightStore()
+  const isActive = _location.pathname.startsWith(p.path)
+  const Icon = p.Icon ?? i.Info
+  return (
+    <NavLinkA
+      aria-label={p.title}
+      data-active={isActive && !isSidebarActive}
+      href={p.path + (isActive && 'stack' in p ? '#stack-reset' : '')}>
+      <div>
+        <Icon />
+      </div>
+    </NavLinkA>
+  )
 }
 const NavLinkA = pstyled.a`
 	:root
@@ -74,37 +77,30 @@ const NavLinkA = pstyled.a`
 		transform: translateY(2px)
 `
 
-
 /**
  * This is a little more complex than the Marketing Navburger, b/c it can have a diff
- * state than sidebarRight b/c the sidebar can also be activated in the 
+ * state than sidebarRight b/c the sidebar can also be activated in the
  * Header->Right->Navburger. The added complexity allows NavBurger to handle this
  * gracefully.
  */
 function NavBurger() {
-	const [isActive, setIsActive] = useState(false)
-	const [isSidebarActive, setIsSidebarActive] = useSidebarRightStore()
-	const onClick = useCallback(_onClick, [])
-	useEffect(() => {if (!isSidebarActive) setIsActive(false)}, [isSidebarActive])
-	return (
-		<NavLinkA 
-			aria-label="Open Right menu"
-			data-active={isActive}
-			href="#sidebar-right-toggle"
-			onClick={onClick}
-		>
-			<div>{isActive
-				? <i.Close width={22}  />
-				: <i.Menu width={22} />
-			}</div>
-		</NavLinkA>
-	)
+  const [isActive, setIsActive] = useState(false)
+  const [isSidebarActive, setIsSidebarActive] = useSidebarRightStore()
+  const onClick = useCallback(_onClick, [])
+  useEffect(() => {
+    if (!isSidebarActive) setIsActive(false)
+  }, [isSidebarActive])
+  return (
+    <NavLinkA aria-label="Open Right menu" data-active={isActive} href="#sidebar-right-toggle" onClick={onClick}>
+      <div>{isActive ? <i.Close width={22} /> : <i.Menu width={22} />}</div>
+    </NavLinkA>
+  )
 
-	function _onClick(e: any) {
-		e.preventDefault()
-		setIsActive(isActive => {
-			setIsSidebarActive(!isActive)
-			return !isActive
-		})
-	}
+  function _onClick(e: any) {
+    e.preventDefault()
+    setIsActive(isActive => {
+      setIsSidebarActive(!isActive)
+      return !isActive
+    })
+  }
 }

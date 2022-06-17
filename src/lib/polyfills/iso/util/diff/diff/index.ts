@@ -1,31 +1,31 @@
-import { DiffFnc, isDate, isEmpty, isObject, properObject } from '../utils'
+import {DiffFnc, isDate, isEmpty, isObject, properObject} from '../utils'
 
 const diff: DiffFnc = (lhs: any, rhs: any): any => {
-	if (lhs === rhs) return {} // equal return no diff
+  if (lhs === rhs) return {} // equal return no diff
 
-	if (!isObject(lhs) || !isObject(rhs)) return rhs // return updated rhs
+  if (!isObject(lhs) || !isObject(rhs)) return rhs // return updated rhs
 
-	const l = properObject(lhs)
-	const r = properObject(rhs)
+  const l = properObject(lhs)
+  const r = properObject(rhs)
 
-	const deletedValues = Object.keys(l).reduce((acc, key) => {
-		return r.hasOwnProperty(key) ? acc : { ...acc, [key]: undefined }
-	}, {})
+  const deletedValues = Object.keys(l).reduce((acc, key) => {
+    return r.hasOwnProperty(key) ? acc : {...acc, [key]: undefined}
+  }, {})
 
-	if (isDate(l) || isDate(r)) {
-		if (l.valueOf() == r.valueOf()) return {}
-		return r
-	}
+  if (isDate(l) || isDate(r)) {
+    if (l.valueOf() == r.valueOf()) return {}
+    return r
+  }
 
-	return Object.keys(r).reduce((acc, key) => {
-		if (!l.hasOwnProperty(key)) return { ...acc, [key]: r[key] } // return added r key
+  return Object.keys(r).reduce((acc, key) => {
+    if (!l.hasOwnProperty(key)) return {...acc, [key]: r[key]} // return added r key
 
-		const difference = diff(l[key], r[key])
+    const difference = diff(l[key], r[key])
 
-		if (isObject(difference) && isEmpty(difference) && !isDate(difference)) return acc // return no diff
+    if (isObject(difference) && isEmpty(difference) && !isDate(difference)) return acc // return no diff
 
-		return { ...acc, [key]: difference } // return updated key
-	}, deletedValues)
+    return {...acc, [key]: difference} // return updated key
+  }, deletedValues)
 }
 
 export default diff

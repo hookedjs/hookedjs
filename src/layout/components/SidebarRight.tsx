@@ -1,24 +1,27 @@
-import { Fragment as F, FunctionalComponent, h } from 'preact'
-
 import NavLink from '#src/layout/components/SidebarNavLink'
 import pstyled from '#src/lib/pstyled'
-import { useSidebarRightStore } from '#src/stores'
+import {useSidebarRightStore} from '#src/stores'
+import {Fragment as F, FunctionalComponent, h} from 'preact'
 
-import type { NavLinks } from '../types'
-import { Logo } from './Logo'
+import type {NavLinks} from '../types'
+import {Logo} from './Logo'
 
-export default function SidebarRight({ navLinks }: { navLinks: NavLinks }) {
-	const [isActive] = useSidebarRightStore()
-	return isActive ? (
-		<SidebarDiv>
-			<Logo size={2} class='logo' />
-			<SidebarNav>
-				{navLinks
-					.filter(nl => nl.hasAccess ? nl.hasAccess() : true)
-					.map(nl => <NavLink {...nl} />)}
-			</SidebarNav>
-		</SidebarDiv>
-	) : <F />
+export default function SidebarRight({navLinks}: {navLinks: NavLinks}) {
+  const [isActive] = useSidebarRightStore()
+  return isActive ? (
+    <SidebarDiv>
+      <Logo size={2} class="logo" />
+      <SidebarNav>
+        {navLinks
+          .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+          .map(nl => (
+            <NavLink {...nl} />
+          ))}
+      </SidebarNav>
+    </SidebarDiv>
+  ) : (
+    <F />
+  )
 }
 const SidebarDiv = pstyled.div`
 	:root

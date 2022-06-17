@@ -1,28 +1,19 @@
-import { ComponentChildren, h } from 'preact'
-
 import pstyled from '#src/lib/pstyled'
+import {ComponentChildren, h} from 'preact'
 
 import Navbar from '../components/Navbar'
 import RoundedContent from '../components/RoundedContent'
 import SidebarRight from '../components/SidebarRight'
-import type { NavLinks } from '../types'
+import type {NavLinks} from '../types'
 
-export default function HeaderLayout(p: { 
-	topLinks: NavLinks
-	rightLinks: NavLinks
-	children: ComponentChildren
- }) {
-	return (
-		<HeaderLayoutDiv>
-			<Navbar navLinks={p.topLinks}/>
-			<SidebarRight 
-				navLinks={p.rightLinks}
-			/>
-			<RoundedContent>
-				{p.children}
-			</RoundedContent>
-		</HeaderLayoutDiv>
-	)
+export default function HeaderLayout(p: {topLinks: NavLinks; rightLinks: NavLinks; children: ComponentChildren}) {
+  return (
+    <HeaderLayoutDiv>
+      <Navbar navLinks={p.topLinks} />
+      <SidebarRight navLinks={p.rightLinks} />
+      <RoundedContent>{p.children}</RoundedContent>
+    </HeaderLayoutDiv>
+  )
 }
 const HeaderLayoutDiv = pstyled.div`
 	:root

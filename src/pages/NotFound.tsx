@@ -1,18 +1,23 @@
-import {h} from 'preact'
-
 import {MapPin} from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
+import {h} from 'preact'
 
 export default function NotFound() {
-	return <NotFoundDiv>
-		<div>
-			<div><img src="/notfound.png" width="300" height="300" /></div>
-			<MapPinDiv><MapPin size={50} fill="var(--primary)" /></MapPinDiv>
-			<h1>Page not found!</h1>
-			<br />
-			<a href='/'>Go Home?</a>
-		</div>
-	</NotFoundDiv>
+  return (
+    <NotFoundDiv>
+      <div>
+        <div>
+          <img src="/notfound.png" width="300" height="300" />
+        </div>
+        <MapPinDiv>
+          <MapPin size={50} fill="var(--primary)" />
+        </MapPinDiv>
+        <h1>Page not found!</h1>
+        <br />
+        <a href="/">Go Home?</a>
+      </div>
+    </NotFoundDiv>
+  )
 }
 // Background thanks to transparenttextures.com
 const NotFoundDiv = pstyled.div`

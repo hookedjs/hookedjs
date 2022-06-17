@@ -1,31 +1,34 @@
-import {h} from 'preact'
-
 import {Auth} from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
-import { nav } from '#src/lib/router'
-import { Paths } from '#src/routes'
-import { AuthStore, useAuthStore } from '#src/stores'
-
+import {nav} from '#src/lib/router'
+import {Paths} from '#src/routes'
+import {AuthStore, useAuthStore} from '#src/stores'
+import {h} from 'preact'
 
 export default function Forbidden() {
-	const [auth] = useAuthStore()
-	const LoginUrl = Paths.Login + '?from=' + location.pathname + location.search
-	return <ForbiddenDiv>
-		<div>
-			<Auth size={200} />
-			<h1>You lack access to this record.</h1>
-			<br />
-			<a href={Paths.Home}>Home</a>&nbsp;&nbsp;&nbsp;
-			{auth.name
-				? <a href={LoginUrl} onClick={onSwitchClick}>Switch User</a>
-				: <a href={LoginUrl}>Login</a>
-			}
-		</div>
-	</ForbiddenDiv>
-	function onSwitchClick(e: any) {
-		e.preventDefault()
-		AuthStore.logout().then(() => nav(LoginUrl))
-	}
+  const [auth] = useAuthStore()
+  const LoginUrl = Paths.Login + '?from=' + location.pathname + location.search
+  return (
+    <ForbiddenDiv>
+      <div>
+        <Auth size={200} />
+        <h1>You lack access to this record.</h1>
+        <br />
+        <a href={Paths.Home}>Home</a>&nbsp;&nbsp;&nbsp;
+        {auth.name ? (
+          <a href={LoginUrl} onClick={onSwitchClick}>
+            Switch User
+          </a>
+        ) : (
+          <a href={LoginUrl}>Login</a>
+        )}
+      </div>
+    </ForbiddenDiv>
+  )
+  function onSwitchClick(e: any) {
+    e.preventDefault()
+    AuthStore.logout().then(() => nav(LoginUrl))
+  }
 }
 // Background thanks to transparenttextures.com
 const ForbiddenDiv = pstyled.div`

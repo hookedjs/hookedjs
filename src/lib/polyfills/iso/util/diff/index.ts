@@ -4,10 +4,4 @@ import detailedDiff from './detailed'
 import diff from './diff'
 import updatedDiff from './updated'
 
-export {
-	addedDiff,
-	deletedDiff,
-	detailedDiff,
-	diff,
-	updatedDiff
-}
+export {addedDiff, deletedDiff, detailedDiff, diff, updatedDiff}

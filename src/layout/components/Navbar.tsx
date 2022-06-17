@@ -1,36 +1,40 @@
 import '#src/lib/forms'
-
-import { h } from 'preact'
-
-import { useCallback, useEffect, useRef, useState } from '#src/lib/hooks'
+import {useCallback, useEffect, useRef, useState} from '#src/lib/hooks'
 import {useMedia} from '#src/lib/hooks'
 import * as i from '#src/lib/icons'
-import {nav, useLocationStore} from '#src/lib/router'
 import pstyled from '#src/lib/pstyled'
+import {nav, useLocationStore} from '#src/lib/router'
 // import { Paths } from '#src/routes'
-import { useSidebarRightStore } from '#src/stores'
+import {useSidebarRightStore} from '#src/stores'
+import {h} from 'preact'
 
-import type { NavLinkProps, NavLinks } from '../types'
+import type {NavLinkProps, NavLinks} from '../types'
 
-export default function Navbar(p: { sidebarLeft?: boolean, navLinks: NavLinks, searchOptions?: SearchOption[]}) {
-	const isWide = useMedia('(min-width: 700px)')
-	return <NavbarDiv>
-		<div>
-			<LogoA aria-label="Home" href='/'><div><div>
-				<i.ReactLogo />
-				<div>Stacks!</div>
-			</div></div></LogoA>
-			{p.sidebarLeft && isWide && p.searchOptions && <SearchBar options={p.searchOptions} />}
-		</div>
+export default function Navbar(p: {sidebarLeft?: boolean; navLinks: NavLinks; searchOptions?: SearchOption[]}) {
+  const isWide = useMedia('(min-width: 700px)')
+  return (
+    <NavbarDiv>
+      <div>
+        <LogoA aria-label="Home" href="/">
+          <div>
+            <div>
+              <i.ReactLogo />
+              <div>Stacks!</div>
+            </div>
+          </div>
+        </LogoA>
+        {p.sidebarLeft && isWide && p.searchOptions && <SearchBar options={p.searchOptions} />}
+      </div>
 
-		<div>
-			{isWide && p.navLinks
-				.filter(nl => nl.hasAccess ? nl.hasAccess() : true)
-				.map(nl => 'isButton' in nl ? <NavButton {...nl} /> : <NavLink {...nl} />)}
-			<RightBurger />
-		</div>
-
-	</NavbarDiv>
+      <div>
+        {isWide &&
+          p.navLinks
+            .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+            .map(nl => ('isButton' in nl ? <NavButton {...nl} /> : <NavLink {...nl} />))}
+        <RightBurger />
+      </div>
+    </NavbarDiv>
+  )
 }
 const NavbarDiv = pstyled.div`
 	:root
@@ -80,79 +84,82 @@ const LogoA = pstyled.a`
 `
 
 export interface SearchOption {
-	name: string
-	value: string
+  name: string
+  value: string
 }
 function SearchBar(p: {options: SearchOption[]}) {
-	const [value, setValue] = useState('')
-	const [isFocused, setIsFocused] = useState(false)
-	const inputRef = useRef<HTMLInputElement>()
-	const selectRef = useRef<HTMLSelectElement>()
-	const [option, setOption] = useState(p.options[0].value)
-	const onOptionChange = useCallback((e: any) => setOption(e.target.value), [])
+  const [value, setValue] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>()
+  const selectRef = useRef<HTMLSelectElement>()
+  const [option, setOption] = useState(p.options[0].value)
+  const onOptionChange = useCallback((e: any) => setOption(e.target.value), [])
 
-	const onBlur = useCallback(_onBlur, [])
-	const onClickClear = useCallback(_onClickClear, [])
-	const onSubmit = useCallback(_onSubmit, [value])
+  const onBlur = useCallback(_onBlur, [])
+  const onClickClear = useCallback(_onClickClear, [])
+  const onSubmit = useCallback(_onSubmit, [value])
 
-	return <SearchBarDiv data-focused={isFocused}>
-		<form action='search' onSubmit={onSubmit}>
-			<div class='select-div'>
-				<select
-					aria-label="Record Type" 
-					name="type"
-					onFocus={() => setIsFocused(true)}
-					onBlur={onBlur}
-					ref={selectRef as Ref<HTMLSelectElement>}
-					value={option}
-					onChange={onOptionChange}
-				>
-					{p.options.map(o => <option value={o.value}>{o.name}</option>)}
-				</select>
-			</div>
-			<div class='magglass'><i.Search size={20} horizontal /></div>
-			<input
-				name="query"
-				value={value}
-				onInput={(e: any) => setValue(e.target.value)}
-				placeholder="Search"
-				onFocus={() => setIsFocused(true)}
-				onBlur={onBlur}
-				ref={inputRef as Ref<HTMLInputElement>}
-				aria-label="Search"
-			/>
-			<a
-				href="#search-clear"
-				tabIndex={0}
-				onClick={onClickClear}
-				class={`clear ${isFocused ? 'block' : ''}`}
-			>x</a>
-		</form>
-	</SearchBarDiv>
+  return (
+    <SearchBarDiv data-focused={isFocused}>
+      <form action="search" onSubmit={onSubmit}>
+        <div class="select-div">
+          <select
+            aria-label="Record Type"
+            name="type"
+            onFocus={() => setIsFocused(true)}
+            onBlur={onBlur}
+            ref={selectRef as Ref<HTMLSelectElement>}
+            value={option}
+            onChange={onOptionChange}>
+            {p.options.map(o => (
+              <option value={o.value}>{o.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="magglass">
+          <i.Search size={20} horizontal />
+        </div>
+        <input
+          name="query"
+          value={value}
+          onInput={(e: any) => setValue(e.target.value)}
+          placeholder="Search"
+          onFocus={() => setIsFocused(true)}
+          onBlur={onBlur}
+          ref={inputRef as Ref<HTMLInputElement>}
+          aria-label="Search"
+        />
+        <a href="#search-clear" tabIndex={0} onClick={onClickClear} class={`clear ${isFocused ? 'block' : ''}`}>
+          x
+        </a>
+      </form>
+    </SearchBarDiv>
+  )
 
-	function _onBlur(e?: any) {
-		setTimeout(() => { // skip a clock cycle b/c body is momentarily active when clicking select
-			if (document.activeElement === inputRef.current || document.activeElement === selectRef.current) return
-			if (e?.relatedTarget?.hash === '#search-clear') setValue('')
-			setIsFocused(false)
-			inputRef.current!.blur()
-			selectRef.current!.blur()
-		})
-	}
-	// I don't think this is ever actually fired due to blur event preventing it,
-	// but just in case it was we handle it.
-	function _onClickClear(e: any) {
-		e.preventDefault()
-		setValue('')
-		_onBlur()
-	}
-	function _onSubmit() { 
-		setValue('')
-		setIsFocused(false)
-		inputRef.current!.blur()
-		selectRef.current!.blur()
-		nav(option + '?search=' + value)
-	}
+  function _onBlur(e?: any) {
+    setTimeout(() => {
+      // skip a clock cycle b/c body is momentarily active when clicking select
+      if (document.activeElement === inputRef.current || document.activeElement === selectRef.current) return
+      if (e?.relatedTarget?.hash === '#search-clear') setValue('')
+      setIsFocused(false)
+      inputRef.current!.blur()
+      selectRef.current!.blur()
+    })
+  }
+  // I don't think this is ever actually fired due to blur event preventing it,
+  // but just in case it was we handle it.
+  function _onClickClear(e: any) {
+    e.preventDefault()
+    setValue('')
+    _onBlur()
+  }
+  function _onSubmit() {
+    setValue('')
+    setIsFocused(false)
+    inputRef.current!.blur()
+    selectRef.current!.blur()
+    nav(option + '?search=' + value)
+  }
 }
 const SearchBarDiv = pstyled.div`
 	:root
@@ -215,12 +222,8 @@ const SearchBarDiv = pstyled.div`
 			--searchbar-width: 270px
 `
 
-function NavButton({ path, title }: { path: string, title: string }) {
-	return (
-		<NavButtonA href={path}>
-			{title}
-		</NavButtonA>
-	)
+function NavButton({path, title}: {path: string; title: string}) {
+  return <NavButtonA href={path}>{title}</NavButtonA>
 }
 const NavButtonA = pstyled.a`
 	:root
@@ -245,17 +248,19 @@ const NavButtonA = pstyled.a`
 `
 
 function NavLink(p: NavLinkProps) {
-	const [_location] = useLocationStore()
-	const [isSidebarActive] = useSidebarRightStore()
-	const isActive = _location.pathname.startsWith(p.path)
-	return (
-		<NavLinkA
-			aria-label={p.title}
-			data-active={isActive && !isSidebarActive}
-			href={p.path + (isActive && 'stack' in p ? '#stack-reset' : '')}>
-			<div><div>{p.title}</div></div>
-		</NavLinkA>
-	)
+  const [_location] = useLocationStore()
+  const [isSidebarActive] = useSidebarRightStore()
+  const isActive = _location.pathname.startsWith(p.path)
+  return (
+    <NavLinkA
+      aria-label={p.title}
+      data-active={isActive && !isSidebarActive}
+      href={p.path + (isActive && 'stack' in p ? '#stack-reset' : '')}>
+      <div>
+        <div>{p.title}</div>
+      </div>
+    </NavLinkA>
+  )
 }
 const NavLinkA = pstyled.a`
 	:root
@@ -280,32 +285,29 @@ const NavLinkA = pstyled.a`
 
 /**
  * This is a little complex b/c it can have a diff state than sidebarRight b/c the sidebar can
- * also be activated in BottomNav components. The added complexity allows NavBurger to handle 
+ * also be activated in BottomNav components. The added complexity allows NavBurger to handle
  * this gracefully.
  */
 function RightBurger() {
-	const [isLinkActive, setIsLinkActive] = useState(false)
-	const [isSidebarActive, setIsSidebarActive] = useSidebarRightStore()
-	useEffect(() => {if (!isSidebarActive) setIsLinkActive(false)}, [isSidebarActive])
-	const onClick = useCallback(_onClick, [])
-	return (
-		<NavBurgerA 
-			aria-label="Toggle Right Menu"
-			data-active={isLinkActive}
-			href={'#navburger-click'}
-			onClick={onClick}
-		>
-			<div>{isLinkActive ? <i.Close /> : <i.Menu />}</div>
-		</NavBurgerA>
-	)
+  const [isLinkActive, setIsLinkActive] = useState(false)
+  const [isSidebarActive, setIsSidebarActive] = useSidebarRightStore()
+  useEffect(() => {
+    if (!isSidebarActive) setIsLinkActive(false)
+  }, [isSidebarActive])
+  const onClick = useCallback(_onClick, [])
+  return (
+    <NavBurgerA aria-label="Toggle Right Menu" data-active={isLinkActive} href={'#navburger-click'} onClick={onClick}>
+      <div>{isLinkActive ? <i.Close /> : <i.Menu />}</div>
+    </NavBurgerA>
+  )
 
-	function _onClick(e: any) {
-		e.preventDefault()
-		setIsLinkActive(isActive => {
-			setIsSidebarActive(!isActive)
-			return !isActive
-		})
-	}
+  function _onClick(e: any) {
+    e.preventDefault()
+    setIsLinkActive(isActive => {
+      setIsSidebarActive(!isActive)
+      return !isActive
+    })
+  }
 }
 const NavBurgerA = pstyled.a`
 	:root

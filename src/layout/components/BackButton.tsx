@@ -1,14 +1,15 @@
+import {ArrowL} from '#src/lib/icons'
+import pstyled from '#src/lib/pstyled'
 import {h} from 'preact'
 
-import { ArrowL } from '#src/lib/icons'
-import pstyled from '#src/lib/pstyled'
-
 export default function BackButton() {
-	return <BackButtonDiv>
-		<BackButtonA title="Go Back" href="#stack-back">
-			<ArrowL size={20} />
-		</BackButtonA>
-	</BackButtonDiv>
+  return (
+    <BackButtonDiv>
+      <BackButtonA title="Go Back" href="#stack-back">
+        <ArrowL size={20} />
+      </BackButtonA>
+    </BackButtonDiv>
+  )
 }
 const BackButtonDiv = pstyled.div`
 	:root

@@ -1,11 +1,11 @@
 export function isOnline() {
-	return true
+  return true
 }
 
 export function isOffline() {
-	return !isOnline()
+  return !isOnline()
 }
 
 export async function waitForOnline() {
-	await sleep(9999999)
+  await sleep(9999999)
 }

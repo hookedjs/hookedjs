@@ -1,31 +1,29 @@
-import { DiffFnc, isDate, isEmpty, isObject, properObject } from '../utils'
+import {DiffFnc, isDate, isEmpty, isObject, properObject} from '../utils'
 
 const updatedDiff: DiffFnc = (lhs, rhs) => {
+  if (lhs === rhs) return {}
 
-	if (lhs === rhs) return {}
+  if (!isObject(lhs) || !isObject(rhs)) return rhs
 
-	if (!isObject(lhs) || !isObject(rhs)) return rhs
+  const l = properObject(lhs)
+  const r = properObject(rhs)
 
-	const l = properObject(lhs)
-	const r = properObject(rhs)
+  if (isDate(l) || isDate(r)) {
+    if (l.valueOf() == r.valueOf()) return {}
+    return r
+  }
 
-	if (isDate(l) || isDate(r)) {
-		if (l.valueOf() == r.valueOf()) return {}
-		return r
-	}
+  return Object.keys(r).reduce((acc, key) => {
+    if (l.hasOwnProperty(key)) {
+      const difference = updatedDiff(l[key], r[key])
 
-	return Object.keys(r).reduce((acc, key) => {
+      if (isObject(difference) && isEmpty(difference) && !isDate(difference)) return acc
 
-		if (l.hasOwnProperty(key)) {
-			const difference = updatedDiff(l[key], r[key])
+      return {...acc, [key]: difference}
+    }
 
-			if (isObject(difference) && isEmpty(difference) && !isDate(difference)) return acc
-
-			return { ...acc, [key]: difference }
-		}
-
-		return acc
-	}, {})
+    return acc
+  }, {})
 }
 
 export default updatedDiff

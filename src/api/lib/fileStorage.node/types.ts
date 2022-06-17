@@ -1,5 +1,5 @@
 export interface GetResult {
-	contentType: string
-	createdAt: Date
-	data: string | Buffer
+  contentType: string
+  createdAt: Date
+  data: string | Buffer
 }

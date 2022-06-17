@@ -1,26 +1,29 @@
-import {ComponentChildren, h} from 'preact'
-
 import pstyled from '#src/lib/pstyled'
+import {ComponentChildren, h} from 'preact'
 
 import BackButton from './BackButton'
 
-
 export default function Section(p: {
-	header1?: ComponentChildren
-	header2?: ComponentChildren
-	fullHeight?: boolean
-	backButton?: boolean
-	children: ComponentChildren
+  header1?: ComponentChildren
+  header2?: ComponentChildren
+  fullHeight?: boolean
+  backButton?: boolean
+  children: ComponentChildren
 }) {
-	return <SectionDiv data-fullHeight={p.fullHeight} data-backButton={p.backButton}>
-		{!!p.header1 && (
-			<div class='top'>
-				<h2 class='header1'>{p.backButton && <BackButton />}{p.header1}</h2>
-				{!!p.header2 && <h4 class='header2'>{p.header2}</h4>}
-			</div>
-		)}
-		<div class='bottom'>{p.children}</div>
-	</SectionDiv>
+  return (
+    <SectionDiv data-fullHeight={p.fullHeight} data-backButton={p.backButton}>
+      {!!p.header1 && (
+        <div class="top">
+          <h2 class="header1">
+            {p.backButton && <BackButton />}
+            {p.header1}
+          </h2>
+          {!!p.header2 && <h4 class="header2">{p.header2}</h4>}
+        </div>
+      )}
+      <div class="bottom">{p.children}</div>
+    </SectionDiv>
+  )
 }
 
 const SectionDiv = pstyled.div`

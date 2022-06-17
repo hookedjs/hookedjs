@@ -1,6 +1,6 @@
 /**
  * A global store inspired by Redux/Mobx with builtin React use Hook
- * 
+ *
  * What makes it cool is:
  * 1. How small it is. 1kb vs 10kb+
  * 2. Includes a React hook which acts just like useState does, so zero learning curve
@@ -11,57 +11,57 @@
  * 7. Easy option to persist to localStorage
  * 8. Super type-safe
  */
-import { StateUpdater, useLayoutEffect, useState } from '#src/lib/hooks'
+import {StateUpdater, useLayoutEffect, useState} from '#src/lib/hooks'
 
 class StateStore<T> {
-	private _value: T
-	private persistKey = ''
-	private subscribers = new Set<(next: T) => any>()
-	
-	constructor(defaultInitialVal: T, persistKey?: string) {
-		this._value = defaultInitialVal
-		if (persistKey) {
-			this.persistKey = persistKey
-			const fromDisk = localStorage.getItem(persistKey)
-			if (fromDisk)
-				this._value = JSON.parse(fromDisk)
-			else
-				localStorage.setItem(persistKey, JSON.stringify(defaultInitialVal))
-		}
+  private _value: T
+  private persistKey = ''
+  private subscribers = new Set<(next: T) => any>()
 
-		/*
+  constructor(defaultInitialVal: T, persistKey?: string) {
+    this._value = defaultInitialVal
+    if (persistKey) {
+      this.persistKey = persistKey
+      const fromDisk = localStorage.getItem(persistKey)
+      if (fromDisk) this._value = JSON.parse(fromDisk)
+      else localStorage.setItem(persistKey, JSON.stringify(defaultInitialVal))
+    }
+
+    /*
 		Normally you can use arrow functions and avoid binding to this,
 		but Vite's HMR (aka prefresh) barfs on them.
 		*/
-		this.setValue = this.setValue.bind(this)
-		this.subscribe = this.subscribe.bind(this)
-		this.use = this.use.bind(this)
-	}
+    this.setValue = this.setValue.bind(this)
+    this.subscribe = this.subscribe.bind(this)
+    this.use = this.use.bind(this)
+  }
 
-	get value() {return this._value}
-	set value(next: T) { this.setValue(next) }
+  get value() {
+    return this._value
+  }
+  set value(next: T) {
+    this.setValue(next)
+  }
 
-	setValue(nextOrFnc: T | ((prev: T) => T)) {
-		const isFunction = {}.toString.call(nextOrFnc) === '[object Function]'
-		if (isFunction)
-			this._value = (nextOrFnc as any)(this._value)
-		else
-			this._value = nextOrFnc as T
-		
-		this.subscribers.forEach(s => s(this._value))
-		if (this.persistKey) localStorage.setItem(this.persistKey, JSON.stringify(this._value))
-	}
-	
-	subscribe(callback: (next: T) => any) {
-		this.subscribers.add(callback)
-		return () => this.subscribers.delete(callback)
-	}
-	
-	use() {
-		const [_state, _setState] = useState(this._value)
-		useLayoutEffect(() => this.subscribe(next => _setState(next)), [])
-		return [_state, this.setValue] as [T, StateUpdater<T>]
-	}
+  setValue(nextOrFnc: T | ((prev: T) => T)) {
+    const isFunction = {}.toString.call(nextOrFnc) === '[object Function]'
+    if (isFunction) this._value = (nextOrFnc as any)(this._value)
+    else this._value = nextOrFnc as T
+
+    this.subscribers.forEach(s => s(this._value))
+    if (this.persistKey) localStorage.setItem(this.persistKey, JSON.stringify(this._value))
+  }
+
+  subscribe(callback: (next: T) => any) {
+    this.subscribers.add(callback)
+    return () => this.subscribers.delete(callback)
+  }
+
+  use() {
+    const [_state, _setState] = useState(this._value)
+    useLayoutEffect(() => this.subscribe(next => _setState(next)), [])
+    return [_state, this.setValue] as [T, StateUpdater<T>]
+  }
 }
 
 export default StateStore

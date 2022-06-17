@@ -1,78 +1,83 @@
-import {ComponentChildren, h} from 'preact'
-
-import { useEffect, useLayoutEffect, useRef } from '#src/lib/hooks'
+import {useEffect, useLayoutEffect, useRef} from '#src/lib/hooks'
 import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
-import { useToastStore } from '#src/stores'
+import {useToastStore} from '#src/stores'
+import {ComponentChildren, h} from 'preact'
 
 const timeouts = new Set<any>()
 
 export function ToastFromContext() {
-	const [Store] = useToastStore()
-	return <Toast {...Store} />
+  const [Store] = useToastStore()
+  return <Toast {...Store} />
 }
 
 export interface ToastProps {
-	placement: 'right' | 'bottom' | 'center',
-	message: ComponentChildren,
-	duration?: number,
-	icon?: 'success' | 'warning' | 'error' | i.IconComponentType,
-	iconSize?: number
+  placement: 'right' | 'bottom' | 'center'
+  message: ComponentChildren
+  duration?: number
+  icon?: 'success' | 'warning' | 'error' | i.IconComponentType
+  iconSize?: number
 }
 export default function Toast(p: ToastProps) {
-	const ref = useRef<any>(null)
-	// const isWide = useMedia('(min-width: 700px)')
+  const ref = useRef<any>(null)
+  // const isWide = useMedia('(min-width: 700px)')
 
-	let Icon = p.icon!
-	if (Icon === 'success') Icon = i.Success
-	if (Icon === 'warning') Icon = i.Alert
-	if (Icon === 'error') Icon = i.Error
-	
-	useLayoutEffect(reset, [p])
-	useEffect(init, [p])
+  let Icon = p.icon!
+  if (Icon === 'success') Icon = i.Success
+  if (Icon === 'warning') Icon = i.Alert
+  if (Icon === 'error') Icon = i.Error
 
-	
+  useLayoutEffect(reset, [p])
+  useEffect(init, [p])
 
-	return <ToastOuter data-placement={p.placement} class={`_hidden ${typeof p.icon === 'string' ? p.icon : ''}`} ref={ref}>
-		<div>
-			<div data-icon={!!p.icon}>
-				{!!p.icon && <div><Icon size={p.iconSize ?? 40} /></div>}
-				{p.message}
-			</div>
-		</div>
-	</ToastOuter>
+  return (
+    <ToastOuter data-placement={p.placement} class={`_hidden ${typeof p.icon === 'string' ? p.icon : ''}`} ref={ref}>
+      <div>
+        <div data-icon={!!p.icon}>
+          {!!p.icon && (
+            <div>
+              <Icon size={p.iconSize ?? 40} />
+            </div>
+          )}
+          {p.message}
+        </div>
+      </div>
+    </ToastOuter>
+  )
 
-	function reset() {
-		ref.current.base.classList.remove('animatedIn')
-		ref.current.base.classList.remove('animatedOut')
-		ref.current.base.style.display = 'none'
-		if (p.placement === 'right')
-			ref.current.base.classList.add('_hidden')
-		if (timeouts.size) {
-			timeouts.forEach(t => clearTimeout(t))
-			timeouts.clear()
-		}
-	}
-	function init() {
-		if (p.message) {
-			ref.current.base.style.display = 'initial'
-			ref.current.base.classList.add('animatedIn')
-			ref.current.base.classList.remove('_hidden')
-			if (!p.duration) p.duration = 2e3
-			if (p.duration === -1) return
-			timeouts.add(setTimeout(function selfDestruct() {
-				ref.current.base.classList.remove('animatedIn')
-				ref.current.base.classList.add('animatedOut')
-				ref.current.base.classList.add('_hidden')
-				timeouts.add(setTimeout(() => {
-					ref.current.base.classList.remove('animatedOut')
-					ref.current.base.style.display = 'none'
-				}, 450))
-			}, p.duration))
-		}
-	}
+  function reset() {
+    ref.current.base.classList.remove('animatedIn')
+    ref.current.base.classList.remove('animatedOut')
+    ref.current.base.style.display = 'none'
+    if (p.placement === 'right') ref.current.base.classList.add('_hidden')
+    if (timeouts.size) {
+      timeouts.forEach(t => clearTimeout(t))
+      timeouts.clear()
+    }
+  }
+  function init() {
+    if (p.message) {
+      ref.current.base.style.display = 'initial'
+      ref.current.base.classList.add('animatedIn')
+      ref.current.base.classList.remove('_hidden')
+      if (!p.duration) p.duration = 2e3
+      if (p.duration === -1) return
+      timeouts.add(
+        setTimeout(function selfDestruct() {
+          ref.current.base.classList.remove('animatedIn')
+          ref.current.base.classList.add('animatedOut')
+          ref.current.base.classList.add('_hidden')
+          timeouts.add(
+            setTimeout(() => {
+              ref.current.base.classList.remove('animatedOut')
+              ref.current.base.style.display = 'none'
+            }, 450),
+          )
+        }, p.duration),
+      )
+    }
+  }
 }
-
 
 const ToastOuter = pstyled.div`
 	:root

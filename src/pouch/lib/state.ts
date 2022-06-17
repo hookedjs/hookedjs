@@ -1,6 +1,5 @@
-import type { ComponentChildren } from 'preact'
-
-import { useLayoutEffect, useState } from '#src/lib/hooks'
+import {useLayoutEffect, useState} from '#src/lib/hooks'
+import type {ComponentChildren} from 'preact'
 
 import * as dbs from '../databases'
 
@@ -8,22 +7,24 @@ import * as dbs from '../databases'
  * Does not render children until auth has settled.
  */
 export function DbProvider({children}: {children: ComponentChildren}) {
-	const [isLoading, setIsLoading] = useState(true)
-	useLayoutEffect(() => {watchLoading()}, [])
-	return isLoading ? null : children as any
+  const [isLoading, setIsLoading] = useState(true)
+  useLayoutEffect(() => {
+    watchLoading()
+  }, [])
+  return isLoading ? null : (children as any)
 
-	async function watchLoading() {
-		await initDatabases()
-		setIsLoading(false)
-	}
+  async function watchLoading() {
+    await initDatabases()
+    setIsLoading(false)
+  }
 }
 
 export async function initDatabases() {
-	await dbs.initAuthDb()
-	await dbs.initTenantDb()
+  await dbs.initAuthDb()
+  await dbs.initTenantDb()
 }
 
 export async function destroyDatabases() {
-	await dbs.destroyAuthDb()
-	await dbs.destroyTenantDb()
+  await dbs.destroyAuthDb()
+  await dbs.destroyTenantDb()
 }

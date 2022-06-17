@@ -1,25 +1,26 @@
-import { h } from 'preact'
-
 import NavLink from '#src/layout/components/SidebarNavLink'
 import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
-import { useCurrentUser } from '#src/pouch'
-import { AuthStore } from '#src/stores'
+import {useCurrentUser} from '#src/pouch'
+import {AuthStore} from '#src/stores'
+import {h} from 'preact'
 
-import type { NavLinks } from '../types'
+import type {NavLinks} from '../types'
 
-export default function Sidebar({ navLinks }: { navLinks: NavLinks }) {
-	return (
-		<SidebarDiv>
-			<SidebarHeader />
-			<SidebarToggler />
-			<Nav>
-				{navLinks
-					.filter(nl => nl.hasAccess ? nl.hasAccess() : true)
-					.map(nl => <NavLink {...nl} />)}
-			</Nav>
-		</SidebarDiv>
-	)
+export default function Sidebar({navLinks}: {navLinks: NavLinks}) {
+  return (
+    <SidebarDiv>
+      <SidebarHeader />
+      <SidebarToggler />
+      <Nav>
+        {navLinks
+          .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+          .map(nl => (
+            <NavLink {...nl} />
+          ))}
+      </Nav>
+    </SidebarDiv>
+  )
 }
 const SidebarDiv = pstyled.div`
 	:root
@@ -33,22 +34,22 @@ const SidebarDiv = pstyled.div`
 `
 
 export function SidebarHeader() {
-	const user = useCurrentUser()
-	return (
-		<SidebarHeaderDiv>
-			<div class='left'>
-				<i.Person size={76} class="svg-div full"/>
-				<i.Person size={50} class="svg-div mini" />
-				<div class='label full'>{user.roles.includes(AuthStore.dbRoles.ADMIN) ? 'Admin' : 'Tenant'}</div>
-				<div class='label mini'>{user.givenName}</div>
-			</div>
-			<div class='right'>
-				<div class='top'>{user.status.toTitleCase()}</div>
-				<div class='middle'>{user.fullName}</div>
-				<div class='bottom'>{user.name}</div>
-			</div>
-		</SidebarHeaderDiv>
-	)
+  const user = useCurrentUser()
+  return (
+    <SidebarHeaderDiv>
+      <div class="left">
+        <i.Person size={76} class="svg-div full" />
+        <i.Person size={50} class="svg-div mini" />
+        <div class="label full">{user.roles.includes(AuthStore.dbRoles.ADMIN) ? 'Admin' : 'Tenant'}</div>
+        <div class="label mini">{user.givenName}</div>
+      </div>
+      <div class="right">
+        <div class="top">{user.status.toTitleCase()}</div>
+        <div class="middle">{user.fullName}</div>
+        <div class="bottom">{user.name}</div>
+      </div>
+    </SidebarHeaderDiv>
+  )
 }
 const SidebarHeaderDiv = pstyled.div`
 	:root
@@ -110,14 +111,14 @@ const SidebarHeaderDiv = pstyled.div`
 `
 
 export function SidebarToggler() {
-	return (
-		<SidebarTogglerDiv>
-			<a class='toggle' href='#sidebar-toggle'>
-				<i.ChevronL2x size={19} class="collapse" />
-				<i.ChevronR2x size={19} class="expand" />
-			</a>
-		</SidebarTogglerDiv>
-	)
+  return (
+    <SidebarTogglerDiv>
+      <a class="toggle" href="#sidebar-toggle">
+        <i.ChevronL2x size={19} class="collapse" />
+        <i.ChevronR2x size={19} class="expand" />
+      </a>
+    </SidebarTogglerDiv>
+  )
 }
 const SidebarTogglerDiv = pstyled.div`
 	:root

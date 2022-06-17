@@ -15,12 +15,11 @@ What makes it cool:
 7. Type-strict
 8. Extremely anorexic with 3rd party libs = blazing fast, more secure, and easier to maintain
 
-
 <h2> Table of Contents 🌍</h2>
 
 - [Status 🚨](#status-)
 - [Setup ⚙️](#setup-️)
-	- [CouchDB](#couchdb)
+  - [CouchDB](#couchdb)
 - [Running locally 🏎](#running-locally-)
 - [API ☁](#api-)
 - [DB Schema Management 🗂](#db-schema-management-)
@@ -41,8 +40,8 @@ As of now, HookedJS requires MacOS in order to build IOS apps.
 1. [Install homebrew](https://brew.sh/)
 2. [Install nvm](https://github.com/nvm-sh/nvm#install--update-script)
 3. [Install Docker](https://docs.docker.com/docker-for-mac/install/)
-1. Install Xcode from the App Store and open it to accept the user agreement.
-2. Follow [the official React Native instructions](https://facebook.github.io/react-native/docs/getting-started.html) to configure your machine for IOS and Android using the "React Native CLI Quickstart" tab, NOT the "Expo CLI Quickstart" tab.
+4. Install Xcode from the App Store and open it to accept the user agreement.
+5. Follow [the official React Native instructions](https://facebook.github.io/react-native/docs/getting-started.html) to configure your machine for IOS and Android using the "React Native CLI Quickstart" tab, NOT the "Expo CLI Quickstart" tab.
 
 Then, install more dependencies and bootstrap
 
@@ -157,17 +156,17 @@ For example, this snippet models a user table, gets a user object from the datab
 ```typescript
 @Entity()
 export default class UserEntity extends BaseEntity {
-	@PrimaryColumn('varchar', {length: 30})
-	id: string
+  @PrimaryColumn('varchar', {length: 30})
+  id: string
 
-	@Column('varchar', {unique: true, length: 30}) 
-	email: string
+  @Column('varchar', {unique: true, length: 30})
+  email: string
 
-	@Column('varchar', {length: 30}) 
-	name: string
+  @Column('varchar', {length: 30})
+  name: string
 }
 
-const user = await UserEntity.findOne({ where: { email: 'foo@bar.com' } })
+const user = await UserEntity.findOne({where: {email: 'foo@bar.com'}})
 user.name = 'Shirley'
 await user.save()
 ```
@@ -183,9 +182,10 @@ TypeORM has two workflows for database schema management: `synchronize` and `mig
 |_synchronize_|TypeORM will immediately and greedily generate and apply SQL migrations on the fly. So if you changed the name of column in your code, TypeORM will drop the old column and create a new one, destroying any data that was in the old column.|
 |_migration_|You manage the migrations in code, and they are ran automatically.|
 
-The `synchronize` mode is more convenient, but is obviously too dangerous for a published application. Therefore, this application uses `synchronize` for local development and `migration` for production. __It's up to you as a developer to ensure that you create and test the needed migration files before you deploy(!)__. Luckily for you, TypeORM can to generate migration files for you, and these are usually good-enough.
+The `synchronize` mode is more convenient, but is obviously too dangerous for a published application. Therefore, this application uses `synchronize` for local development and `migration` for production. **It's up to you as a developer to ensure that you create and test the needed migration files before you deploy(!)**. Luckily for you, TypeORM can to generate migration files for you, and these are usually good-enough.
 
 To generate a migration file for what's currently in code vs. database:
+
 ```bash
 npm run typeorm:migration-gen -- NameOfSnapshot
 ```
@@ -193,6 +193,7 @@ npm run typeorm:migration-gen -- NameOfSnapshot
 ## Deploying to AWS as Cloudformation Stack 🏁
 
 Deploy assumes you have already
+
 - [set up an AWS account](http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/AboutAWSAccounts.html)
 - have the latest version of the [AWS CLI](https://aws.amazon.com/cli/) installed
 - have the latest version of the [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed
@@ -203,11 +204,13 @@ Deploy assumes you have already
 1. View your stacks online at [CloudFormation](https://console.aws.amazon.com/cloudformation/home), or open your API at the URL from the deploy output.
 
 To delete your stack, run:
+
 ```bash
 aws cloudformation delete-stack --stack-name (name of your stack) --region us-east-1
 ```
 
 If your stack is tied to CloudFront, you can bust CloudFront caches by:
+
 ```bash
 aws cloudfront list-distributions | grep Id
 aws cloudfront create-invalidation --distribution-id <id> --paths "/static/*"
@@ -224,9 +227,8 @@ aws cloudfront create-invalidation --distribution-id <id> --paths "/static/*"
 When configured to sleep, API calls may timeout (28s) before the database finishes waking up. To tolerate this, the web application needs to retry API calls that fail due to database failures. Here is the expected `503` response from the API on failure:
 
 ```json
-{"message":"Service Unavailable"}
+{"message": "Service Unavailable"}
 ```
-
 
 ## References and Special Thanks 😘
 
@@ -234,4 +236,3 @@ When configured to sleep, API calls may timeout (28s) before the database finish
 - https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html
 - https://github.com/vendia/serverless-express
 - https://github.com/claudiajs/claudia
-

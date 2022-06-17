@@ -1,25 +1,29 @@
-import { FunctionalComponent, h } from 'preact'
-
 import * as i from '#src/lib/icons'
-import {useLocationStore} from '#src/lib/router'
 import pstyled from '#src/lib/pstyled'
+import {useLocationStore} from '#src/lib/router'
+import {FunctionalComponent, h} from 'preact'
 
-interface NavLinkProps { path: string, title: string, Icon?: FunctionalComponent }
+interface NavLinkProps {
+  path: string
+  title: string
+  Icon?: FunctionalComponent
+}
 
 export default function NavLink(p: NavLinkProps) {
-	const [{pathname}] = useLocationStore()
-	const isActive = p.path === '/' ? pathname === '/' : pathname.startsWith(p.path)
-	const Icon = p.Icon ?? i.Info
-	return (
-		<NavLinkA
-			aria-label={p.title}
-			href={p.path + (isActive && 'stack' in p ? '#stack-reset' : '')}
-			data-active={isActive}
-		>
-			<div><Icon /></div>
-			<NavLinkText class='navlinkText'>{p.title}</NavLinkText>
-		</NavLinkA>
-	)
+  const [{pathname}] = useLocationStore()
+  const isActive = p.path === '/' ? pathname === '/' : pathname.startsWith(p.path)
+  const Icon = p.Icon ?? i.Info
+  return (
+    <NavLinkA
+      aria-label={p.title}
+      href={p.path + (isActive && 'stack' in p ? '#stack-reset' : '')}
+      data-active={isActive}>
+      <div>
+        <Icon />
+      </div>
+      <NavLinkText class="navlinkText">{p.title}</NavLinkText>
+    </NavLinkA>
+  )
 }
 const NavLinkA = pstyled.a`
 	:root

@@ -1,48 +1,45 @@
-import { ComponentChildren, h } from 'preact'
-
-import { useEffect, useRef } from '#src/lib/hooks'
+import {useEffect, useRef} from '#src/lib/hooks'
 import {useMedia} from '#src/lib/hooks'
 import pstyled from '#src/lib/pstyled'
-import { ThemeStore } from '#src/stores'
+import {ThemeStore} from '#src/stores'
+import {ComponentChildren, h} from 'preact'
 
 import BottomNav from '../components/BottomNav'
-import Navbar, { SearchOption } from '../components/Navbar'
+import Navbar, {SearchOption} from '../components/Navbar'
 import RoundedContent from '../components/RoundedContent'
 import Sidebar from '../components/Sidebar'
 import SidebarRight from '../components/SidebarRight'
-import type { NavLinks } from '../types'
+import type {NavLinks} from '../types'
 
 export default function SidebarLayout(p: {
-	topLinks: NavLinks
-	leftLinks: NavLinks
-	rightLinks: NavLinks
-	bottomLinks: NavLinks
-	searchOptions: SearchOption[]
-	children: ComponentChildren
+  topLinks: NavLinks
+  leftLinks: NavLinks
+  rightLinks: NavLinks
+  bottomLinks: NavLinks
+  searchOptions: SearchOption[]
+  children: ComponentChildren
 }) {
-	const isWide = useMedia('(min-width: 700px)')
-	const ref = useRef<any>(null)
-	useEffect(listenForThemeToggle, [])
-	return (
-		<SidebarLayoutDiv ref={ref} class={ThemeStore.value === 'dark' ? 'dark' : ''}>
-			{isWide && <Navbar sidebarLeft navLinks={p.topLinks} searchOptions={p.searchOptions} />}
-			{isWide && <Sidebar navLinks={p.leftLinks} />}
-			<SidebarRight navLinks={p.rightLinks} />
-			{!isWide && <BottomNav navLinks={p.bottomLinks} />}
-			<RoundedContent withSidebar>
-				{p.children}
-			</RoundedContent>
-		</SidebarLayoutDiv>
-	)
+  const isWide = useMedia('(min-width: 700px)')
+  const ref = useRef<any>(null)
+  useEffect(listenForThemeToggle, [])
+  return (
+    <SidebarLayoutDiv ref={ref} class={ThemeStore.value === 'dark' ? 'dark' : ''}>
+      {isWide && <Navbar sidebarLeft navLinks={p.topLinks} searchOptions={p.searchOptions} />}
+      {isWide && <Sidebar navLinks={p.leftLinks} />}
+      <SidebarRight navLinks={p.rightLinks} />
+      {!isWide && <BottomNav navLinks={p.bottomLinks} />}
+      <RoundedContent withSidebar>{p.children}</RoundedContent>
+    </SidebarLayoutDiv>
+  )
 
-	// Use passive listeners instead of ThemeStore.use, to avoid unnecessary re-renders
-	function listenForThemeToggle() {
-		return ThemeStore.subscribe(function _toggle() {
-			const cl = ref.current.base.classList
-			if (cl.contains('dark')) cl.remove('dark')
-			else cl.add('dark')
-		})
-	}
+  // Use passive listeners instead of ThemeStore.use, to avoid unnecessary re-renders
+  function listenForThemeToggle() {
+    return ThemeStore.subscribe(function _toggle() {
+      const cl = ref.current.base.classList
+      if (cl.contains('dark')) cl.remove('dark')
+      else cl.add('dark')
+    })
+  }
 }
 
 const SidebarLayoutDiv = pstyled.div`
@@ -80,4 +77,3 @@ const SidebarLayoutDiv = pstyled.div`
 	.miniSidebar :root
 		--sidebar-width: var(--sidebar-width-mini)
 `
-

@@ -1,16 +1,13 @@
+import pstyled from '#src/lib/pstyled'
 import {h} from 'preact'
 
-import pstyled from '#src/lib/pstyled'
-
 export default function CodeSnippet({snippet}: {snippet: any}) {
-	const str = typeof snippet === 'string' ? snippet : JSON.stringify(snippet, null, 2)
-	return (
-		<CodeSnippetPre>
-			<code class="language-javascript">
-				{str}
-			</code>
-		</CodeSnippetPre>
-	)
+  const str = typeof snippet === 'string' ? snippet : JSON.stringify(snippet, null, 2)
+  return (
+    <CodeSnippetPre>
+      <code class="language-javascript">{str}</code>
+    </CodeSnippetPre>
+  )
 }
 
 const CodeSnippetPre = pstyled.pre`

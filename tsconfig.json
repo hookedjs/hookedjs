@@ -18,7 +18,7 @@
     "jsx": "preserve",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
-    
+
     // Custom
     "allowUnreachableCode": true,
     "importsNotUsedAsValues": "error",
@@ -26,11 +26,11 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "paths": {
-			"#src/*": ["./src/*"],
-		},
+      "#src/*": ["./src/*"]
+    }
   },
-  
+
   "include": ["src"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules"]
   // "references": [{ "path": "./tsconfig.node.json" }]
 }
