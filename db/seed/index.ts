@@ -1,8 +1,9 @@
+import '../../src/lib/polyfills/node'
+
 import casual from 'casual'
 
 import config from '../../src/api/lib/config.node'
 import '../../src/api/lib/pouch/init'
-import '../../src/lib/polyfills/node'
 import {AuthUserStatusEnum, AuthUsers, TenantPersons} from '../../src/pouch/databases'
 
 sleep(1000).then(main)

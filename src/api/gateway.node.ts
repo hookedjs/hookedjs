@@ -1,3 +1,5 @@
+import '../lib/polyfills/node'
+
 import fastify from 'fastify'
 import helmetPlugin from 'fastify-helmet'
 import staticPlugin from 'fastify-static'
@@ -5,7 +7,6 @@ import fs from 'fs'
 import helmet from 'helmet'
 import path from 'path'
 
-import '../lib/polyfills/node'
 import {ForbiddenError, NotFoundError, ValidationErrorSet} from '../lib/validation'
 import config from './lib/config.node'
 

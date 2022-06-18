@@ -1,5 +1,4 @@
-import {decorateComponent} from '#src/lib/testLib'
-import {render} from '@testing-library/preact'
+import {decorateComponent, render} from '#src/lib/testLib'
 import {h} from 'preact'
 
 import Story, {Default, defaultProps as storyDefaultProps} from './StorybookIntro.stories'

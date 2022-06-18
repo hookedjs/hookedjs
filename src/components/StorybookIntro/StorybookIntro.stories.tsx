@@ -1,20 +1,15 @@
-import { ComponentProps, h } from 'preact'
+import {ComponentProps, h} from 'preact'
 
-import { StorybookIntro as Component } from "./StorybookIntro"
+import {StorybookIntro as Component, defaultProps as componentDefaultProps} from './StorybookIntro'
 
-export const defaultProps: ComponentProps<typeof Component> = {}
+export const defaultProps: ComponentProps<typeof Component> = componentDefaultProps
 
-// More on default export: https://storybook.js.org/docs/preact/writing-stories/introduction#default-export
 export default {
   component: Component,
   argTypes: {},
   excludeStories: ['defaultProps'],
-};
-
-export function Default() {
-  return (
-    <Component />
-  )
 }
 
-
+export function Default() {
+  return <Component />
+}

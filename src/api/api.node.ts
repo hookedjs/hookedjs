@@ -1,9 +1,10 @@
+import '../lib/polyfills/node'
+
 import fastify from 'fastify'
 // import fileUploadPlugin from 'fastify-file-upload'
 import fastifyPluginize from 'fastify-plugin'
 import glob from 'glob'
 
-import '../lib/polyfills/node'
 import {ForbiddenError, NotFoundError, ValidationErrorSet} from '../lib/validation'
 import config from './lib/config.node'
 import './lib/pouch/init'

@@ -5,10 +5,11 @@
  * 1. Start the stack: `pnpm dev`
  * 2. Run this script `npx ts-node -P tsconfig.node.json scripts/api/authPasswordRequest.ts`
  */
+import '../../src/lib/polyfills/node'
+
 import {inspect} from 'util'
 
 import config from '../../src/api/lib/config.node'
-import '../../src/lib/polyfills/node'
 import type {PasswordRequestProps} from '../../src/pouch'
 
 main()

@@ -6,8 +6,9 @@
  * 2. Run ./authRegister or ./authPasswordRequest to get a passwordTmp
  * 2. Run this script `npx ts-node -P tsconfig.node.json scripts/api/authLogin.ts`
  */
-import config from '../../src/api/lib/config.node'
 import '../../src/lib/polyfills/node'
+
+import config from '../../src/api/lib/config.node'
 import type {LoginProps} from '../../src/pouch'
 
 main()

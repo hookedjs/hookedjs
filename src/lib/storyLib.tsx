@@ -2,6 +2,8 @@ import {vi} from '#src/lib/testLib'
 import {action as _action} from '@storybook/addon-actions'
 import {ComponentProps, h} from 'preact'
 
+export * from '@storybook/preact'
+
 export const action = process.env.STORYBOOK ? _action : () => vi.fn
 
 /**

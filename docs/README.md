@@ -23,6 +23,7 @@ What makes it cool:
 - [Running locally 🏎](#running-locally-)
 - [API ☁](#api-)
 - [DB Schema Management 🗂](#db-schema-management-)
+- [Component Scaffolding Generator](#component-scaffolding-generator)
 - [Deploying to AWS as Cloudformation Stack 🏁](#deploying-to-aws-as-cloudformation-stack-)
 - [Known Issues 🐞](#known-issues-)
 - [References and Special Thanks 😘](#references-and-special-thanks-)
@@ -189,6 +190,26 @@ To generate a migration file for what's currently in code vs. database:
 ```bash
 npm run typeorm:migration-gen -- NameOfSnapshot
 ```
+
+## Component Scaffolding Generator
+
+Use [hygen](http://www.hygen.io/) to quickly generate new components. Use PascalCase when naming components.
+
+To create a new component run:
+
+```
+yarn hygen component new --name {NAME} --folder {FOLDER}
+```
+
+Where `{NAME}` refers to the component name in PascalCase, and `{FOLDER}` refers to the folder where you want to create the component.
+
+eg:
+
+```
+yarn hygen component new --name MyComponent --folder src/components
+```
+
+will generate src/components/MyComponent/index{.tsx, .stories.tsx, .spec.tsx}.
 
 ## Deploying to AWS as Cloudformation Stack 🏁
 

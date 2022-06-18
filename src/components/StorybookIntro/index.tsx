@@ -1,1 +1,1 @@
-export { StorybookIntro } from './StorybookIntro'
+export {StorybookIntro} from './StorybookIntro'
