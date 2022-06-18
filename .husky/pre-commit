@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-pnpm format:changed && pnpm lint
+npm run format:changed && npm run lint

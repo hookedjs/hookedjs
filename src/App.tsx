@@ -1,4 +1,4 @@
-import {Fragment, h} from 'preact'
+import {Fragment as F, h} from 'preact'
 
 import {ErrorBoundary, UnhandledErrorNotification} from './layout/components/ErrorBoundaries'
 import {PortalFromContext} from './layout/components/Portal'
@@ -23,7 +23,7 @@ export default function App() {
   function StaleBrowserWarning() {
     const isModern = 'fetch' in window && 'Promise' in window && 'assign' in Object && 'keys' in Object
     return isModern ? (
-      <Fragment />
+      <F />
     ) : (
       <Toast
         icon="error"

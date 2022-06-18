@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+/// <reference types="vite/client" />
 import preact from '@preact/preset-vite'
 import {defineConfig} from 'vite'
 import {VitePWA} from 'vite-plugin-pwa'
@@ -34,5 +36,10 @@ export default defineConfig({
         secure: false,
       },
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/lib/testSetup.ts',
   },
 })
