@@ -8,18 +8,19 @@
  */
 import '../../src/lib/polyfills/node'
 
-import config from '../../src/api/lib/config.node'
-import type {LoginProps} from '../../src/pouch'
+import {LoginProps} from '../../src/pouch'
+
+// import config from '../../src/api/lib/config.node'
 
 main()
 
 async function main() {
   const props: LoginProps = {
-    name: 'sallyfields@hookedjs.org',
-    password: '52243012',
+    name: 'b@b.com',
+    password: 'Password8',
   }
 
-  const res = await fetch(`${config.gateway}/api/login`, {
+  const res = await fetch(`http://127.0.0.1:5984/_session`, {
     method: 'POST',
     body: JSON.stringify(props),
   })

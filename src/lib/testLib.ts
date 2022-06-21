@@ -1,8 +1,10 @@
 import '@testing-library/jest-dom'
+import {cleanup} from '@testing-library/preact'
 import {afterEach, vi} from 'vitest'
 
 afterEach(() => {
-  vi.restoreAllMocks()
+  cleanup()
+  vi.resetAllMocks()
 })
 
 export * from '@testing-library/preact'
