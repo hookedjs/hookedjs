@@ -1,20 +1,16 @@
 import {useCallback, useEffect, useState} from '#src/lib/hooks'
 import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
-import {useLocationStore} from '#src/lib/router'
+import {replacePathVars, useLocationStore} from '#src/lib/router'
 import {useSidebarRightStore} from '#src/stores'
-import {h} from 'preact'
+import {Fragment as F, h} from 'preact'
 
 import type {NavLinkProps, NavLinks} from '../types'
 
 export default function BottomNav({navLinks}: {navLinks: NavLinks}) {
   return (
     <Nav>
-      {navLinks
-        .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
-        .map(nl => (
-          <NavLink {...nl} />
-        ))}
+      <NavInner navLinks={navLinks} />
       <NavBurger />
     </Nav>
   )
@@ -103,4 +99,18 @@ function NavBurger() {
       return !isActive
     })
   }
+}
+
+function NavInner(props: {navLinks: NavLinks}) {
+  const [loc] = useLocationStore()
+  return (
+    <F>
+      {props.navLinks
+        .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+        .map(nl => ({...nl, path: replacePathVars(nl.path, loc.route?.vars)}))
+        .map(nl => (
+          <NavLink {...nl} />
+        ))}
+    </F>
+  )
 }

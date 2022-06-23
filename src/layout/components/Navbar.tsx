@@ -3,14 +3,14 @@ import {useCallback, useEffect, useRef, useState} from '#src/lib/hooks'
 import {useMedia} from '#src/lib/hooks'
 import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
-import {nav, useLocationStore} from '#src/lib/router'
+import {nav, replacePathVars, useLocationStore} from '#src/lib/router'
 // import { Paths } from '#src/routes'
 import {useSidebarRightStore} from '#src/stores'
-import {h} from 'preact'
+import {Fragment as F, h} from 'preact'
 
 import type {NavLinkProps, NavLinks} from '../types'
 
-export default function Navbar(p: {sidebarLeft?: boolean; navLinks: NavLinks; searchOptions?: SearchOption[]}) {
+export default function Navbar(props: {sidebarLeft?: boolean; navLinks: NavLinks; searchOptions?: SearchOption[]}) {
   const isWide = useMedia('(min-width: 700px)')
   return (
     <NavbarDiv>
@@ -23,14 +23,11 @@ export default function Navbar(p: {sidebarLeft?: boolean; navLinks: NavLinks; se
             </div>
           </div>
         </LogoA>
-        {p.sidebarLeft && isWide && p.searchOptions && <SearchBar options={p.searchOptions} />}
+        {props.sidebarLeft && isWide && props.searchOptions && <SearchBar options={props.searchOptions} />}
       </div>
 
       <div>
-        {isWide &&
-          p.navLinks
-            .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
-            .map(nl => ('isButton' in nl ? <NavButton {...nl} /> : <NavLink {...nl} />))}
+        {isWide && <NavbarLinks navLinks={props.navLinks} />}
         <RightBurger />
       </div>
     </NavbarDiv>
@@ -222,6 +219,17 @@ const SearchBarDiv = pstyled.div`
 			--searchbar-width: 270px
 `
 
+function NavbarLinks(props: {navLinks: NavLinks}) {
+  const [loc] = useLocationStore()
+  return (
+    <F>
+      {props.navLinks
+        .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+        .map(nl => ({...nl, path: replacePathVars(nl.path, loc.route?.vars)}))
+        .map(nl => ('isButton' in nl ? <NavButton {...nl} /> : <NavLink {...nl} />))}
+    </F>
+  )
+}
 function NavButton({path, title}: {path: string; title: string}) {
   return <NavButtonA href={path}>{title}</NavButtonA>
 }

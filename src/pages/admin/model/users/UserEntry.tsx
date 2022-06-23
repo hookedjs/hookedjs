@@ -5,26 +5,23 @@ import {ErrorMessage, InputField, SubmitButton, useForm} from '#src/lib/forms'
 import {useCallback} from '#src/lib/hooks'
 import qs from '#src/lib/queryStrings'
 import {PageMetaStore, RouteType} from '#src/lib/router'
-import {AuthUser, AuthUserFieldsEnum, AuthUserStatusEnum, IAuthUserExtra, useAuthUserS} from '#src/pouch'
+import {IUserExtra, User, UserFieldsEnum, UserStatusEnum, useUserS} from '#src/pouch'
 import type {IStandardFields} from '#src/pouch/lib/Database'
 import {ToastStore} from '#src/stores'
 import {ComponentChildren, h} from 'preact'
 
 export default function UserEntry({route}: {route: RouteType}) {
-  // TODO: rename id to name
-  const {id} = qs.parse<Record<string, string>>(),
-    entry = id
-      ? // TODO: I think we can omit 'org:couchdb.user' now that AuthUsers.get is autoprefixing
-        useAuthUserS('org.couchdb.user:' + id)
-      : new AuthUser({
-          _id: '',
-          name: '',
-          surname: '',
-          givenName: '',
-          roles: [],
-          status: AuthUserStatusEnum.ACTIVE,
-          tenants: [],
-        })
+  const {name} = qs.parse<Record<string, string>>()
+  const entry = name
+    ? useUserS('org.couchdb.user:' + name)[0]
+    : new User({
+        _id: '',
+        name: '',
+        surname: '',
+        givenName: '',
+        roles: [],
+        status: UserStatusEnum.ACTIVE,
+      })
 
   PageMetaStore.value = {title: entry.fullName}
 
@@ -38,12 +35,12 @@ export default function UserEntry({route}: {route: RouteType}) {
       <Section header1={route.title} backButton>
         <Form.Component onSubmitJson={onSubmit as any}>
           {Fields()}
-          <SubmitButton>{id ? 'Save' : 'Submit'}</SubmitButton>
+          <SubmitButton>{name ? 'Save' : 'Submit'}</SubmitButton>
           <ErrorMessage errors={errors} />
         </Form.Component>
       </Section>
 
-      {!!id && (
+      {!!name && (
         <Section header1="JSON">
           <CodeSnippet snippet={entry.values} />
         </Section>
@@ -51,14 +48,9 @@ export default function UserEntry({route}: {route: RouteType}) {
     </PaddedPage>
   )
 
-  async function onSubmitCb(
-    formValues: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & IAuthUserExtra), any>,
-  ) {
+  async function onSubmitCb(formValues: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & IUserExtra), any>) {
     // _id is calculated from name in _users
     formValues._id = 'org.couchdb.user:' + formValues.name
-
-    // Map fields
-    formValues.tenants = JSON.parse(formValues.tenants)
 
     // Scrub optional fields that are empty
     if (!formValues.deletedAt) delete formValues.deletedAt
@@ -85,196 +77,185 @@ export default function UserEntry({route}: {route: RouteType}) {
   }
 
   function Fields() {
-    const fields: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & IAuthUserExtra), ComponentChildren> = {
+    const fields: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & IUserExtra), ComponentChildren> = {
       _id: (
         <InputField
-          name={AuthUserFieldsEnum._id}
+          name={UserFieldsEnum._id}
           labelText="_id"
           inputProps={{defaultValue: entry._id}}
           disabled={true}
           hidden={true}
-          error={errors[AuthUserFieldsEnum._id]?.note}
+          error={errors[UserFieldsEnum._id]?.note}
+        />
+      ),
+      type: (
+        <InputField
+          name={UserFieldsEnum.type}
+          labelText="type"
+          inputProps={{defaultValue: entry.type}}
+          disabled={true}
+          hidden={true}
+          error={errors[UserFieldsEnum.type]?.note}
         />
       ),
       name: (
         <InputField
-          name={AuthUserFieldsEnum.name}
+          name={UserFieldsEnum.name}
           labelText="Email"
-          inputProps={{autoFocus: !id, type: 'email', defaultValue: entry.name}}
-          disabled={!!id || submitting}
-          error={errors[AuthUserFieldsEnum.name]?.note}
+          inputProps={{autoFocus: !name, type: 'email', defaultValue: entry.name}}
+          disabled={!!name || submitting}
+          error={errors[UserFieldsEnum.name]?.note}
         />
       ),
       password: (
         <InputField
-          name={AuthUserFieldsEnum.password}
+          name={UserFieldsEnum.password}
           labelText="Password"
-          inputProps={{autoFocus: !!id, defaultValue: entry.password}}
+          inputProps={{autoFocus: !!name, defaultValue: entry.password}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.password]?.note}
+          error={errors[UserFieldsEnum.password]?.note}
         />
       ),
       password_scheme: (
         <InputField
-          name={AuthUserFieldsEnum.password_scheme}
+          name={UserFieldsEnum.password_scheme}
           labelText="password_scheme"
           inputProps={{defaultValue: entry.password_scheme}}
           disabled={true}
           hidden={true}
-          error={errors[AuthUserFieldsEnum.password_scheme]?.note}
+          error={errors[UserFieldsEnum.password_scheme]?.note}
         />
       ),
       iterations: (
         <InputField
-          name={AuthUserFieldsEnum.iterations}
+          name={UserFieldsEnum.iterations}
           labelText="iterations"
           inputProps={{type: 'number', defaultValue: entry.iterations}}
           disabled={true}
           hidden={true}
-          error={errors[AuthUserFieldsEnum.iterations]?.note}
+          error={errors[UserFieldsEnum.iterations]?.note}
         />
       ),
       derived_key: (
         <InputField
-          name={AuthUserFieldsEnum.derived_key}
+          name={UserFieldsEnum.derived_key}
           labelText="derived_key"
           inputProps={{defaultValue: entry.derived_key}}
           disabled={true}
           hidden={true}
-          error={errors[AuthUserFieldsEnum.derived_key]?.note}
+          error={errors[UserFieldsEnum.derived_key]?.note}
         />
       ),
       salt: (
         <InputField
-          name={AuthUserFieldsEnum.salt}
+          name={UserFieldsEnum.salt}
           labelText="salt"
           inputProps={{defaultValue: entry.salt}}
           disabled={true}
           hidden={true}
-          error={errors[AuthUserFieldsEnum.salt]?.note}
+          error={errors[UserFieldsEnum.salt]?.note}
         />
       ),
       passwordTmp: (
         <InputField
-          name={AuthUserFieldsEnum.passwordTmp}
+          name={UserFieldsEnum.passwordTmp}
           labelText="Temp Password"
           inputProps={{defaultValue: entry.passwordTmp}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.passwordTmp]?.note}
+          error={errors[UserFieldsEnum.passwordTmp]?.note}
         />
       ),
       passwordTmpAt: (
         <InputField
-          name={AuthUserFieldsEnum.passwordTmpAt}
+          name={UserFieldsEnum.passwordTmpAt}
           labelText="Temp password created At"
           inputProps={{
             type: 'date',
             defaultValue: entry.passwordTmpAt?.toISOString() ?? '',
           }}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.passwordTmpAt]?.note}
+          error={errors[UserFieldsEnum.passwordTmpAt]?.note}
         />
       ),
       passwordTmpFailCount: (
         <InputField
-          name={AuthUserFieldsEnum.passwordTmpFailCount}
+          name={UserFieldsEnum.passwordTmpFailCount}
           labelText="Temp password failed login Attempts"
           inputProps={{
             defaultValue: entry.passwordTmpFailCount,
             type: 'number',
           }}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.passwordTmpFailCount]?.note}
+          error={errors[UserFieldsEnum.passwordTmpFailCount]?.note}
         />
       ),
       givenName: (
         <InputField
-          name={AuthUserFieldsEnum.givenName}
+          name={UserFieldsEnum.givenName}
           labelText="First Name"
           inputProps={{defaultValue: entry.givenName}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.givenName]?.note}
+          error={errors[UserFieldsEnum.givenName]?.note}
         />
       ),
       surname: (
         <InputField
-          name={AuthUserFieldsEnum.surname}
+          name={UserFieldsEnum.surname}
           labelText="Last Name"
           inputProps={{defaultValue: entry.surname}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.surname]?.note}
+          error={errors[UserFieldsEnum.surname]?.note}
         />
       ),
       roles: (
         <InputField
-          name={AuthUserFieldsEnum.roles}
+          name={UserFieldsEnum.roles}
           labelText="Roles"
           inputProps={{defaultValue: entry.roles.join(), isarray: true}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.roles]?.note}
+          error={errors[UserFieldsEnum.roles]?.note}
         />
       ),
       status: (
         <InputField
-          name={AuthUserFieldsEnum.status}
+          name={UserFieldsEnum.status}
           labelText="Status"
           inputProps={{defaultValue: entry.status}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.status]?.note}
-        />
-      ),
-      tenants: (
-        <InputField
-          name={AuthUserFieldsEnum.tenants}
-          labelText="Tenants"
-          inputProps={{
-            defaultValue: JSON.stringify(entry.tenants),
-            isarray: true,
-          }}
-          disabled={submitting}
-          error={errors[AuthUserFieldsEnum.tenants]?.note}
-        />
-      ),
-      defaultTenantId: (
-        <InputField
-          name={AuthUserFieldsEnum.defaultTenantId}
-          labelText="Default Tenant ID"
-          inputProps={{defaultValue: entry.defaultTenantId}}
-          disabled={submitting}
-          error={errors[AuthUserFieldsEnum.defaultTenantId]?.note}
+          error={errors[UserFieldsEnum.status]?.note}
         />
       ),
       deletedAt: (
         <InputField
-          name={AuthUserFieldsEnum.deletedAt}
+          name={UserFieldsEnum.deletedAt}
           labelText="Deleted At"
           inputProps={{
             type: 'date',
             defaultValue: entry.deletedAt?.toISOString() ?? '',
           }}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.deletedAt]?.note}
+          error={errors[UserFieldsEnum.deletedAt]?.note}
         />
       ),
       bannedAt: (
         <InputField
-          name={AuthUserFieldsEnum.bannedAt}
+          name={UserFieldsEnum.bannedAt}
           labelText="Banned At"
           inputProps={{
             type: 'date',
             defaultValue: entry.bannedAt?.toISOString() ?? '',
           }}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.bannedAt]?.note}
+          error={errors[UserFieldsEnum.bannedAt]?.note}
         />
       ),
       bannedReason: (
         <InputField
-          name={AuthUserFieldsEnum.bannedReason}
+          name={UserFieldsEnum.bannedReason}
           labelText="Banned Reason"
           inputProps={{defaultValue: entry.bannedReason}}
           disabled={submitting}
-          error={errors[AuthUserFieldsEnum.bannedReason]?.note}
+          error={errors[UserFieldsEnum.bannedReason]?.note}
         />
       ),
     }

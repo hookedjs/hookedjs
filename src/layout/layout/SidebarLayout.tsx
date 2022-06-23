@@ -55,10 +55,10 @@ const SidebarLayoutDiv = pstyled.div`
 		--content-inner-top: calc( var(--content-top) + var(--content-top-padding) )
 		--content-bottom: 0px
 		--content-bottom-padding: 10px
-		--content-inner-bottom: calc( var(--content-bottom) + var(--content-bottom-padding) )
+		--content-inner-bottom: calc( var(--content-bottom) + var(--content-bottom-padding) - 1px )
 		--content-right: 0px
 		--content-right-padding: 10px
-		--content-inner-right: calc( var(--content-right) + var(--content-right-padding) + var(--scrollbar-width) )
+		--content-inner-right: calc( var(--content-right) + var(--content-right-padding) + var(--scrollbar-width) - 1px )
 		--content-left: var(--sidebar-width)
 		--content-left-padding: 0px
 		--content-inner-left: calc( var(--content-left) + var(--content-left-padding) )

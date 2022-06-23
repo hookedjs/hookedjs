@@ -8,6 +8,11 @@ export default function FillerListFactory({route}: {route: RouteType}) {
   const parent = getParentPath()
   const entryPath = parent + '/entry'
 
+  const {
+    sortBy,
+    sortDirection,
+  } = CmsTablePage.getTableProps()
+
   return (
     <CmsTablePage
       pageTitle={route.title}
@@ -24,7 +29,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
       bulkOptions={[
         {
           label: 'Delete',
-          cb(selection) {
+          cb: (selection) => {
             ToastStore.setValue({
               message: `Deleted ${selection.length} items`,
               icon: 'success',
@@ -72,7 +77,10 @@ export default function FillerListFactory({route}: {route: RouteType}) {
             '',
           ],
         },
-      ]}
+      ].sortF((a: any, b: any) => {
+        if (sortBy) return a[sortBy] > b[sortBy] ? 1 : -1;
+        return 0;
+      })}
       mapMarkers={[
         {
           title: 'Nancy Smith1',

@@ -1,18 +1,9 @@
 import {ValueError, assertValid, isDefined, isDefinedAndNotNull} from '#src/lib/validation'
 
-import {IStandardFields, loadingDb} from './Database'
+import type {Database, IStandardFields} from './Database'
 
-abstract class PouchModel<ExtraFields extends Record<string, any>> {
-  // TS doesn't support abstract static props yet: https://github.com/microsoft/TypeScript/issues/34516
-  static get db() {
-    return loadingDb
-  }
-  abstract get db(): typeof loadingDb
-  static type: IStandardFields['type']
-  abstract type: string
-
-  // indexes: A comma separated list of field names to index.
-  static indexes: string[] = []
+export abstract class Model<ExtraFields extends Record<string, any>> {
+  abstract db: Database
 
   _id: IStandardFields['_id']
   _rev: IStandardFields['_rev']
@@ -25,10 +16,6 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
   updatedAt: IStandardFields['updatedAt']
   deletedAt?: IStandardFields['deletedAt']
   version: IStandardFields['version']
-
-  get isReady() {
-    return this.db !== loadingDb
-  }
 
   constructor(data: Partial<IStandardFields> & ExtraFields) {
     const now = new Date()
@@ -47,7 +34,7 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
 
   get values() {
     const sanitized = Object.rmUndefAttrs(
-      Object.omit(this, ['db', 'isReady', 'values', 'valuesClean', 'isClean', 'isDirty']),
+      Object.omit(this, ['db', 'values', 'valuesClean', 'isClean', 'isDirty']),
     ) as IStandardFields & ExtraFields
     return sanitized
   }
@@ -80,7 +67,7 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
   async deletePermanent() {
     await this.db.deletePermanent(this.values)
   }
-  subscribe(callback: (doc: PouchModel<any> & ExtraFields) => any) {
+  subscribe(callback: (doc: Model<any> & ExtraFields) => any) {
     return this.db.subscribe([this._id], doc => {
       callback(Object.assign(this, doc) as any)
     })
@@ -101,7 +88,7 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
       _revisions: false,
       _attachments: false,
       _conflicts: false,
-      _id: assertValid('_id', this._id, ['isRequired', 'isString', 'isNoneEmpty']),
+      _id: assertValid('_id', this._id, ['isRequired', 'isString', 'isNotEmpty']),
       createdAt: isDefined(this.createdAt) && assertValid('createdAt', this.createdAt, ['isDate']),
       updatedAt: isDefined(this.updatedAt) && assertValid('updatedAt', this.updatedAt, ['isDate']),
       deletedAt: isDefined(this.deletedAt) && assertValid('deletedAt', this.deletedAt, ['isDate']),
@@ -115,9 +102,9 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
     return isUnique
   }
   async validateFieldIsUnique(fieldName: keyof this, errorMessage?: string) {
-    return (await this.isFieldUnique(fieldName))
+    return typeof fieldName !== 'string' || (await this.isFieldUnique(fieldName))
       ? false
-      : new ValueError(fieldName as string, errorMessage || `${fieldName} is invalid`)
+      : new ValueError(fieldName, errorMessage || `${fieldName} is invalid`)
   }
 
   static mockStandardFields: IStandardFields = {
@@ -131,7 +118,7 @@ abstract class PouchModel<ExtraFields extends Record<string, any>> {
     updatedAt: new Date(),
     deletedAt: undefined,
     version: 0,
-    type: 'base',
   }
 }
-export default PouchModel
+
+export default Model

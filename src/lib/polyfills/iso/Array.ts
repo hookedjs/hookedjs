@@ -33,30 +33,29 @@ declare global {
      */
     copy(): T[]
     /**
-     * Removes all elements matching value
+     * Remove values that are repeated
      */
-    remove(value: T): T[]
+    deDup(): T[]
     /**
      * Checks if the array contains the any value multiple times
      */
     duplicateCheck(): boolean
     /**
-     * Remove values that are repeated
+     * Aka !arr.includes(val)
      */
-    deDup(): T[]
+    excludes(val: any): boolean
     /**
      * Returns a Record keyed by a property of the elements in the array
      */
     keyBy(key: string | number | symbol): Record<string, T[]>
     /**
-     * Aka !arr.includes(val)
+     * Subtracts the values of an array(s) from the current array
      */
-    excludes(val: any): boolean
+    minus(...otherArrs: string[][]): undefined
     /**
-     *
+     * Functional version of subtract that returns a new array
      */
-    toSet(): Set<T[]>
-
+    minusF(...otherArrs: string[][]): T[]
     /**
      * Functional version of pop
      */
@@ -85,15 +84,18 @@ declare global {
      * Functional version of shiftN
      */
     shiftNF(n: number): T[]
-
     /**
-     * Subtracts the values of an array(s) from the current array
+     * Removes all elements matching value
      */
-    minus(...otherArrs: string[][]): undefined
+    remove(value: T): T[]
     /**
-     * Functional version of subtract that returns a new array
+     * Functional version of sort
      */
-    minusF(...otherArrs: string[][]): T[]
+    sortF(sorter: (a: number, b: number) => number): T[]
+    /**
+     *
+     */
+    toSet(): Set<T[]>
   }
 }
 
@@ -116,12 +118,9 @@ Object.defineProperties(Array.prototype, {
     enumerable: false,
   },
 
-  remove: {
-    value: function (el: any) {
-      let i: number
-      while ((i = this.indexOf(el)) > -1) {
-        this.splice(i, 1)
-      }
+  deDup: {
+    value: function () {
+      return Array.from(new Set(this))
     },
     enumerable: false,
   },
@@ -133,9 +132,9 @@ Object.defineProperties(Array.prototype, {
     enumerable: false,
   },
 
-  deDup: {
-    value: function () {
-      return Array.from(new Set(this))
+  excludes: {
+    value: function (val: any) {
+      return !this.includes(val)
     },
     enumerable: false,
   },
@@ -153,21 +152,27 @@ Object.defineProperties(Array.prototype, {
     enumerable: false,
   },
 
-  excludes: {
-    value: function (val: any) {
-      return !this.includes(val)
+  minus: {
+    value: function (...arrs: any[][]) {
+      let i
+      for (const arr of arrs) {
+        for (const el of arr) {
+          while ((i = this.indexOf(el)) > -1) {
+            this.splice(i, 1)
+          }
+        }
+      }
     },
     enumerable: false,
   },
 
-  toSet: {
-    value: function () {
-      return new Set(this)
+  minusF: {
+    value: function (...arrs: any[][]) {
+      return Array.difference(this, ...arrs)
     },
     enumerable: false,
   },
 
-  // popF(): T
   popF: {
     value: function () {
       return this.slice(0, -1)
@@ -199,6 +204,16 @@ Object.defineProperties(Array.prototype, {
     enumerable: false,
   },
 
+  remove: {
+    value: function (el: any) {
+      let i: number
+      while ((i = this.indexOf(el)) > -1) {
+        this.splice(i, 1)
+      }
+    },
+    enumerable: false,
+  },
+
   shiftF: {
     value: function () {
       return this.slice(1)
@@ -213,31 +228,23 @@ Object.defineProperties(Array.prototype, {
     enumerable: false,
   },
 
-  // shiftNF(n: number): T[]
   shiftNF: {
     value: function (n: number) {
       return this.slice(n)
     },
     enumerable: false,
   },
-
-  minus: {
-    value: function (...arrs: any[][]) {
-      let i
-      for (const arr of arrs) {
-        for (const el of arr) {
-          while ((i = this.indexOf(el)) > -1) {
-            this.splice(i, 1)
-          }
-        }
-      }
+  
+  sortF: {
+    value: function (sorter: (a: number, b: number) => number) {
+      return [...this].sort(sorter)
     },
     enumerable: false,
   },
 
-  minusF: {
-    value: function (...arrs: any[][]) {
-      return Array.difference(this, ...arrs)
+  toSet: {
+    value: function () {
+      return new Set(this)
     },
     enumerable: false,
   },

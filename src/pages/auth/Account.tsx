@@ -8,7 +8,7 @@ import {h} from 'preact'
 // Further copy the styles of https://account.zenmate.com/en_US/account, especially the form inputs.
 
 export default function Account() {
-  const user = useCurrentUser()
+  const user = useCurrentUser()!
   return (
     <PaddedPage>
       <Section header1="Account Settings">

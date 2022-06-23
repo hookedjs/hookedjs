@@ -9,7 +9,7 @@
  *    account is not being shared between people
  */
 import {throwForbiddenError} from '../../lib/validation'
-import {AuthUsers, initTenantDbApi} from '../../pouch/databases'
+import {Users, initDatabases} from '../../pouch'
 import {addAdminToDb} from '../lib/pouch/permissions'
 
 export const tenantDbPrefix = 't-'
@@ -23,12 +23,9 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
     if (!req.user.name) {
       throwForbiddenError()
     }
-    const user = await AuthUsers.get(req.user.name)
+    const user = await Users.get(req.user.name)
     const tenantId = `${tenantDbPrefix}${String.uid()}`
-    await initTenantDbApi(tenantId)
-    user.defaultTenantId = user.defaultTenantId || tenantId
-    user.tenants = user.tenants || []
-    user.tenants.push({id: tenantId, name: props.name})
+    await initDatabases()
     await user.save()
     await addAdminToDb(req.user.name, tenantId)
     reply.send({id: tenantId})

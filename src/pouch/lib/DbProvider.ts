@@ -1,4 +1,4 @@
-import {useLayoutEffect, useState} from '#src/lib/hooks'
+import {useMount, useState} from '#src/lib/hooks'
 import type {ComponentChildren} from 'preact'
 
 import * as dbs from '../databases'
@@ -8,9 +8,7 @@ import * as dbs from '../databases'
  */
 export function DbProvider({children}: {children: ComponentChildren}) {
   const [isLoading, setIsLoading] = useState(true)
-  useLayoutEffect(() => {
-    watchLoading()
-  }, [])
+  useMount(watchLoading)
   return isLoading ? null : (children as any)
 
   async function watchLoading() {
@@ -20,11 +18,16 @@ export function DbProvider({children}: {children: ComponentChildren}) {
 }
 
 export async function initDatabases() {
-  await dbs.initAuthDb()
-  await dbs.initTenantDb()
+  const currentUser = await dbs.Users.getCurrent()
+  if (!currentUser) return
+  await dbs.Users.connect()
+  await dbs.TenantPersons.connect({currentUser})
+  await dbs.Tenants.connect({currentUser})
 }
 
-export async function destroyDatabases() {
-  await dbs.destroyAuthDb()
-  await dbs.destroyTenantDb()
+export async function resetDatabases() {
+  await dbs.Users.db.destroy()
+  dbs.Users.current = undefined
+  await dbs.TenantPersons.db.destroy()
+  await dbs.Tenants.db.destroy()
 }

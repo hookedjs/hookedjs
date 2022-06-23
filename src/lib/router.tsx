@@ -19,7 +19,7 @@ import {applyTheme, defaultTheme} from '../layout/theme'
 import StateStore from './StateStore'
 import {useEffect, useErrorBoundary, useLayoutEffect, useRef, useState} from './hooks'
 import pstyled from './pstyled'
-import {ForbiddenError, NotFoundError} from './validation'
+import {ForbiddenError, NotFoundError, throwError} from './validation'
 
 /**
  * RouterComponent: Wraps the Router Switch in a Layout, and strategically only re-renders
@@ -30,13 +30,27 @@ interface RouterProps {
   routesByPath: Record<string, RouteType>
 }
 interface RouteType extends SetPageMetaProps {
+  // An icon that represents the route. Often needed for menu items
   Icon?: FunctionalComponent
+  /**
+   * A URL pathname to match
+   *
+   * Can use ':myVar' syntax to match a variable and pass it to
+   * the component as a prop
+   */
   path: string
+  // The guts of the route -- what shows up in the body
   Component: FunctionalComponent<{route: RouteType}>
+  // Component that wraps the guts of the route
   Layout?: FunctionalComponent
+  // a string to identify a "stack" of routes to create/join
   stack?: string
+  // callback to check if the current user has access
   hasAccess: () => boolean
-  hasBack?: boolean // indicate if back is available
+  // indicate if back is available
+  hasBack?: boolean
+  // Vars that are passed to the component from the URL
+  vars?: Record<string, string>
 }
 function RouterComponent(props: RouterProps) {
   const [isLayoutReady, setIsLayoutReady] = useState(false)
@@ -46,21 +60,21 @@ function RouterComponent(props: RouterProps) {
   if (!props.routesByPath['/notfound']) throw new Error('A route with path /notfound is required.')
   if (error) {
     if (error instanceof ForbiddenError) {
-      const r = props.routesByPath['/forbidden'] || props.routesByPath['/notfound']
+      const route = props.routesByPath['/forbidden'] || props.routesByPath['/notfound']
       return (
         <BlankLayout>
           <RouteWrapper>
-            <r.Component route={r} />
+            <route.Component route={route} />
           </RouteWrapper>
         </BlankLayout>
       )
     }
     if (error instanceof NotFoundError) {
-      const r = props.routesByPath['/notfound']
+      const route = props.routesByPath['/notfound']
       return (
         <BlankLayout>
           <RouteWrapper>
-            <r.Component route={r} />
+            <route.Component route={route} />
           </RouteWrapper>
         </BlankLayout>
       )
@@ -81,14 +95,17 @@ function RouterComponent(props: RouterProps) {
 
     function onLocationChange() {
       resetError()
-      const match = props.routesByPath[location.pathname]
+      const route = getRouteForPath(location.pathname, props.routesByPath)
 
       // only update the layout if it's changed
       let Next = BlankLayout as any
-      if (match && match.Layout) Next = match.Layout
+      if (route && route.Layout) Next = route.Layout
       if (Layout !== Next) setLayout(() => Next)
 
-      setIsLayoutReady(true)
+      if (!isLayoutReady) {
+        LocationStore.refresh()
+        setIsLayoutReady(true)
+      }
     }
   }
 }
@@ -96,27 +113,91 @@ function RouterComponent(props: RouterProps) {
 /**
  * RouterSwitch: Switches routes based on current url and also checks access control
  */
-const stacks = new Map<string, any>()
 function RouterSwitch({routesByPath}: RouterProps) {
   const [_location] = useLocationStore()
-  const r = routesByPath[_location.pathname] || routesByPath['/notfound']
-  setPageMeta(r)
-  let Stack = RouteWrapper
-  if (r.stack) {
-    if (stacks.has(r.stack)) Stack = stacks.get(r.stack)
-    else {
-      Stack = StackFactory(r.stack)
-      stacks.set(r.stack, Stack)
-    }
-  }
-  if (!r.hasAccess()) throw new ForbiddenError()
+  const route = getRouteForPath(_location.pathname, routesByPath)
+  const Stack = getStackForRoute(route)
+  setPageMeta(route)
+  if (!route.hasAccess()) throw new ForbiddenError()
   return (
     <Stack>
       <Suspense fallback={<div />}>
-        <r.Component route={r} />
+        <route.Component route={route} />
       </Suspense>
     </Stack>
   )
+}
+
+/**
+ * getRouteForPath: Finds the route that matches the current url
+ *
+ * - Supports route variables like ':myVar' and injects them into the route
+ */
+function getRouteForPath(path: string, routesByPath?: RouterProps['routesByPath']): RouteType {
+  if (routesByPath) {
+    getRouteForPath.routesByPathLast = routesByPath
+  } else {
+    routesByPath = getRouteForPath.routesByPathLast
+  }
+  const routeArray = Object.values(routesByPath)
+  // const r = routesByPath[_location.pathname] || routesByPath['/notfound']
+  const locationParts = path.split('/')
+  let match = routesByPath['/notfound']
+  routeLoop: for (let route of routeArray) {
+    if (route.path === path) {
+      match = route
+      break
+    }
+    const routeParts = route.path.split('/')
+    if (routeParts.length !== locationParts.length) {
+      continue
+    }
+    let routeVars: Record<string, string> = {}
+    for (let i = 0; i < routeParts.length; i++) {
+      const routePart = routeParts[i]
+      const locationPart = locationParts[i]
+      if (routePart.startsWith(':')) {
+        routeVars[routePart.substring(1)] = locationPart
+      } else if (routePart !== locationPart) {
+        continue routeLoop
+      }
+    }
+    match = {
+      ...route,
+      vars: routeVars,
+    }
+  }
+  return match
+}
+getRouteForPath.routesByPathLast = {} as RouterProps['routesByPath']
+/**
+ * getStackForRoute: Creates/Joins the stack that matches the current route stack
+ */
+function getStackForRoute(route: RouteType): FunctionalComponent {
+  const stacks = getStackForRoute.stacks
+  let stack = RouteWrapper
+  if (route.stack) {
+    const stackWithVars = replacePathVars(route.stack, route?.vars)
+    if (stacks.has(stackWithVars)) {
+      stack = stacks.get(stackWithVars)
+    } else {
+      stack = StackFactory(stackWithVars)
+      stacks.set(stackWithVars, stack)
+    }
+  }
+  return stack
+}
+getStackForRoute.stacks = new Map<string, any>()
+
+/**
+ * replacePathVars: Replaces the variables in a path with their values
+ */
+export function replacePathVars(path: string, vars: Record<string, string> = {}): string {
+  const mapped = path.replace(/:([^/]+)/g, (_, varName) => {
+    const v = vars[varName] ?? throwError('Missing router path variable: ' + varName)
+    return v
+  })
+  return mapped
 }
 
 /**
@@ -194,7 +275,7 @@ function RouteWrapper({children}: any) {
  * StackFactory: A route wrapper factory to join a page to a route stack
  * and enhance stack-like-features
  */
-type StackHistoryEntry = {location: LocationType; scroll: number}
+type StackHistoryEntry = {location: Omit<LocationType, 'route'>; scroll: number}
 type StackHistory = StackHistoryEntry[]
 let StackHistories: Record<string, StackHistory> = localStorage.getItem('StackHistories')
   ? JSON.parse(localStorage.getItem('StackHistories')!)
@@ -208,7 +289,10 @@ function StackHistoriesReset() {
 }
 function StackFactory(basePath: string) {
   const baseHistory = {
-    location: {pathname: basePath + '/home', search: ''},
+    location: {
+      pathname: basePath + '/home',
+      search: '',
+    },
     scroll: 0,
   }
   class Stack {
@@ -500,18 +584,31 @@ const setPageMeta = (function createSetPageMeta() {
 interface LocationType {
   pathname: string
   search: string
+  route: RouteType
 }
-const LocationStore = new StateStore({
-  pathname: location.pathname,
-  search: location.search,
-})
-export const useLocationStore = LocationStore.use
-navListener(() =>
-  LocationStore.setValue({
+const LocationStore = Object.assign(
+  new StateStore<LocationType>({
     pathname: location.pathname,
     search: location.search,
+    route: {
+      title: '',
+      path: '',
+      Component: () => <F />,
+      hasAccess: () => true,
+    },
   }),
+  {
+    refresh: (route?: RouteType) => {
+      LocationStore.setValue({
+        pathname: location.pathname,
+        search: location.search,
+        route: route ?? getRouteForPath(location.pathname),
+      })
+    },
+  },
 )
+export const useLocationStore = LocationStore.use
+navListener(() => LocationStore.refresh())
 
 const PageMetaStore = new StateStore<SetPageMetaProps>({title: ''})
 PageMetaStore.subscribe(setPageMeta)

@@ -17,11 +17,12 @@ export default function AdminLayout({children}: {children: any}) {
         routes.Support,
         {path: '#theme-toggle', title: 'Dark Mode', Icon: i.Palette},
       ]}
-      bottomLinks={[routes.AdminStatsStack, routes.AdminBlogStack, routes.AdminUserStack]}
-      leftLinks={[routes.AdminStatsStack, routes.AdminBlogStack, routes.AdminUserStack]}
+      bottomLinks={[routes.AdminStatsStack, routes.AdminBlogStack, routes.AdminTenantStack, routes.AdminUserStack]}
+      leftLinks={[routes.AdminStatsStack, routes.AdminBlogStack, routes.AdminTenantStack, routes.AdminUserStack]}
       searchOptions={[
-        {name: 'Users', value: Paths.AdminUserList},
         {name: 'Posts', value: Paths.AdminBlogPostList},
+        {name: 'Tenants', value: Paths.AdminTenantList},
+        {name: 'Users', value: Paths.AdminUserList},
       ]}>
       {children}
     </SidebarLayout>

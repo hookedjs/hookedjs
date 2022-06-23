@@ -190,6 +190,22 @@ export function useInterval(cb: () => any, ms = 0, cancelOnDismount = true) {
 }
 
 /**
+ * useMount: Call callback cb after mount. Does nothing with return result
+ */
+export const useMount = (fn: () => any) => {
+  useEffect(() => {
+    fn()
+  }, [])
+}
+
+/**
+ * useMount: Call callback cb on unmount
+ */
+export const useUnmount = (fn: () => any) => {
+  useEffect(() => fn, [])
+}
+
+/**
  * useMountedState: returns a fcn that returns true if component is mounted.
  * from react-use
  */

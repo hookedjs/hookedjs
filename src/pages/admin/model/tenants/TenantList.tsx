@@ -1,11 +1,11 @@
 import CmsTablePage from '#src/layout/components/CmsTablePage'
 import Portal from '#src/layout/components/Portal'
 import {RouteType, getParentPath} from '#src/lib/router'
-import {User, useUsersS} from '#src/pouch'
+import {Tenant, TenantStatusEnum, useTenantsS} from '#src/pouch'
 import {ToastStore} from '#src/stores'
-import {h} from 'preact'
+import {Fragment, h} from 'preact'
 
-export default function UserList({route}: {route: RouteType}) {
+export default function TenantList({route}: {route: RouteType}) {
   const parentPath = getParentPath()
   const pageSize = 10
   const {
@@ -15,7 +15,7 @@ export default function UserList({route}: {route: RouteType}) {
     sortBy,
     sortDirection,
   } = CmsTablePage.getTableProps()
-  const [entries, refetch] = useUsersS({
+  const [entries, refetch] = useTenantsS({
     ...(sortBy ? {sort: [{[sortBy]: sortDirection}]} : {}),
     selector: {
       $and: [
@@ -23,8 +23,6 @@ export default function UserList({route}: {route: RouteType}) {
           ? [
               {
                 $or: [
-                  {givenName: {$regex: search}},
-                  {surname: {$regex: search}},
                   {name: {$regex: search}},
                   {status: {$regex: search}},
                 ],
@@ -44,7 +42,7 @@ export default function UserList({route}: {route: RouteType}) {
   return (
     <CmsTablePage
       pageTitle={route.title}
-      cols={[{label: 'Name'}, {label: 'Email', sortValue: '_id'}, {label: 'Status'}, {label: 'Roles'}]}
+      cols={[{label: 'Name'}, {label: 'Contact'}, {label: 'Status'}, {label: 'Joined'}]}
       categories={[
         {label: 'All', value: '', count: entries.length},
         ...Object.entries(byCategory).map(([k, v]) => ({
@@ -55,17 +53,17 @@ export default function UserList({route}: {route: RouteType}) {
       ]}
       bulkOptions={[
         {label: 'Delete', cb: deleteCb},
-        {label: 'Ban', cb: banCb},
+        {label: 'Disable', cb: disableCb},
       ]}
       pages={Math.ceil(entries.length / pageSize)}
       total={entries.length}
       rows={entriesPaged.map(obj => ({
         obj,
         cols: [
-          <a href={`${parentPath}/entry?name=${obj.name}`}>{obj.fullName}</a>,
-          <a href={`mailto:${obj.name}`}>{obj.name}</a>,
+          <a href={`${parentPath}/entry?id=${obj._id}`}>{obj.name}</a>,
+          <Fragment>Bob (<a href={`mailto:${'bob@bob.com'}`}>{'bob@bob.com'}</a>)</Fragment>,
           obj.status,
-          obj.roles.join(),
+          new Date(obj.createdAt).toLocaleDateString(),
         ],
       }))}
     />
@@ -76,7 +74,7 @@ export default function UserList({route}: {route: RouteType}) {
       message: `Okay to delete ${selection.length} user(s)?`,
     })
     if (confirmed) {
-      await Promise.all(selection.map((entry: User) => entry.delete()))
+      await Promise.all(selection.map((entry: Tenant) => entry.delete()))
       ToastStore.setValue({
         message: `Deleted ${selection.length} entries`,
         icon: 'success',
@@ -86,15 +84,18 @@ export default function UserList({route}: {route: RouteType}) {
     }
   }
 
-  async function banCb(selection: any[]) {
-    // TODO: Ban should prompt for reason
+  async function disableCb(selection: any[]) {
+    // TODO: Disable should prompt for reason
     const confirmed = await Portal.confirm({
-      message: `Okay to ban ${selection.length} user(s)?`,
+      message: `Okay to disable ${selection.length} tenants(s)?`,
     })
     if (confirmed) {
-      await Promise.all(selection.map((entry: User) => entry.ban('Banned by bulk action')))
+      await Promise.all(selection.map((entry: Tenant) => {
+        entry.status = TenantStatusEnum.DISABLED
+        return entry.save()
+      }))
       ToastStore.setValue({
-        message: `Banned ${selection.length} user(s)`,
+        message: `Disabled ${selection.length} tenant(s)`,
         icon: 'success',
         placement: 'right',
       })

@@ -1,20 +1,18 @@
 import {nav} from '#src/lib/router'
-import {AuthUsers} from '#src/pouch'
 import {Paths} from '#src/routes'
-import {AuthStore, AuthStoreType, useAuthStore} from '#src/stores'
 import {h} from 'preact'
 
 export default function TenantSwitcher() {
-  const [auth] = useAuthStore()
+  const tenants: any[] = []
 
   return (
     <div>
       <h1>Select Account</h1>
-      {auth.tenants?.map(
+      {tenants?.map(
         tenant =>
           (
             <p key={tenant.id}>
-              <a href={Paths.TenantDashboardStack} onClick={e => selectTenant(e, tenant)}>
+              <a href={Paths.TenantDashboardStack} onClick={selectTenant}>
                 <button>{tenant.name}</button>
               </a>
             </p>
@@ -28,16 +26,12 @@ export default function TenantSwitcher() {
     </div>
   )
 
-  async function selectTenant(e: any, tenant: AuthStoreType['currentTenant']) {
+  async function selectTenant(e: any) {
     e.preventDefault()
-    const profile = await AuthUsers.getCurrent()
-    profile.defaultTenantId = tenant!.id
-    profile.save()
-    AuthStore.value.currentTenant = tenant
+    // const user = (await Users.getCurrent())!
+    // user.defaultTenantId = tenant!.id
+    // user.save()
+    // AuthStore.value.currentTenantId = tenant
     nav(e.target.href)
   }
-}
-
-function useAuth() {
-  throw new Error('Function not implemented.')
 }

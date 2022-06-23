@@ -1,9 +1,10 @@
 import NavLink from '#src/layout/components/SidebarNavLink'
 import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
-import {useCurrentUser} from '#src/pouch'
+import {replacePathVars, useLocationStore} from '#src/lib/router'
+import {UserRoleEnum, useCurrentUser} from '#src/pouch'
 import {AuthStore} from '#src/stores'
-import {h} from 'preact'
+import {Fragment as F, h} from 'preact'
 
 import type {NavLinks} from '../types'
 
@@ -13,11 +14,7 @@ export default function Sidebar({navLinks}: {navLinks: NavLinks}) {
       <SidebarHeader />
       <SidebarToggler />
       <Nav>
-        {navLinks
-          .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
-          .map(nl => (
-            <NavLink {...nl} />
-          ))}
+        <NavInner navLinks={navLinks} />
       </Nav>
     </SidebarDiv>
   )
@@ -34,13 +31,13 @@ const SidebarDiv = pstyled.div`
 `
 
 export function SidebarHeader() {
-  const user = useCurrentUser()
+  const user = useCurrentUser()!
   return (
     <SidebarHeaderDiv>
       <div class="left">
         <i.Person size={76} class="svg-div full" />
         <i.Person size={50} class="svg-div mini" />
-        <div class="label full">{user.roles.includes(AuthStore.dbRoles.ADMIN) ? 'Admin' : 'Tenant'}</div>
+        <div class="label full">{user.isAdmin ? 'Admin' : 'Tenant'}</div>
         <div class="label mini">{user.givenName}</div>
       </div>
       <div class="right">
@@ -154,3 +151,17 @@ const Nav = pstyled.nav`
 	.miniSidebar :root .navlinkText
 		display: none
 `
+
+function NavInner(props: {navLinks: NavLinks}) {
+  const [loc] = useLocationStore()
+  return (
+    <F>
+      {props.navLinks
+        .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+        .map(nl => ({...nl, path: replacePathVars(nl.path, loc.route?.vars)}))
+        .map(nl => (
+          <NavLink {...nl} />
+        ))}
+    </F>
+  )
+}

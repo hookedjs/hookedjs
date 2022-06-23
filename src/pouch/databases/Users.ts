@@ -1,4 +1,4 @@
-import {useLayoutEffectDeep, useState} from '#src/lib/hooks'
+import {useInterval, useLayoutEffectDeep, useState} from '#src/lib/hooks'
 import {
   ValueError,
   assertAttrsWithin,
@@ -6,20 +6,16 @@ import {
   assertValidSet,
   isDefined,
   isDefinedAndNotNull,
-  throwForbiddenError,
 } from '#src/lib/validation'
-import type {IStandardFields} from '#src/pouch/lib/Database'
 import {useAuthStore} from '#src/stores'
 
-import {readAuth} from '..'
-import PouchCollection from '../../../lib/Collection'
-import PouchModel from '../../../lib/Model'
-import {createModelHooks} from '../../../lib/hooks'
-import db from '../db'
+import {Collection, Database, Model, createModelHooks, readAuth} from '../lib'
+import type {IStandardFields} from '../lib'
 
-export type IAuthUserExtra = {
+export type IUserExtra = {
   name: string
-  roles: AuthUserRoleEnum[]
+  type?: 'user'
+  roles: UserRoleEnum[]
   password?: string
   password_scheme?: string
   iterations?: number
@@ -32,49 +28,47 @@ export type IAuthUserExtra = {
   bannedReason?: string
   givenName: string
   surname: string
-  status: AuthUserStatusEnum
-  tenants: {id: string; name: string}[]
-  defaultTenantId?: string
+  status: UserStatusEnum
 }
-export interface IAuthUser extends IStandardFields, IAuthUserExtra {}
-export interface IAuthUserCreate extends Partial<IStandardFields>, IAuthUserExtra {}
+interface IUser extends IStandardFields, IUserExtra {}
+interface IUserCreate extends Partial<IStandardFields>, IUserExtra {}
 
-export class AuthUser extends PouchModel<IAuthUserExtra> {
-  static get db() {
-    return db.handle
-  }
-  get db() {
-    return db.handle
-  }
-  static type = 'user'
-  type = AuthUser.type
-  static indexes = []
+const db = new Database({name: '_users', remoteOnly: true})
 
-  name: IAuthUserExtra['name']
-  password: IAuthUserExtra['password']
-  password_scheme: IAuthUserExtra['password_scheme']
-  iterations: IAuthUserExtra['iterations']
-  derived_key: IAuthUserExtra['derived_key']
-  salt: IAuthUserExtra['salt']
-  passwordTmp: IAuthUserExtra['passwordTmp']
-  passwordTmpAt: IAuthUserExtra['passwordTmpAt']
-  passwordTmpFailCount: IAuthUserExtra['passwordTmpFailCount']
-  bannedAt: IAuthUserExtra['bannedAt']
-  bannedReason: IAuthUserExtra['bannedReason']
-  givenName: IAuthUserExtra['givenName']
-  surname: IAuthUserExtra['surname']
-  roles: IAuthUserExtra['roles']
-  status: IAuthUserExtra['status']
-  tenants: IAuthUserExtra['tenants']
-  defaultTenantId: IAuthUserExtra['defaultTenantId']
+export class User extends Model<IUserExtra> {
+  db = db
 
-  constructor(data: IAuthUserCreate) {
-    super(data)
-    Object.assign(this, data)
-  }
+  name: IUserExtra['name']
+  type = 'user'
+  password: IUserExtra['password']
+  password_scheme: IUserExtra['password_scheme']
+  iterations: IUserExtra['iterations']
+  derived_key: IUserExtra['derived_key']
+  salt: IUserExtra['salt']
+  passwordTmp: IUserExtra['passwordTmp']
+  passwordTmpAt: IUserExtra['passwordTmpAt']
+  passwordTmpFailCount: IUserExtra['passwordTmpFailCount']
+  bannedAt: IUserExtra['bannedAt']
+  bannedReason: IUserExtra['bannedReason']
+  givenName: IUserExtra['givenName']
+  surname: IUserExtra['surname']
+  roles: IUserExtra['roles']
+  status: IUserExtra['status']
 
   get fullName() {
     return `${this.givenName} ${this.surname}`
+  }
+
+  get isAdmin() {
+    return this.roles.includes(UserRoleEnum.ADMIN)
+  }
+  get isTenant() {
+    return this.roles.excludes(UserRoleEnum.ADMIN)
+  }
+
+  constructor(data: IUserCreate) {
+    super(data)
+    Object.assign(this, data)
   }
 
   // Ensure password never hangs around
@@ -88,21 +82,18 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
   }
 
   async validate() {
-    return assertValidSet<IStandardFields & IAuthUserExtra>(this.values, {
+    return assertValidSet<IStandardFields & IUserExtra>(this.values, {
       ...this.baseValidations(),
       _id: assertValid('_id', this._id, ['isRequired', 'isString'], {
         isEqual: {expected: `org.couchdb.user:${this.name}`},
       }),
       name: assertValid('name', this.name, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
-        // This doesn't work for AuthUser, because _id is computered from name :-/
+        // This doesn't work for User, because _id is computered from name :-/
         // await this.validateFieldIsUnique('name', 'email is already claimed')
         this.name !== this.valuesClean.name && new ValueError('email cannot be changed'),
       ]),
-      type: assertValid('type', this.type, [], {
-        isEqual: {
-          expected: AuthUser.type,
-          message: `type must be ${AuthUser.type}`,
-        },
+      type: assertValid('type', this.type, ['isRequired', 'isString'], {
+        isEqual: {expected: 'user'},
       }),
       password:
         isDefinedAndNotNull(this.password) &&
@@ -123,78 +114,89 @@ export class AuthUser extends PouchModel<IAuthUserExtra> {
       }),
       surname: assertValid('surname', this.surname, ['isRequired', 'isString'], {isLongerThan: 2, isShorterThan: 30}),
       status: assertValid('status', this.status, ['isRequired'], {
-        isOneOfSet: AuthUserStatusSet,
+        isOneOfSet: UserStatusSet,
       }),
       bannedAt: isDefined(this.bannedAt) && assertValid('bannedAt', this.bannedAt, ['isDate']),
       bannedReason:
         isDefined(this.bannedReason) && assertValid('bannedReason', this.bannedReason, ['isString', 'isTruthy']),
       roles: assertValid('roles', this.roles, ['isRequired', 'isArray'], {
-        arrayValuesAreOneOfSet: AuthUserRoleSet,
+        arrayValuesAreOneOfSet: UserRoleSet,
       }),
-      tenants: assertValid('tenants', this.tenants, ['isRequired', 'isArray']),
-      defaultTenantId: assertValid('defaultTenantId', this.defaultTenantId, ['isRequired', 'isString']),
     })
   }
 
-  async ban(reason: IAuthUserExtra['bannedReason']) {
-    this.status = AuthUserStatusEnum.BANNED
+  async ban(reason: IUserExtra['bannedReason']) {
+    this.status = UserStatusEnum.BANNED
     this.bannedAt = new Date()
     this.bannedReason = reason
     await this.save()
   }
 }
 
-class AuthUserCollection extends PouchCollection<AuthUser, IAuthUserCreate> {
-  model = AuthUser
+class UserCollection extends Collection<User, IUserCreate> {
+  model = User
+  db = db
 
-  get(id: string) {
-    return super.get(this.autoPrefixId(id))
-  }
-
-  autoPrefixId(id: string) {
-    const prefixed = id.startsWith('org.couchdb.user:') ? id : `org.couchdb.user:${id}`
-    return prefixed
-  }
-
-  current: AuthUser | undefined = undefined
+  current: User | undefined = undefined
+  getCurrentP: Promise<User> | undefined = undefined
   async getCurrent() {
-    const name = readAuth()?.name ?? throwForbiddenError()
-    this.current = await this.get(`org.couchdb.user:${name}`)
+    // De-dup multiple simultaneous calls to getCurrent
+    if (this.getCurrentP) {
+      return this.getCurrentP
+    }
+    if (this.current) {
+      return this.current
+    }
+    const auth = readAuth()
+    if (auth?.roles?.includes(UserRoleEnum.ADMIN)) {
+      this.current = adminUserStub
+    } else if (readAuth()?.name) {
+      const name = readAuth().name
+      this.getCurrentP = this.get(`org.couchdb.user:${name}`)
+      this.current = await this.getCurrentP
+    } else {
+      this.current = undefined
+    }
     return this.current
   }
 }
-export const AuthUsers = new AuthUserCollection()
+export const Users = new UserCollection()
 
-export const [useAuthUser, useAuthUsers, useAuthUserCount, useAuthUserS, useAuthUsersS, useAuthUserCountS] =
-  createModelHooks<AuthUser>(AuthUsers)
+export const [useUser, useUsers, useUserCount, useUserS, useUsersS, useUserCountS] = createModelHooks<User>(Users)
 
 export function useCurrentUser() {
   const [auth] = useAuthStore()
-  const isAdmin = auth.roles.includes(AuthUserRoleEnum.ADMIN)
-  const [user, setUser] = useState(isAdmin ? adminAuthUserStub : AuthUsers.current)
-  useLayoutEffectDeep(() => {
-    onAuthChange()
-  }, [auth])
-  return user!
+  const [user, setUser] = useState(Users.current || UserLoadingFields)
+  useLayoutEffectDeep(refresh, [auth])
+  useInterval(refresh, 60000)
 
-  async function onAuthChange() {
-    setUser(isAdmin ? adminAuthUserStub : await AuthUsers.getCurrent())
+  // Activate suspense if loading
+  if (Users.getCurrentP) {
+    throw Users.getCurrentP
+  }
+  return user
+
+  function refresh() {
+    Users.getCurrent().then(next => {
+      setUser(next || UserLoadingFields)
+    })
   }
 }
 
-export enum AuthUserRoleEnum {
+export enum UserRoleEnum {
   ADMIN = '_admin',
 }
-export const AuthUserRoleSet = new Set(Enum.getEnumValues(AuthUserRoleEnum))
+// const UserRoleSet = new Set(Enum.getEnumValues(UserRoleEnum))
+const UserRoleSet = new Set(Enum.getEnumValues(UserRoleEnum))
 
-export enum AuthUserStatusEnum {
+export enum UserStatusEnum {
   PENDING = 'pending',
   ACTIVE = 'active',
   BANNED = 'banned',
 }
-export const AuthUserStatusSet = new Set(Enum.getEnumValues(AuthUserStatusEnum))
+const UserStatusSet = new Set(Enum.getEnumValues(UserStatusEnum))
 
-export const AuthUserExampleCreateFields: IAuthUserCreate = {
+const UserExampleCreateFields: IUserCreate = {
   name: 'sallyfields@hookedjs.org',
   password: 'Password8',
   bannedAt: undefined,
@@ -202,23 +204,31 @@ export const AuthUserExampleCreateFields: IAuthUserCreate = {
   surname: 'Sally',
   givenName: 'Fields',
   roles: [],
-  status: AuthUserStatusEnum.ACTIVE,
-  tenants: [],
-  defaultTenantId: undefined,
+  status: UserStatusEnum.ACTIVE,
 }
 
-export const AuthUserExampleFields: IAuthUser = {
-  ...PouchModel.mockStandardFields,
-  ...AuthUserExampleCreateFields,
+const UserExampleFields: IUser = {
+  ...Model.mockStandardFields,
+  ...UserExampleCreateFields,
+  password: undefined,
   password_scheme: 'pbkdf2',
   iterations: 10,
   derived_key: 'test',
   salt: 'test',
 }
 
-export const AuthUserExample = new AuthUser(AuthUserExampleFields)
+const UserLoadingFields: IUser & {fullName: string; isAdmin: boolean; isTenant: boolean} = {
+  ...UserExampleFields,
+  name: '',
+  surname: '',
+  givenName: '',
+  fullName: '',
+  isAdmin: false,
+  isTenant: true,
+}
 
-export const AuthUserFieldsEnum = Enum.getEnumFromClassInstance(AuthUserExample)
+const UserExample = new User(UserExampleFields)
+export const UserFieldsEnum = Enum.getEnumFromClassInstance(UserExample)
 
 export class LoginProps {
   name = ''
@@ -233,7 +243,7 @@ export class LoginProps {
     Object.assign(this, props)
   }
 }
-export const LoginPropsExample = new LoginProps(Object.pick(AuthUserExampleCreateFields, ['name', 'password']))
+export const LoginPropsExample = new LoginProps(Object.pick(UserExampleCreateFields, ['name', 'password']))
 export const LoginPropsEnum = Enum.getEnumFromClassInstance(LoginPropsExample)
 
 export class PasswordRequestProps {
@@ -247,7 +257,7 @@ export class PasswordRequestProps {
     Object.assign(this, props)
   }
 }
-export const PasswordRequestPropsExample = new PasswordRequestProps(Object.pick(AuthUserExampleCreateFields, ['name']))
+export const PasswordRequestPropsExample = new PasswordRequestProps(Object.pick(UserExampleCreateFields, ['name']))
 export const PasswordRequestPropsEnum = Enum.getEnumFromClassInstance(PasswordRequestPropsExample)
 
 export class RegisterProps {
@@ -271,20 +281,19 @@ export class RegisterProps {
   }
 }
 export const RegisterPropsExample = new RegisterProps({
-  ...Object.pick(AuthUserExampleCreateFields, ['name', 'givenName', 'surname']),
+  ...Object.pick(UserExampleCreateFields, ['name', 'givenName', 'surname']),
   acceptedTerms: true,
 })
 export const RegisterPropsEnum = Enum.getEnumFromClassInstance(RegisterPropsExample)
 
-export const adminAuthUserStub = new AuthUser({
+const adminUserStub = new User({
   _id: 'admin',
   _rev: '',
-  type: AuthUser.type,
   version: 0,
   name: 'admin@hookedjs.org',
   createdAt: new Date(),
   updatedAt: new Date(),
-  roles: [AuthUserRoleEnum.ADMIN],
+  roles: [UserRoleEnum.ADMIN],
   password: undefined,
   password_scheme: undefined,
   iterations: undefined,
@@ -292,9 +301,7 @@ export const adminAuthUserStub = new AuthUser({
   salt: undefined,
   givenName: 'Admin',
   surname: 'Admin',
-  status: AuthUserStatusEnum.ACTIVE,
-  tenants: [],
-  defaultTenantId: undefined,
+  status: UserStatusEnum.ACTIVE,
   bannedAt: undefined,
   bannedReason: undefined,
 })

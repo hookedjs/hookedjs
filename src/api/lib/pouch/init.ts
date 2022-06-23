@@ -1,7 +1,8 @@
-import * as dbs from '../../../pouch/databases'
+import {initDatabases} from '#src/pouch'
+
 import config from '../../lib/config.node'
 
-cookieAuth(config.dbUser, config.dbPass).then(dbs.initAuthDbApi)
+cookieAuth(config.dbUser, config.dbPass).then(initDatabases)
 
 async function cookieAuth(username: string, password: string) {
   const res = await fetch(`${config.dbUrl}/_session`, {

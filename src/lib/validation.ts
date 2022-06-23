@@ -1,7 +1,7 @@
 import type {FastifyRequest} from 'fastify'
 
-export function throwError(message: string): never {
-  throw new Error(message)
+export function throwError(message: Object | string): never {
+  throw typeof message === 'string' ? new Error(message) : message
 }
 
 export class NotFoundError extends Error {
@@ -128,7 +128,7 @@ export class AssertValidClass {
     // can attrValue be converted to a date
     !new Date(this.attrValue)?.getTime() && new TypeError(this.attrName, 'date')
   isArray = () => !Array.isArray(this.attrValue) && new TypeError(this.attrName, 'array')
-  isNoneEmpty = () => !this.attrValue.length && new ValueError(this.attrName, `${this.attrName} is empty`)
+  isNotEmpty = () => !this.attrValue.length && new ValueError(this.attrName, `${this.attrName} is empty`)
   isHash = () => this.attrValue.length < 30 && new ValueError(this.attrName, `${this.attrName} must be a hash`)
   isEmail = () => !isEmailRegex.test(this.attrValue) && new ValueError(this.attrName, `${this.attrName} is invalid`)
   isPassword = () =>

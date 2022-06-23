@@ -122,7 +122,8 @@ const NoResultDiv = pstyled.div`
 
 function SearchForm() {
   const q = qs.parse()
-  const tableName = routesByPath[location.pathname].title
+  const [loc] = useLocationStore()
+  const tableName = loc.route.title
   const onSubmit = useCallback(_onSubmit, [])
 
   return (

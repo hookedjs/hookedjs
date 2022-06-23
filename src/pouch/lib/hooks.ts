@@ -1,8 +1,8 @@
-import {useEffect, useRef, useUpdate} from '#src/lib/hooks'
+import {useEffect, useEffectDeep, useRef, useUpdate} from '#src/lib/hooks'
 import {NotFoundError, throwNotFoundError} from '#src/lib/validation'
 
-import type {IFindProps} from './Database'
-import type PouchModel from './Model'
+import type {IFindProps, IStandardFields} from './Database'
+import type Model from './Model'
 
 interface State<T> {
   data?: T
@@ -15,37 +15,39 @@ interface State<T> {
 /**
  * A Stateful db query hook to get many docs
  *
- * Strategically doesn't rely on local state bc state is reset when used with Suspense
+ * - Doesn't rely on local state bc state is reset when used with Suspense
+ * - Implementents stale-while-refreshing
  */
-function useDocs<PM extends PouchModel<any>>(
-  collection: any,
-  findProps?: IFindProps<PM> | string,
-  // limit can also go in findProps, but this extra field is convenient for useDoc
-  limit?: number,
-): State<PM[]> {
+function useDocs<PM extends Model<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM[]> {
   const rerender = useUpdate()
-  useEffect(watch, [findProps])
+  useEffectDeep(watch, [findProps])
   const listener = useRef({cancel() {}})
 
   const mapped = Object.copy({
     selector: {},
     ...(typeof findProps === 'string' ? ({selector: {_id: {$in: [findProps]}}} as any) : findProps),
-    ...(limit && {limit}),
   })
-  mapped.selector.type = collection.model.type
 
-  const cacheKey = JSON.stringify(mapped),
-    cached = collection.db.findCache.get(cacheKey)
+  const cacheKey = JSON.stringify(mapped)
+  const cached = collection.db.findCache.get(cacheKey)
 
-  if (!cached) return {refetch, isLoading: true, fetchP: collection.db.find(mapped)}
-  if (cached?.error) return {refetch, isLoading: false, error: cached.error}
-  if (cached?.value)
+  if (!cached) {
+    return {refetch, isLoading: true, fetchP: collection.db.find(mapped)}
+  }
+  if (cached?.error) {
+    return {refetch, isLoading: false, error: cached.error}
+  }
+  if (cached?.value) {
     return {
       refetch,
       isLoading: false,
       data: cached.value.map((doc: any) => new collection.model(doc)),
+      fetchP: async () => {},
     }
-  if (cached?.fetching) return {refetch, isLoading: true, fetchP: cached.fetchP}
+  }
+  if (cached?.fetching) {
+    return {refetch, isLoading: true, fetchP: cached.fetchP}
+  }
 
   throw new Error('Unhandled cache error')
 
@@ -86,16 +88,13 @@ function useDocs<PM extends PouchModel<any>>(
       cached.value.map((d: any) => d._id),
       (changed: any) => {
         // Update cache if not already caught up.
-        const latest = collection.db.findCache.get(cacheKey),
-          cachedVersionOfChanged = latest.value.find((doc: any) => doc._id === changed._id)
-        if (changed._rev != cachedVersionOfChanged._rev) {
-          const next = {
-            ...latest,
-            value: latest.value.map((doc: any) => (doc._id === changed._id ? changed : doc)),
-            time: new Date(),
-          }
-          collection.db.findCache.set(cacheKey, next)
+        const latest = collection.db.findCache.get(cacheKey)
+        const next = {
+          ...latest,
+          value: latest.value.map((doc: any) => (doc._id === changed._id ? changed : doc)),
+          time: Date.now(),
         }
+        collection.db.findCache.set(cacheKey, next)
         // Trigger re-render so the view updates from cache
         rerender()
       },
@@ -105,21 +104,28 @@ function useDocs<PM extends PouchModel<any>>(
 
 /**
  * A Stateful db query hook to get a single doc
+ *
+ * - Doesn't rely on local state bc state is reset when used with Suspense
+ * - Implementents stale-while-refreshing
  */
-function useDoc<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM> {
-  const docs = useDocs<PM>(collection, findProps, 1)
+function useDoc<PM extends Model<any>>(collection: any, findProps?: IFindProps<PM> | string): State<PM> {
+  // Ensure only one record is retrieved by adding limit, but don't do it if
+  // findProps is for a single doc id so that caching works
+  if (!findProps || !(typeof findProps === 'string' || findProps.selector?._id)) {
+    findProps = Object.assign({}, findProps, {limit: 1})
+  }
+  const state = useDocs<PM>(collection, findProps)
   return {
-    refetch: docs.refetch,
-    isLoading: docs.isLoading,
-    error: docs.error || (docs.data?.length ? undefined : new NotFoundError()),
-    data: docs.data?.length ? docs.data[0] : undefined,
+    ...state,
+    error: state.error || (state.data?.length ? undefined : new NotFoundError()),
+    data: state.data?.length ? state.data[0] : undefined,
   }
 }
 
 /**
  * A Stateful db query hook to get a count of docs that match a query
  */
-function useCount<PM extends PouchModel<any>>(collection: any, findProps: IFindProps<PM>): State<number> {
+function useCount<PM extends Model<any>>(collection: any, findProps: IFindProps<PM>): State<number> {
   const _findProps = {...Object.copy(findProps), fields: []}
   const docs = useDocs<PM>(collection, _findProps)
   return {
@@ -131,12 +137,11 @@ function useCount<PM extends PouchModel<any>>(collection: any, findProps: IFindP
 /**
  * A Suspenseful db query hook to get many docs
  */
-function useDocsS<PM extends PouchModel<any>>(
+function useDocsS<PM extends Model<any>>(
   collection: any,
   findProps?: IFindProps<PM> | string,
-  limit?: number,
 ): [PM[], State<any>['refetch']] {
-  const state = useDocs(collection, findProps, limit)
+  const state = useDocs(collection, findProps)
   if (state.isLoading) throw state.fetchP
   if (state.error) throw state.error
   return [state.data!, state.refetch]
@@ -145,55 +150,57 @@ function useDocsS<PM extends PouchModel<any>>(
 /**
  * A Suspenseful db query hook to get a single doc
  */
-function useDocS<PM extends PouchModel<any>>(collection: any, findProps?: IFindProps<PM> | string): PM {
-  const docs = useDocsS<PM>(collection, findProps, 1)
-  return docs[0]?.[0] ?? throwNotFoundError()
+function useDocS<PM extends Model<any>>(
+  collection: any,
+  findProps?: IFindProps<PM> | string,
+): [PM, State<any>['refetch']] {
+  const state = useDoc(collection, findProps)
+  if (state.isLoading) throw state.fetchP
+  if (state.error) throw state.error
+  return [state.data!, state.refetch]
 }
 
 /**
  * A Stateful db query hook to get a count of docs that match a query
  */
-function useCountS<PM extends PouchModel<any>>(
-  collection: any,
-  findProps: IFindProps<PM>,
-): [number, State<any>['refetch']] {
+function useCountS<PM extends Model<any>>(collection: any, findProps: IFindProps<PM>): [number, State<any>['refetch']] {
   const _findProps = {...Object.copy(findProps), fields: []}
   const docs = useDocsS<PM>(collection, _findProps)
   return [docs[0].length, docs[1]]
 }
 
-function createModelUseManyHook<PM extends PouchModel<any>>(collection: any) {
+function createModelUseManyHook<PM extends Model<any>>(collection: any) {
   return function useModelDocs(findProps?: IFindProps<PM> | string): State<PM[]> {
     return useDocs<PM>(collection, findProps as any)
   }
 }
-function createModelUseHook<PM extends PouchModel<any>>(collection: any) {
+function createModelUseHook<PM extends Model<any>>(collection: any) {
   return function useModelDoc(findProps?: IFindProps<PM> | string): State<PM> {
     return useDoc<PM>(collection, findProps)
   }
 }
-function createModelUseCountHook<PM extends PouchModel<any>>(collection: any) {
+function createModelUseCountHook<PM extends Model<any>>(collection: any) {
   return function useModelCount(findProps?: IFindProps<PM> | string): State<number> {
     return useCount<PM>(collection, findProps as any)
   }
 }
-function createModelUseManyHookS<PM extends PouchModel<any>>(collection: any) {
+function createModelUseManyHookS<PM extends Model<any>>(collection: any) {
   return function useModelDocsS(findProps?: IFindProps<PM> | string): [PM[], State<any>['refetch']] {
     return useDocsS<PM>(collection, findProps)
   }
 }
-function createModelUseHookS<PM extends PouchModel<any>>(collection: any) {
-  return function useModelDocS(findProps?: IFindProps<PM> | string): PM {
+function createModelUseHookS<PM extends Model<any>>(collection: any) {
+  return function useModelDocS(findProps?: IFindProps<PM> | string): [PM, State<any>['refetch']] {
     return useDocS<PM>(collection, findProps)
   }
 }
-function createModelUseCountHookS<PM extends PouchModel<any>>(collection: any) {
+function createModelUseCountHookS<PM extends Model<any>>(collection: any) {
   return function useModelCountS(findProps?: IFindProps<PM> | string): [number, State<any>['refetch']] {
     return useCountS<PM>(collection, findProps as any)
   }
 }
 
-export function createModelHooks<PM extends PouchModel<any>>(collection: any) {
+export function createModelHooks<PM extends Model<any>>(collection: any) {
   return [
     createModelUseHook<PM>(collection),
     createModelUseManyHook<PM>(collection),

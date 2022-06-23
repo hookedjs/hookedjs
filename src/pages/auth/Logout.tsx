@@ -6,7 +6,9 @@ import {h} from 'preact'
 
 export default function Logout() {
   useEffect(() => {
-    AuthStore.logout().then(() => nav(Paths.Login))
+    AuthStore.logout().then(() => {
+      nav(Paths.Login)
+    })
   }, [])
   return <div />
 }

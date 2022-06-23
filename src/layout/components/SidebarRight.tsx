@@ -1,7 +1,8 @@
 import NavLink from '#src/layout/components/SidebarNavLink'
 import pstyled from '#src/lib/pstyled'
+import {replacePathVars, useLocationStore} from '#src/lib/router'
 import {useSidebarRightStore} from '#src/stores'
-import {Fragment as F, FunctionalComponent, h} from 'preact'
+import {Fragment as F, h} from 'preact'
 
 import type {NavLinks} from '../types'
 import {Logo} from './Logo'
@@ -12,11 +13,7 @@ export default function SidebarRight({navLinks}: {navLinks: NavLinks}) {
     <SidebarDiv>
       <Logo size={2} class="logo" />
       <SidebarNav>
-        {navLinks
-          .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
-          .map(nl => (
-            <NavLink {...nl} />
-          ))}
+        <SidebarNavInner navLinks={navLinks} />
       </SidebarNav>
     </SidebarDiv>
   ) : (
@@ -51,3 +48,17 @@ const SidebarNav = pstyled.nav`
 	:root
 		width: var(--sidebarRight-width)
 `
+
+function SidebarNavInner(props: {navLinks: NavLinks}) {
+  const [loc] = useLocationStore()
+  return (
+    <F>
+      {props.navLinks
+        .filter(nl => (nl.hasAccess ? nl.hasAccess() : true))
+        .map(nl => ({...nl, path: replacePathVars(nl.path, loc.route?.vars)}))
+        .map(nl => (
+          <NavLink {...nl} />
+        ))}
+    </F>
+  )
+}

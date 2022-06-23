@@ -1,24 +1,19 @@
-import {useEffect, useLayoutEffect, useState} from '#src/lib/hooks'
+import {useLayoutEffect} from '#src/lib/hooks'
 import {Alert} from '#src/lib/icons'
-import {isOnline, waitForOnline} from '#src/lib/network'
+import {useIsOnline} from '#src/lib/network'
 import pstyled from '#src/lib/pstyled'
 import {h} from 'preact'
 
 import {applyTheme, defaultTheme} from '../theme'
 
 export default function LoginLayout({children}: any) {
-  const [isOnlineS, setIsOnlineS] = useState(isOnline())
+  const isOnline = useIsOnline()
   useLayoutEffect(() => applyTheme(defaultTheme))
-  useEffect(watchForOnline, [])
   return (
     <LoginLayoutOuter class="dark">
-      <LoginLayoutInner>{isOnlineS ? children : <OfflineNotice />}</LoginLayoutInner>
+      <LoginLayoutInner>{isOnline ? children : <OfflineNotice />}</LoginLayoutInner>
     </LoginLayoutOuter>
   )
-
-  function watchForOnline() {
-    if (!isOnlineS) waitForOnline().then(() => setIsOnlineS(true))
-  }
 }
 const LoginLayoutOuter = pstyled.div`
 	:root

@@ -1,6 +1,7 @@
 import SidebarLayout from '#src/layout/layout/SidebarLayout'
 import {useLayoutEffect} from '#src/lib/hooks'
 import * as i from '#src/lib/icons'
+import {useLocationStore} from '#src/lib/router'
 import {Paths, routes} from '#src/routes'
 import {h} from 'preact'
 

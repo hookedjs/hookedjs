@@ -20,3 +20,5 @@ type Never<T> = {
  * Make properties either normal or never
  */
 type AllOrNothing<T> = T | Never<T>
+
+type TSFIXME = any

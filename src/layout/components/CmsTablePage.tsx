@@ -1,4 +1,5 @@
 import pstyled from '#src/lib/pstyled'
+import queryStrings from '#src/lib/queryStrings'
 import {getParentPath} from '#src/lib/router'
 import {Fragment as F, h} from 'preact'
 
@@ -29,6 +30,17 @@ export default function CmsTablePage({
       </Section>
     </PaddedPage>
   )
+}
+CmsTablePage.getTableProps = () => {
+  const qs = {
+    category: '',
+    search: '',
+    page: 1,
+    sortBy: '',
+    sortDirection: 'asc',
+    ...queryStrings.parse()
+  }
+  return qs
 }
 const AddNewButton = pstyled.a`
 	:root

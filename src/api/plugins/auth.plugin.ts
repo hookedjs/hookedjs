@@ -17,7 +17,7 @@ import crypto from 'crypto'
 import {customAlphabet} from 'nanoid'
 
 import {FormValidationErrorSet, throwFormValidationErrorSet} from '../../lib/validation'
-import {AuthUserStatusEnum, AuthUsers, LoginProps, PasswordRequestProps, RegisterProps} from '../../pouch/databases'
+import {LoginProps, PasswordRequestProps, RegisterProps, UserStatusEnum, Users} from '../../pouch'
 import config from '../lib/config.node'
 import mail from '../lib/mail'
 
@@ -47,12 +47,10 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
     const passwordTmp = createPasswordTmp()
     const now = new Date()
     // create user
-    const user = await AuthUsers.createOne({
+    const user = await Users.createOne({
       ...props,
       roles: [],
-      status: AuthUserStatusEnum.PENDING,
-      tenants: [],
-      defaultTenantId: '',
+      status: UserStatusEnum.PENDING,
       password: config.dbPass,
       passwordTmp: passwordTmp.toHash(),
       passwordTmpAt: now,
@@ -60,7 +58,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
     }).catch(async e => {
       if (e.status === 409) {
         // 409 means exists
-        const existing = await AuthUsers.get(props.name)
+        const existing = await Users.get(props.name)
         // If passwordTmp is expired, create a new one
         if (!existing.passwordTmpAt || existing.passwordTmpAt.getTime() < now.getTime() - LIFESPAN) {
           existing.passwordTmp = passwordTmp.toHash()
@@ -108,14 +106,14 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
       'email and/or password are invalid',
     )
 
-    const user = await AuthUsers.get(props.name).catch(e => {
+    const user = await Users.get(props.name).catch(e => {
       throw e.type === 'NotFound' ? genericError : e
     })
 
     if (!req.user.roles.includes('_admin')) {
       await checkPassword()
     }
-    if (user.status === AuthUserStatusEnum.BANNED) {
+    if (user.status === UserStatusEnum.BANNED) {
       throwFormValidationErrorSet(req.body, 'Your account is blocked.')
     }
 
@@ -131,7 +129,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
       headers: {cookie: ';'}, // bypasses global admin cookie
     })
 
-    user.status = AuthUserStatusEnum.ACTIVE
+    user.status = UserStatusEnum.ACTIVE
     delete user.passwordTmp
     delete user.passwordTmpAt
     delete user.passwordTmpFailCount
@@ -172,7 +170,7 @@ export default async function authorizationPlugin(app: FastifyInstance, options:
    */
   app.post('/api/passwordRequest', async function postPasswordRequest(req, reply) {
     const props = new PasswordRequestProps(req.body)
-    const user = await AuthUsers.get(props.name).catch(() => {})
+    const user = await Users.get(props.name).catch(() => {})
     const now = new Date()
 
     // If not user, pretend it's a valid request by returning 200

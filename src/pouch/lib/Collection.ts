@@ -1,36 +1,30 @@
-import {IFindProps, IStandardFields, loadingDb} from './Database'
-import type PouchModel from './Model'
+import type {Database, IFindProps, IStandardFields} from './Database'
+import type {Model} from './Model'
 
-abstract class PouchCollection<PM extends PouchModel<any>, PMCreate> {
+export abstract class Collection<PM extends Model<any>, PMCreate> {
   abstract model: any
-  indexes: string[] = []
+  abstract db: Database
 
-  get db() {
-    return this.model.db
+  async connect(_?: any) {
+    await this.db.connect()
   }
-
-  get isReady() {
-    return this.db !== loadingDb
-  }
-
   async get(id: string): Promise<PM> {
-    return new this.model(await this.db.get(id))
+    const doc = await this.db.get(id)
+    return new this.model(doc)
   }
-  find(props: IFindProps<IStandardFields & PM> = {}): Promise<PM[]> {
-    const propsMapped = Object.copy(props)
-    if (!propsMapped.selector) propsMapped.selector = {}
-    propsMapped.selector.type = this.model.type
-
-    const nonIndexedFields = propsMapped.selector._keys().minusF(this.model.indexes.concat(['_id', 'type']))
-    if (nonIndexedFields.length) throw new Error(`Cannot use non-indexed fields: ${nonIndexedFields.join(', ')}`)
-
-    return this.db.find(propsMapped as any).then((res: any[]) => res.map((d: any) => new this.model(d)))
+  async find(props: IFindProps<IStandardFields & PM> = {}): Promise<PM[]> {
+    const docs = (await this.db.find({
+      selector: {},
+      ...props,
+    })) as PM[]
+    return docs.map(d => new this.model(d))
   }
-  async findOne(props: Parameters<PouchCollection<PM, PMCreate>['find']>[0] = {}): Promise<PM> {
-    const propsMapped = Object.copy(props)
-    if (!propsMapped.selector) propsMapped.selector = {}
-    propsMapped.selector.type = this.model.type
-    return new this.model((await this.db.findOne(propsMapped)) as any)
+  async findOne(props: IFindProps<IStandardFields & PM> = {}): Promise<PM> {
+    const doc = await this.db.findOne({
+      selector: {},
+      ...props,
+    })
+    return new this.model(doc)
   }
   async create(initials: PMCreate[]): Promise<PM[]> {
     const docs = initials.map(i => new this.model(i))
@@ -56,4 +50,3 @@ abstract class PouchCollection<PM extends PouchModel<any>, PMCreate> {
     return this.db.subscribe(ids, callback)
   }
 }
-export default PouchCollection
