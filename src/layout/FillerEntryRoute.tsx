@@ -1,4 +1,3 @@
-import qs from '#src/lib/queryStrings'
 import {PageMetaStore, RouteType} from '#src/lib/router'
 import {h} from 'preact'
 
@@ -6,11 +5,11 @@ import PaddedPage from './components/PaddedPage'
 import Section from './components/Section'
 
 export default function FillerEntryFactory({route}: {route: RouteType}) {
-  const {id} = qs.parse<Record<string, string>>()
-  PageMetaStore.value = {title: id}
+  const {slug} = route.vars!
+  PageMetaStore.value = {title: slug}
   return (
     <PaddedPage>
-      <Section header1={id} backButton={route.hasBack}>
+      <Section header1={slug} backButton={route.hasBack}>
         <p>Nancy was a mighty fine person.</p>
       </Section>
       <Section>

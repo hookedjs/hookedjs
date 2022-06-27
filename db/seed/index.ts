@@ -4,47 +4,56 @@ import casual from 'casual'
 
 import config from '../../src/api/lib/config.node'
 import '../../src/api/lib/pouch/init'
-import {TenantPersons, UserStatusEnum, Users} from '../../src/pouch/databases'
+import {initP} from '../../src/api/lib/pouch/init'
+import {
+  TenantPersonRoleEnum,
+  TenantPersons,
+  TenantStatusEnum,
+  Tenants,
+  UserExample,
+  UserStatusEnum,
+  Users,
+} from '../../src/pouch/databases'
 
-sleep(1000).then(main)
+main()
 
 async function main() {
-  const user = await createUser()
+  await initP
+  await createUser()
   process.exit(0)
 }
 
-/*
-async indexModels(models: any[]) {
-    const res = Promise.all([
-      this._db.createIndex({index: {fields: ['type']}}),
-      ...models.map(model =>
-        this._db.createIndex({
-          index: {fields: model.indexes, name: model.type},
-        }),
-      ),
-    ])
-    return res
-  }
-  */
-
 async function createUser() {
+  await (await Users.findOne()!).deletePermanent()
   const user = await Users.createOne({
-    name: 'sallyfields@hookedjs.org',
-    // name: casual.email.toLowerCase(),
+    name: createUser.count === 0 ? UserExample.name : casual.email.toLowerCase(),
     password: config.dbPass,
     roles: [],
     status: UserStatusEnum.ACTIVE,
-    // givenName: casual.first_name,
-    givenName: 'Sally',
-    // surname: casual.last_name,
-    surname: 'Fields',
-  }).catch(e => {
-    console.log(e)
-    console.log(e.context)
-    process.exit(1)
-  })
+    givenName: createUser.count === 0 ? 'Sally' : casual.first_name,
+    surname: createUser.count === 0 ? 'Fields' : casual.last_name,
+  }).catch(logErrorAndExit)
+  // console.log({user: user.values})
 
-  console.log({user: user.values})
+  const tenant = await Tenants.createOne({
+    name: casual.company_name,
+    status: TenantStatusEnum.ACTIVE,
+  }).catch(logErrorAndExit)
+  // console.log({tenant: tenant.values})
 
+  await TenantPersons.createOne({
+    tenantId: tenant._id,
+    userId: user._id,
+    role: TenantPersonRoleEnum.ADMIN,
+  }).catch(logErrorAndExit)
+
+  createUser.count++
   return user
+}
+createUser.count = 0
+
+function logErrorAndExit(e: any): never {
+  console.log(e)
+  console.log(e.context)
+  process.exit(1)
 }

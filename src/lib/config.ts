@@ -3,7 +3,8 @@
  */
 
 // @ts-ignore import meta env
-const isProd = import.meta.env.NODE_ENV === 'production'
+const env = process.env ?? globalThis.import.meta.env
+const isProd = (env.NODE_ENV ?? env.NODE_ENV) === 'production'
 
 const config = {
   gateway: 'https://localhost:3000',

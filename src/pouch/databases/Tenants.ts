@@ -2,7 +2,7 @@ import {assertValid, assertValidSet} from '#src/lib/validation'
 
 import {Collection, Database, ISelector, Model, createModelHooks} from '../lib'
 import type {IStandardFields} from '../lib'
-import type {Users} from './Users'
+import type {User, Users} from './Users'
 
 export type ITenantExtra = {
   name: string
@@ -27,7 +27,7 @@ export class Tenant extends Model<ITenantExtra> {
   async validate() {
     return assertValidSet<IStandardFields & ITenantExtra>(this.values, {
       ...this.baseValidations(),
-      name: assertValid('name', this.name, ['isRequired', 'isString', 'isTruthy', 'isEmail']),
+      name: assertValid('name', this.name, ['isRequired', 'isString', 'isNotEmpty']),
       status: assertValid('status', this.status, ['isRequired'], {
         isOneOfSet: TenantStatusSet,
       }),
@@ -39,7 +39,8 @@ class TenantCollection extends Collection<Tenant, ITenantCreate> {
   db = db
   model = Tenant
 
-  async connect({currentUser}: {currentUser: typeof Users.current}) {
+  async connect({currentUser}: {currentUser: User}) {
+    // TODO: Table Segmentation
     // const selector: ISelector<ITenant> = {
     //   $or: [
     //     {
@@ -56,7 +57,7 @@ class TenantCollection extends Collection<Tenant, ITenantCreate> {
     // }
 
     // this.db.selector = selector
-    await this.db.connect()
+    await this.db.connect({currentUser})
   }
 }
 export const Tenants = new TenantCollection()

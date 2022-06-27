@@ -3,6 +3,8 @@ import {NotFoundError, throwNotFoundError} from '#src/lib/validation'
 import PouchDb from 'pouchdb'
 import FindPlugin from 'pouchdb-find'
 
+import type {User} from '../databases'
+
 PouchDb.plugin(FindPlugin)
 
 export class Database {
@@ -48,8 +50,14 @@ export class Database {
     }
     this.findCacheGarbageCollect()
   }
-  connect = async () => {
+  connect = async ({currentUser}: {currentUser: User}) => {
     if (this.ready) {
+      return
+    }
+    // Admins should always be remote-only
+    if (currentUser.isAdmin) {
+      this.handle = this.remoteHandle
+      this.connected = this.ready = this.remoteOnly = true
       return
     }
     const connectP = waitForOnline().then(async () => {

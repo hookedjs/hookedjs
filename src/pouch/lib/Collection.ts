@@ -1,3 +1,4 @@
+import type {User} from '../databases'
 import type {Database, IFindProps, IStandardFields} from './Database'
 import type {Model} from './Model'
 
@@ -5,8 +6,8 @@ export abstract class Collection<PM extends Model<any>, PMCreate> {
   abstract model: any
   abstract db: Database
 
-  async connect(_?: any) {
-    await this.db.connect()
+  async connect(props: {currentUser: User}) {
+    await this.db.connect(props)
   }
   async get(id: string): Promise<PM> {
     const doc = await this.db.get(id)

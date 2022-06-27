@@ -2,7 +2,7 @@ import {assertValid, assertValidSet} from '#src/lib/validation'
 
 import {Collection, Database, ISelector, Model, createModelHooks} from '../lib'
 import type {IStandardFields} from '../lib'
-import type {Users} from './Users'
+import type {User, Users} from './Users'
 
 export type ITenantPersonExtra = {
   userId: string
@@ -42,7 +42,7 @@ class TenantPersonCollection extends Collection<TenantPerson, ITenantPersonCreat
   db = db
   model = TenantPerson
 
-  async connect({currentUser}: {currentUser: typeof Users.current}) {
+  async connect({currentUser}: {currentUser: User}) {
     // const selector: ISelector<ITenantPerson> = {
     //   $or: [
     //     {
@@ -59,7 +59,7 @@ class TenantPersonCollection extends Collection<TenantPerson, ITenantPersonCreat
     // }
 
     // this.db.selector = selector
-    await this.db.connect()
+    await this.db.connect({currentUser})
   }
 }
 export const TenantPersons = new TenantPersonCollection()

@@ -6,12 +6,8 @@ import CmsTablePage from './components/CmsTablePage'
 
 export default function FillerListFactory({route}: {route: RouteType}) {
   const parent = getParentPath()
-  const entryPath = parent + '/entry'
 
-  const {
-    sortBy,
-    sortDirection,
-  } = CmsTablePage.getTableProps()
+  const {sortBy, sortDirection} = CmsTablePage.getTableProps()
 
   return (
     <CmsTablePage
@@ -29,7 +25,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
       bulkOptions={[
         {
           label: 'Delete',
-          cb: (selection) => {
+          cb: selection => {
             ToastStore.setValue({
               message: `Deleted ${selection.length} items`,
               icon: 'success',
@@ -44,7 +40,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
         {
           obj: {},
           cols: [
-            <a href={`${entryPath}?id=Nancy Smith1`}>Nancy Smith1</a>,
+            <a href={`${parent}/nancy-smith1`}>Nancy Smith1</a>,
             <a href="mailto:nancy@smith1.com">nancy@smith1.com</a>,
             'Administrator',
             '',
@@ -53,7 +49,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
         {
           obj: {},
           cols: [
-            <a href={`${entryPath}?id=Nancy Smith2`}>Nancy Smith2</a>,
+            <a href={`${parent}/nancy-smith2`}>Nancy Smith2</a>,
             <a href="mailto:nancy@smith2.com">nancy@smith2.com</a>,
             'Administrator',
             '',
@@ -62,7 +58,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
         {
           obj: {},
           cols: [
-            <a href={`${entryPath}?id=Nancy Smith3`}>Nancy Smith3</a>,
+            <a href={`${parent}/nancy-smith3`}>Nancy Smith3</a>,
             <a href="mailto:nancy@smith3.com">nancy@smith3.com</a>,
             'Administrator',
             '',
@@ -71,15 +67,15 @@ export default function FillerListFactory({route}: {route: RouteType}) {
         {
           obj: {},
           cols: [
-            <a href={`${entryPath}?id=Nancy Smith4`}>Nancy Smith4</a>,
+            <a href={`${parent}/nancy-smith4`}>Nancy Smith4</a>,
             <a href="mailto:nancy@smith4.com">nancy@smith4.com</a>,
             'Administrator',
             '',
           ],
         },
       ].sortF((a: any, b: any) => {
-        if (sortBy) return a[sortBy] > b[sortBy] ? 1 : -1;
-        return 0;
+        if (sortBy) return a[sortBy] > b[sortBy] ? 1 : -1
+        return 0
       })}
       mapMarkers={[
         {
@@ -89,7 +85,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
           popupWidth: '10rem',
           popup: (
             <div>
-              <a href={`${entryPath}?id=Nancy Smith1`}>Nancy Smith1</a>
+              <a href={`${parent}/nancy-smith1`}>Nancy Smith1</a>
               <div>
                 1300 W Lake Ave
                 <br />
@@ -105,7 +101,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
           popupWidth: '10rem',
           popup: (
             <div>
-              <a href={`${entryPath}?id=Nancy Smith2`}>Nancy Smith2</a>
+              <a href={`${parent}/nancy-smith2`}>Nancy Smith2</a>
               <div>
                 1200 Roaring Springs Dr
                 <br />
@@ -121,7 +117,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
           popupWidth: '10rem',
           popup: (
             <div>
-              <a href={`${entryPath}?id=Nancy Smith3`}>Nancy Smith3</a>
+              <a href={`${parent}/nancy-smith3`}>Nancy Smith3</a>
               <div>
                 400 W Lake Ave
                 <br />
@@ -137,7 +133,7 @@ export default function FillerListFactory({route}: {route: RouteType}) {
           popupWidth: '10rem',
           popup: (
             <div>
-              <a href={`${entryPath}?id=Nancy Smith4`}>Nancy Smith4</a>
+              <a href={`${parent}/nancy-smith4`}>Nancy Smith4</a>
               <div>
                 800 Roaring Springs Dr
                 <br />

@@ -46,13 +46,20 @@ export const routes = Object.freeze({
     path: '/logout',
     Component: lazy(() => import('./pages/auth/Logout')),
   }),
+  TenantDeleteAccount: RouteFactory({
+    title: 'Delete Account',
+    Icon: i.Logout,
+    path: '/delete-account',
+    Component: lazy(() => import('./pages/auth/DeleteAccount')),
+    hasAccess: AuthStore.checkLoggedIn,
+  }),
   Forbidden: RouteFactory({
     title: 'Forbidden',
     path: '/forbidden',
     Component: lazy(() => import('./pages/auth/Forbidden')),
   }),
 
-  // Marketing Routes: home, support, about, blog
+  // Marketing Routes: home, support, about, posts
 
   Home: RouteFactory({
     title: 'Home',
@@ -82,10 +89,10 @@ export const routes = Object.freeze({
     Component: FillerPageRoute,
     Layout: MarketingLayout,
   }),
-  Blog: RouteFactory({
-    title: 'Blog',
+  Posts: RouteFactory({
+    title: 'Posts',
     Icon: i.Post,
-    path: '/blog',
+    path: '/posts',
     Component: FillerPageRoute,
     Layout: MarketingLayout,
   }),
@@ -101,23 +108,6 @@ export const routes = Object.freeze({
       else nav(Paths.TenantSwitcher, {replace: true})
       return <div />
     },
-  }),
-
-  TenantCreate: RouteFactory({
-    title: 'Create Tenant',
-    Icon: i.Login,
-    path: '/tenant-create',
-    Component: lazy(() => import('./pages/auth/TenantCreate')),
-    Layout: LoginLayout,
-    hasAccess: AuthStore.checkLoggedIn,
-  }),
-  TenantSwitcher: RouteFactory({
-    title: 'Select Account',
-    Icon: i.Login,
-    path: '/tenant-switch',
-    Component: lazy(() => import('./pages/auth/TenantSwitcher')),
-    Layout: LoginLayout,
-    hasAccess: AuthStore.checkLoggedIn,
   }),
 
   // Admin Routes: stats, settings, users, posts
@@ -158,40 +148,40 @@ export const routes = Object.freeze({
     hasAccess: AuthStore.checkIfAdmin,
   }),
 
-  AdminBlogStack: RouteFactory({
-    title: 'Blog',
-    Icon: i.Post,
-    path: '/admin/blog',
-    Component: PassThrough,
-    Layout: AdminLayout,
-    stack: '/admin/blog',
-    hasAccess: AuthStore.checkIfAdmin,
-  }),
-  AdminBlogPostList: RouteFactory({
+  AdminPostStack: RouteFactory({
     title: 'Posts',
     Icon: i.Post,
-    path: '/admin/blog/home',
+    path: '/admin/posts',
+    Component: PassThrough,
+    Layout: AdminLayout,
+    stack: '/admin/posts',
+    hasAccess: AuthStore.checkIfAdmin,
+  }),
+  AdminPostList: RouteFactory({
+    title: 'Posts',
+    Icon: i.Post,
+    path: '/admin/posts/home',
     Component: FillerListRoute,
     Layout: AdminLayout,
-    stack: '/admin/blog',
+    stack: '/admin/posts',
     hasAccess: AuthStore.checkIfAdmin,
   }),
-  AdminBlogPostEntry: RouteFactory({
+  AdminPostEntry: RouteFactory({
     title: 'Post',
     Icon: i.Post,
-    path: '/admin/blog/entry',
+    path: '/admin/posts/:slug',
     Component: FillerEntryRoute,
     Layout: AdminLayout,
-    stack: '/admin/blog',
+    stack: '/admin/posts',
     hasAccess: AuthStore.checkIfAdmin,
   }),
-  AdminBlogPostCreate: RouteFactory({
+  AdminPostCreate: RouteFactory({
     title: 'Create Post',
     Icon: i.Post,
-    path: '/admin/blog/create',
+    path: '/admin/posts/create',
     Component: FillerCreateRoute,
     Layout: AdminLayout,
-    stack: '/admin/blog',
+    stack: '/admin/posts',
     hasAccess: AuthStore.checkIfAdmin,
   }),
 
@@ -216,7 +206,7 @@ export const routes = Object.freeze({
   AdminUserEntry: RouteFactory({
     title: 'User',
     Icon: i.Auth,
-    path: '/admin/users/entry',
+    path: '/admin/users/:name',
     Component: lazy(() => import('./pages/admin/model/users/UserEntry')),
     Layout: AdminLayout,
     stack: '/admin/users',
@@ -253,7 +243,7 @@ export const routes = Object.freeze({
   AdminTenantEntry: RouteFactory({
     title: 'Tenant',
     Icon: i.Building,
-    path: '/admin/tenants/entry',
+    path: '/admin/tenants/:id',
     Component: lazy(() => import('./pages/admin/model/tenants/TenantEntry')),
     Layout: AdminLayout,
     stack: '/admin/tenants',
@@ -271,6 +261,23 @@ export const routes = Object.freeze({
 
   // Tenant/Customer Routes: stats, settings, users, properties, tasks
 
+  TenantCreate: RouteFactory({
+    title: 'Create Tenant',
+    Icon: i.Login,
+    path: '/tenant-create',
+    Component: lazy(() => import('./pages/auth/TenantCreate')),
+    Layout: LoginLayout,
+    hasAccess: AuthStore.checkLoggedIn,
+  }),
+  TenantSwitcher: RouteFactory({
+    title: 'Select Account',
+    Icon: i.Login,
+    path: '/tenant-switch',
+    Component: lazy(() => import('./pages/auth/TenantSwitcher')),
+    Layout: LoginLayout,
+    hasAccess: AuthStore.checkLoggedIn,
+  }),
+
   TenantRoot: RouteFactory({
     title: 'Dashboard',
     Icon: i.Counter,
@@ -282,16 +289,9 @@ export const routes = Object.freeze({
   TenantSettingsHome: RouteFactory({
     title: 'Settings',
     Icon: i.Account,
-    path: '/tenant/settings',
+    path: '/tenant/:tenantId/settings',
     Component: lazy(() => import('./pages/auth/Account')),
     Layout: TenantLayout,
-    hasAccess: AuthStore.checkLoggedIn,
-  }),
-  TenantDeleteAccount: RouteFactory({
-    title: 'Delete Account',
-    Icon: i.Logout,
-    path: '/tenant/delete-account',
-    Component: lazy(() => import('./pages/auth/DeleteAccount')),
     hasAccess: AuthStore.checkLoggedIn,
   }),
 

@@ -11,7 +11,7 @@ import {ToastStore} from '#src/stores'
 import {ComponentChildren, h} from 'preact'
 
 export default function UserEntry({route}: {route: RouteType}) {
-  const {name} = qs.parse<Record<string, string>>()
+  const name = route.vars?.name
   const entry = name
     ? useUserS('org.couchdb.user:' + name)[0]
     : new User({

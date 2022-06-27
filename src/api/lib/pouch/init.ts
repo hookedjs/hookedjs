@@ -1,8 +1,14 @@
-import {initDatabases} from '#src/pouch'
+import {connectDatabases, createDatabases} from '#src/pouch'
 
 import config from '../../lib/config.node'
 
-cookieAuth(config.dbUser, config.dbPass).then(initDatabases)
+export const initP = init()
+
+async function init() {
+  await cookieAuth(config.dbUser, config.dbPass)
+  await createDatabases()
+  await connectDatabases()
+}
 
 async function cookieAuth(username: string, password: string) {
   const res = await fetch(`${config.dbUrl}/_session`, {
@@ -11,8 +17,9 @@ async function cookieAuth(username: string, password: string) {
   })
   if (!res.ok) throw new Error(`Could not login: ${res.status}`)
   const json = await res.json()
-  const setCookie = res.headers.get('set-cookie')
-  const cookie = setCookie ? setCookie.split(';')[0] : ''
+  localStorage.setItem('auth', JSON.stringify(json))
+  const cookieRaw = res.headers.get('set-cookie')
+  const cookie = cookieRaw ? cookieRaw.split(';')[0] : ''
   window.document.cookie = document.cookie = `${cookie} ${document.cookie}`
   return json as unknown as {ok: boolean; name: string; roles: string[]}
 }

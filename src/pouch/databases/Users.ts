@@ -84,13 +84,17 @@ export class User extends Model<IUserExtra> {
   async validate() {
     return assertValidSet<IStandardFields & IUserExtra>(this.values, {
       ...this.baseValidations(),
-      _id: assertValid('_id', this._id, ['isRequired', 'isString'], {
-        isEqual: {expected: `org.couchdb.user:${this.name}`},
-      }),
+      _id: assertValid(
+        '_id',
+        this._id,
+        ['isRequired', 'isString'],
+        {
+          isEqual: {expected: `org.couchdb.user:${this.name}`},
+        },
+        [!!this.valuesClean._id && this.valuesClean._id !== this.values._id && new ValueError('_id cannot be changed')],
+      ),
       name: assertValid('name', this.name, ['isRequired', 'isString', 'isTruthy', 'isEmail'], {}, [
-        // This doesn't work for User, because _id is computered from name :-/
-        // await this.validateFieldIsUnique('name', 'email is already claimed')
-        this.name !== this.valuesClean.name && new ValueError('email cannot be changed'),
+        !!this.valuesClean._id && this.name !== this.valuesClean.name && new ValueError('email cannot be changed'),
       ]),
       type: assertValid('type', this.type, ['isRequired', 'isString'], {
         isEqual: {expected: 'user'},
@@ -227,7 +231,7 @@ const UserLoadingFields: IUser & {fullName: string; isAdmin: boolean; isTenant: 
   isTenant: true,
 }
 
-const UserExample = new User(UserExampleFields)
+export const UserExample = new User(UserExampleFields)
 export const UserFieldsEnum = Enum.getEnumFromClassInstance(UserExample)
 
 export class LoginProps {

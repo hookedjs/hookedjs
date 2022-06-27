@@ -8,13 +8,7 @@ import {h} from 'preact'
 export default function UserList({route}: {route: RouteType}) {
   const parentPath = getParentPath()
   const pageSize = 10
-  const {
-    category,
-    search,
-    page,
-    sortBy,
-    sortDirection,
-  } = CmsTablePage.getTableProps()
+  const {category, search, page, sortBy, sortDirection} = CmsTablePage.getTableProps()
   const [entries, refetch] = useUsersS({
     ...(sortBy ? {sort: [{[sortBy]: sortDirection}]} : {}),
     selector: {
@@ -59,13 +53,13 @@ export default function UserList({route}: {route: RouteType}) {
       ]}
       pages={Math.ceil(entries.length / pageSize)}
       total={entries.length}
-      rows={entriesPaged.map(obj => ({
-        obj,
+      rows={entriesPaged.map(entry => ({
+        obj: entry,
         cols: [
-          <a href={`${parentPath}/entry?name=${obj.name}`}>{obj.fullName}</a>,
-          <a href={`mailto:${obj.name}`}>{obj.name}</a>,
-          obj.status,
-          obj.roles.join(),
+          <a href={`${parentPath}/${entry.name}`}>{entry.fullName}</a>,
+          <a href={`mailto:${entry.name}`}>{entry.name}</a>,
+          entry.status,
+          entry.roles.join(),
         ],
       }))}
     />

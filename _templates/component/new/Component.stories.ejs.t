@@ -17,7 +17,7 @@ export default {
   component: Component,
   decorators: [],
   argTypes: {
-    // TODO: Add any props you want to be able to change
+    // Add any props you want to be able to change
     class: {
       defaultValue: defaultProps.class,
     },

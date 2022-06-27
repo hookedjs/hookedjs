@@ -19,6 +19,7 @@ export abstract class Model<ExtraFields extends Record<string, any>> {
 
   constructor(data: Partial<IStandardFields> & ExtraFields) {
     const now = new Date()
+    this.valuesClean = this.values
     Object.assign(
       this,
       {
@@ -29,7 +30,6 @@ export abstract class Model<ExtraFields extends Record<string, any>> {
       },
       data,
     )
-    this.valuesClean = this.values
   }
 
   get values() {

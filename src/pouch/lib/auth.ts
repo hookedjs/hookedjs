@@ -2,7 +2,7 @@ import {config} from '#src/lib/config'
 import {throwFormValidationErrorSet} from '#src/lib/validation'
 
 import type {UserRoleEnum} from '../databases/Users'
-import {initDatabases, resetDatabases} from './DbProvider'
+import {connectDatabases, resetDatabases} from './DbProvider'
 
 export interface Auth {
   ok: boolean
@@ -15,7 +15,7 @@ export async function login(username: string, password: string) {
     throwFormValidationErrorSet({username, password}, 'email and/or password invalid'),
   )
   localStorage.setItem('auth', JSON.stringify(auth))
-  await initDatabases()
+  await connectDatabases()
   return auth
 }
 

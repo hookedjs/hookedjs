@@ -15,8 +15,8 @@ export default function MarketingLayout({children}: {children: any}) {
   }
   return (
     <HeaderLayout
-      topLinks={[routes.Blog, loginNavLink]}
-      rightLinks={[routes.Home, routes.Blog, routes.About, loginNavLink, routes.Support]}>
+      topLinks={[routes.Posts, loginNavLink]}
+      rightLinks={[routes.Home, routes.Posts, routes.About, loginNavLink, routes.Support]}>
       {children}
     </HeaderLayout>
   )

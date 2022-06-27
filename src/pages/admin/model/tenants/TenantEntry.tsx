@@ -11,7 +11,7 @@ import {ToastStore} from '#src/stores'
 import {ComponentChildren, h} from 'preact'
 
 export default function TenantEntry({route}: {route: RouteType}) {
-  const {id} = qs.parse<Record<string, string>>()
+  const id = route.vars?.id
   const entry = id
     ? useTenantS(id)[0]
     : new Tenant({
@@ -45,7 +45,9 @@ export default function TenantEntry({route}: {route: RouteType}) {
     </PaddedPage>
   )
 
-  async function onSubmitCb(formValues: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & ITenantExtra), any>) {
+  async function onSubmitCb(
+    formValues: Record<keyof (Pick<IStandardFields, '_id' | 'deletedAt'> & ITenantExtra), any>,
+  ) {
     // Scrub optional fields that are empty
     if (!formValues.deletedAt) delete formValues.deletedAt
 

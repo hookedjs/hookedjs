@@ -17,10 +17,10 @@ export default function AdminLayout({children}: {children: any}) {
         routes.Support,
         {path: '#theme-toggle', title: 'Dark Mode', Icon: i.Palette},
       ]}
-      bottomLinks={[routes.AdminStatsStack, routes.AdminBlogStack, routes.AdminTenantStack, routes.AdminUserStack]}
-      leftLinks={[routes.AdminStatsStack, routes.AdminBlogStack, routes.AdminTenantStack, routes.AdminUserStack]}
+      bottomLinks={[routes.AdminStatsStack, routes.AdminPostStack, routes.AdminTenantStack, routes.AdminUserStack]}
+      leftLinks={[routes.AdminStatsStack, routes.AdminPostStack, routes.AdminTenantStack, routes.AdminUserStack]}
       searchOptions={[
-        {name: 'Posts', value: Paths.AdminBlogPostList},
+        {name: 'Posts', value: Paths.AdminPostList},
         {name: 'Tenants', value: Paths.AdminTenantList},
         {name: 'Users', value: Paths.AdminUserList},
       ]}>

@@ -25,7 +25,15 @@ if (!globalThis.window) {
     },
   }
   const windowMock = {
-    localStorage: {getItem() {}, setItem() {}},
+    localStorage: {
+      store: new Map(),
+      getItem(key: string) {
+        return this.store.get(key)
+      },
+      setItem(key: string, value: string) {
+        return this.store.set(key, value)
+      },
+    },
     ...element,
     document: {
       ...element,
