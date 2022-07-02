@@ -1,11 +1,18 @@
 :root {
 	--scrollbar-width: 14px;
+	--firefox-scrollbar-content-padding: 0px;
 }
 @supports (-webkit-touch-callout: none) {
 	:root {
 		--scrollbar-width: 0px;
 	}
 }
+@-moz-document url-prefix() { 
+	:root {
+		--firefox-scrollbar-content-padding: 14px;
+	}
+}
+
 .scrollbar,#content {
 	/* Firefox */
 	scrollbar-width: auto;          /* "auto" or "thin". auto ~= 14px  */

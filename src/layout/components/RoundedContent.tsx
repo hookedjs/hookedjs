@@ -29,7 +29,7 @@ const ContentDiv = pstyled.div`
 		left: var(--content-left)
 		bottom: var(--content-bottom)
 		right: var(--content-right)
-		padding-right: var(--content-right-padding)
+		padding-right: calc( var(--content-right-padding) + var(--firefox-scrollbar-content-padding) )
 		padding-bottom: var(--content-bottom-padding)
 		padding-left: var(--content-left-padding)
 		background: var(--content-background)
