@@ -84,11 +84,11 @@ export class Database {
   }
   // Closes connections and deletes local database. Doesn't delete remote database.
   destroy = async () => {
-    if (this.remoteOnly) {
+    if (this.handle === this.remoteHandle) {
       return this.close()
     }
     await this.handle.destroy()
-    this.reset()
+    await this.reset()
   }
   // Closes connections and frees memory. Doesn't delete local IndexedDB if exists.
   close = async () => {

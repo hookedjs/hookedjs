@@ -45,6 +45,7 @@ export const routes = Object.freeze({
     Icon: i.Logout,
     path: '/logout',
     Component: lazy(() => import('./pages/auth/Logout')),
+    Layout: LoginLayout,
   }),
   TenantDeleteAccount: RouteFactory({
     title: 'Delete Account',
@@ -272,7 +273,7 @@ export const routes = Object.freeze({
   TenantSwitcher: RouteFactory({
     title: 'Select Account',
     Icon: i.Login,
-    path: '/tenant-switch',
+    path: '/tenant-switcher',
     Component: lazy(() => import('./pages/auth/TenantSwitcher')),
     Layout: LoginLayout,
     hasAccess: AuthStore.checkLoggedIn,

@@ -161,6 +161,7 @@ class UserCollection extends Collection<User, IUserCreate> {
     } else {
       this.current = undefined
     }
+    this.getCurrentP = undefined
     return this.current
   }
 }
