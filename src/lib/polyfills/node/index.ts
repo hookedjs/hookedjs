@@ -1,4 +1,5 @@
 import '../iso'
+import './pouchdb'
 import './window'
 
 ;(globalThis as TSFIXME).isNode = true

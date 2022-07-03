@@ -7,13 +7,16 @@ import type {User} from '../databases'
 
 PouchDb.plugin(FindPlugin)
 
+// Local adapter for pouchdb
+const adapter = (globalThis as any).isNode ? 'memory' : 'idb'
+
 export class Database {
   ready = false
   connected = false
-  handle = new PouchDb('loading')
+  handle = new PouchDb('loading', {adapter})
   host = 'https://localhost:3000/db'
   name = 'loading'
-  remoteHandle = new PouchDb('loading')
+  remoteHandle = new PouchDb('loading', {adapter})
   remoteOnly = false
   selector: ISelector<any> | undefined = undefined
   filter: string | undefined = undefined
@@ -46,7 +49,7 @@ export class Database {
       this.handle = this.remoteHandle
       this.connected = this.ready = true
     } else {
-      this.handle = new PouchDb(this.name)
+      this.handle = new PouchDb(this.name, {adapter})
     }
     this.findCacheGarbageCollect()
   }

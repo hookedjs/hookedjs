@@ -24,7 +24,7 @@ async function main() {
 }
 
 async function createUser() {
-  await (await Users.findOne()!).deletePermanent()
+  await (await Users.findOne().catch(() => {}))?.deletePermanent()
   const user = await Users.createOne({
     name: createUser.count === 0 ? UserExample.name : casual.email.toLowerCase(),
     password: config.dbPass,
