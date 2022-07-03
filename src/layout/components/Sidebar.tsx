@@ -2,7 +2,7 @@ import NavLink from '#src/layout/components/SidebarNavLink'
 import * as i from '#src/lib/icons'
 import pstyled from '#src/lib/pstyled'
 import {replacePathVars, useLocationStore} from '#src/lib/router'
-import {UserRoleEnum, useCurrentUser} from '#src/pouch'
+import {UserRoleEnum, useCurrentUserS} from '#src/pouch'
 import {AuthStore} from '#src/stores'
 import {Fragment as F, h} from 'preact'
 
@@ -31,7 +31,7 @@ const SidebarDiv = pstyled.div`
 `
 
 export function SidebarHeader() {
-  const user = useCurrentUser()!
+  const user = useCurrentUserS()[0]!
   return (
     <SidebarHeaderDiv>
       <div class="left">

@@ -1,6 +1,6 @@
 import {Logo} from '#src/layout/components/Logo'
 import {ErrorMessage, FormJson, InputField, SubmitButton, useForm} from '#src/lib/forms'
-import {useCallback} from '#src/lib/hooks'
+import {useCallback, useEffect} from '#src/lib/hooks'
 import pstyled from '#src/lib/pstyled'
 import qs from '#src/lib/queryStrings'
 import {nav} from '#src/lib/router'
@@ -17,7 +17,13 @@ export default function Login() {
 
   const {submitting, errors} = Form.state
 
-  if (auth.name) nav(from || Paths.Dashboard, {replace: true})
+  useEffect(() => {
+    if (auth.name) {
+      // wait a moment to allow DbProvider to finish connect the dbs
+      // FIXME: We may not need to delay anymore if we switch to no DbProvider
+      setTimeout(() => nav(from || Paths.Dashboard, {replace: true}), 500)
+    }
+  }, [auth.name, from])
 
   return (
     <LoginDiv>

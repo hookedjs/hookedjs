@@ -283,7 +283,7 @@ export const routes = Object.freeze({
     title: 'Dashboard',
     Icon: i.Counter,
     path: '/tenant',
-    Component: Redirect('/tenant-switch'),
+    Component: Redirect('/tenant-switcher'),
     hasAccess: AuthStore.checkLoggedIn,
   }),
 

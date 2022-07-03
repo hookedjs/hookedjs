@@ -31,31 +31,9 @@ export async function connectDatabases() {
  * Creates the databases if they don't exist
  */
 export async function createDatabases() {
-  await initDb(dbs.Users.db.name)
-  await initDb(dbs.TenantPersons.db.name)
-  await initDb(dbs.Tenants.db.name)
-
-  async function initDb(dbName: string) {
-    const res = await fetch(`${config.db}/${dbName}`, {
-      method: 'PUT',
-    })
-    if (res.status === 412) {
-      // No-op -- database already exists
-      return
-    }
-    if (!res.ok) {
-      throw new Error(`Unexpected error creating database db: ${config.db}/${dbName}:${res.status}`)
-    }
-  }
-
-  async function indexModels() {
-    // Users.db.handle.createIndex({
-    //   index: {fields: [UserFieldsEnum.], name: model.type},
-    // })
-    // Tenants.db.handle.createIndex({
-    //   index: {fields: [UserFieldsEnum.], name: model.type},
-    // })
-  }
+  await dbs.Users.db.initRemoteDb()
+  await dbs.TenantPersons.db.initRemoteDb()
+  await dbs.Tenants.db.initRemoteDb()
 }
 
 export async function resetDatabases() {

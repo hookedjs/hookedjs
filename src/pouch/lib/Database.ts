@@ -1,3 +1,4 @@
+import {config} from '#src/lib/config'
 import {waitForOnline} from '#src/lib/network'
 import {NotFoundError, throwNotFoundError} from '#src/lib/validation'
 import PouchDb from 'pouchdb'
@@ -11,15 +12,37 @@ PouchDb.plugin(FindPlugin)
 const adapter = (globalThis as any).isNode ? 'memory' : 'idb'
 
 export class Database {
-  ready = false
   connected = false
-  handle = new PouchDb('loading', {adapter})
-  host = 'https://localhost:3000/db'
-  name = 'loading'
-  remoteHandle = new PouchDb('loading', {adapter})
-  remoteOnly = false
-  selector: ISelector<any> | undefined = undefined
+
+  /**
+   * CouchDB Design Documents to be created on db init
+   * ex. {
+      _id: '_design/byCurrentUser',
+      filters: {
+        byCurrentUser: ((doc: ITenantPerson) => {
+          return doc.userId === 'org.couchdb.user:foo@bar.com'
+        }).toString(),
+      }
+    }
+   */
+  // FIXME: Use update docs to set updatedAt, editedBy, etc. https://docs.couchdb.org/en/3.2.2/ddocs/ddocs.html#update-functions
+  designDocs: {
+    _id: string
+    filters: Record<string, string>
+  }[] = []
+
+  /**
+   * Can segment which records to sync with from database by id
+   * Ref: https://pouchdb.com/api.html#replication
+   */
+  docIds: string[] | undefined = undefined
+
+  /**
+   * Can segment which records to sync with from database using a filter
+   * Ref: https://pouchdb.com/api.html#replication
+   */
   filter: string | undefined = undefined
+
   findCache = new Map<
     string,
     {
@@ -30,9 +53,49 @@ export class Database {
       time: number
     }
   >()
+
   findCacheGarbageCollectInterval: NodeJS.Timeout // an interval
 
-  constructor(props: Pick<Database, 'name'> & Partial<Pick<Database, 'host' | 'remoteOnly'>>) {
+  handle = new PouchDb('loading', {adapter})
+
+  host = config.db
+
+  name = 'loading'
+
+  ready = false
+
+  remoteHandle = new PouchDb('loading', {adapter})
+
+  remoteOnly = false
+
+  /**
+   * The security document to be set on the database during initRemoteDb
+   */
+  security = {}
+
+  /**
+   * Can segment which records to sync with from database using a find like selector
+   * Ref: https://pouchdb.com/api.html#replication
+   * Warning: Aren't implemented in PouchDB yet -- https://github.com/pouchdb/pouchdb/issues/7489
+   * Ex.
+      const selector: ISelector<ITenantPerson> = {
+        $or: [
+          {
+            userId: {
+              $eq: currentUser?._id ?? 'NEVER',
+            },
+          },
+          {
+            name: {
+              $eq: 'Name1',
+            }
+          }
+        ]
+      }
+   */
+  selector: ISelector<any> | undefined = undefined
+
+  constructor(props: Pick<Database, 'name'> & Partial<Pick<Database, 'designDocs' | 'host' | 'remoteOnly'>>) {
     Object.assign(this, props)
     this.reset()
   }
@@ -53,6 +116,36 @@ export class Database {
     }
     this.findCacheGarbageCollect()
   }
+  async initRemoteDb() {
+    const endPoint = `${this.host}/${this.name}`
+    const initRes = await fetch(endPoint, {method: 'PUT'})
+    if (initRes.status === 412) {
+      return // No-op -- database already exists
+    }
+    if (!initRes.ok) {
+      console.log({r: await initRes.json()})
+      throw new Error(`Unexpected error creating database db: ${endPoint}:${initRes.status}`)
+    }
+
+    const secRes = await fetch(`${endPoint}/_security`, {method: 'PUT', body: JSON.stringify(this.security)})
+    if (!secRes.ok) {
+      console.log({r: await secRes.json()})
+      throw new Error(`Unexpected error setting database security: ${endPoint}:${secRes.status}`)
+    }
+
+    for (const designDoc of this.designDocs) {
+      const designRes = await fetch(`${endPoint}/${designDoc._id}`, {
+        method: 'PUT',
+        body: JSON.stringify(designDoc),
+      })
+      if (designRes.status === 412) {
+        return // No-op -- doc already exists
+      }
+      if (!designRes.ok) {
+        throw new Error(`Unexpected error creating design doc: ${endPoint}:${designDoc._id}:${designRes.status}`)
+      }
+    }
+  }
   connect = async ({currentUser}: {currentUser: User}) => {
     if (this.ready) {
       return
@@ -65,7 +158,7 @@ export class Database {
     }
     const connectP = waitForOnline().then(async () => {
       await this.handle
-        .sync(this.remoteHandle, {filter: this.filter, retry: true, selector: this.selector})
+        .sync(this.remoteHandle, {doc_ids: this.docIds, filter: this.filter, retry: true, selector: this.selector})
         .catch(err => {
           console.log('Sync failed', err)
           throw err
@@ -249,13 +342,9 @@ export class Database {
   }
   deletePermanent = async (doc: {_id: string; _rev: string}) => {
     this.assertReady()
-    const res = new Promise<any>((resolve, reject) => {
-      this.handle.remove(doc, {}, (err, res) => {
-        if (err) return reject(new Error('Error permanent delete'))
-        resolve(null)
-      })
-    })
-    return res
+    // setting _deleted is safer than remove() in case we're replicating
+    // using filters. Ref: https://pouchdb.com/api.html#filtered-replication
+    await this.handle.put({...doc, _deleted: true})
   }
   subscribe = (ids: string[], callback: (change: any) => void) => {
     this.assertReady()

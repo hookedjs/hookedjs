@@ -8,7 +8,9 @@
   },
   "couch_httpd_auth": {
     "allow_persistent_cookies": true,
-    "timeout": 32503680000000
+    "timeout": 32503680000000,
+    "default_security": "everyone",
+    "users_db_security_editable": true
   },
   "log": {
     "file": "./db/data/log.txt"

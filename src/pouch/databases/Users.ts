@@ -1,4 +1,4 @@
-import {useInterval, useLayoutEffectDeep, useState} from '#src/lib/hooks'
+import {useCallback, useInterval, useLayoutEffectDeep, useState} from '#src/lib/hooks'
 import {
   ValueError,
   assertAttrsWithin,
@@ -169,21 +169,22 @@ export const Users = new UserCollection()
 
 export const [useUser, useUsers, useUserCount, useUserS, useUsersS, useUserCountS] = createModelHooks<User>(Users)
 
-export function useCurrentUser() {
+export function useCurrentUserS(): [user: User | undefined, refresh: Function] {
   const [auth] = useAuthStore()
-  const [user, setUser] = useState(Users.current || UserLoadingFields)
-  useLayoutEffectDeep(refresh, [auth])
-  useInterval(refresh, 60000)
+  const [user, setUser] = useState(Users.current)
+  useLayoutEffectDeep(refreshCb, [auth])
+  useInterval(refreshCb, 60000)
+  const refresh = useCallback(refreshCb, [])
 
   // Activate suspense if loading
   if (Users.getCurrentP) {
     throw Users.getCurrentP
   }
-  return user
+  return [user, refresh]
 
-  function refresh() {
+  function refreshCb() {
     Users.getCurrent().then(next => {
-      setUser(next || UserLoadingFields)
+      setUser(next)
     })
   }
 }
@@ -220,16 +221,6 @@ const UserExampleFields: IUser = {
   iterations: 10,
   derived_key: 'test',
   salt: 'test',
-}
-
-const UserLoadingFields: IUser & {fullName: string; isAdmin: boolean; isTenant: boolean} = {
-  ...UserExampleFields,
-  name: '',
-  surname: '',
-  givenName: '',
-  fullName: '',
-  isAdmin: false,
-  isTenant: true,
 }
 
 export const UserExample = new User(UserExampleFields)

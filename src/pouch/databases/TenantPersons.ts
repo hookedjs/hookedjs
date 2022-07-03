@@ -12,7 +12,7 @@ export type ITenantPersonExtra = {
 export interface ITenantPerson extends IStandardFields, ITenantPersonExtra {}
 export interface ITenantPersonCreate extends Partial<IStandardFields>, ITenantPersonExtra {}
 
-const db = new Database({name: 'tenantPersons'})
+const db = new Database({name: 'tenant_persons'})
 
 export class TenantPerson extends Model<ITenantPersonExtra> {
   db = db
@@ -43,22 +43,6 @@ class TenantPersonCollection extends Collection<TenantPerson, ITenantPersonCreat
   model = TenantPerson
 
   async connect({currentUser}: {currentUser: User}) {
-    // const selector: ISelector<ITenantPerson> = {
-    //   $or: [
-    //     {
-    //       userId: {
-    //         $eq: currentUser?._id ?? 'NEVER',
-    //       },
-    //     },
-    //     // {
-    //     //   name: {
-    //     //     $eq: 'Name1',
-    //     //   }
-    //     // }
-    //   ]
-    // }
-
-    // this.db.selector = selector
     await this.db.connect({currentUser})
   }
 }
